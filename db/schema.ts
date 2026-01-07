@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index, uuid } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -72,6 +72,48 @@ export const verification = pgTable(
   },
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
+
+export const workspaces = pgTable("workspaces", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  ownerId: uuid("owner_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const workspaceMembers = pgTable("workspace_members", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  workspaceId: uuid("workspace_id").notNull(),
+  userId: uuid("user_id").notNull(),
+  role: text("role").$type<"admin" | "member" | "viewer">().notNull(),
+  joinedAt: timestamp("joined_at").defaultNow(),
+});
+
+export const tasks = pgTable("tasks", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  workspaceId: uuid("workspace_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  status: text("status")
+    .$type<"todo" | "in_progress" | "blocked" | "done">()
+    .default("todo"),
+  priority: text("priority")
+    .$type<"low" | "medium" | "high">()
+    .default("medium"),
+  assigneeId: uuid("assignee_id"),
+  createdBy: uuid("created_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const activityLogs = pgTable("activity_logs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  workspaceId: uuid("workspace_id").notNull(),
+  actorId: uuid("actor_id").notNull(),
+  entityType: text("entity_type").notNull(),
+  entityId: uuid("entity_id").notNull(),
+  action: text("action").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
