@@ -1,20 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useSearchParams, usePathname, useRouter } from "next/navigation"
 
 type TaskStatus = "todo" | "in_progress" | "blocked" | "done"
 type TaskPriority = "low" | "medium" | "high"
-
-interface FilterBarProps {
-  onFilterChange: (filters: {
-    status?: TaskStatus[]
-    priority?: TaskPriority[]
-    assignee?: string
-  }) => void
-}
 
 const statuses: { value: TaskStatus; label: string }[] = [
   { value: "todo", label: "To Do" },
@@ -35,39 +28,58 @@ const assignees = [
   { value: "3", label: "Bob Johnson" },
 ]
 
-export function FilterBar({ onFilterChange }: FilterBarProps) {
+export function FilterBar() {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter()
   const [selectedStatus, setSelectedStatus] = useState<TaskStatus | "">("")
   const [selectedPriority, setSelectedPriority] = useState<TaskPriority | "">("")
   const [selectedAssignee, setSelectedAssignee] = useState("")
 
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString())
+
+    if (selectedStatus) {
+      params.set("status", selectedStatus)
+    } else {
+      params.delete("status")
+    }
+
+    if (selectedPriority) {
+      params.set("priority", selectedPriority)
+    } else {
+      params.delete("priority")
+    }
+
+    if (selectedAssignee) {
+      params.set("assignee", selectedAssignee)
+    } else {
+      params.delete("assignee")
+    }
+
+    replace(`${pathname}?${params.toString()}`, { scroll: false })
+  }, [
+    selectedStatus,
+    selectedPriority,
+    selectedAssignee,
+  ])
+
   const handleStatusChange = (value: TaskStatus) => {
     setSelectedStatus(value)
-    updateFilters(value, selectedPriority, selectedAssignee)
   }
 
   const handlePriorityChange = (value: TaskPriority) => {
     setSelectedPriority(value)
-    updateFilters(selectedStatus, value, selectedAssignee)
   }
 
   const handleAssigneeChange = (value: string) => {
     setSelectedAssignee(value)
-    updateFilters(selectedStatus, selectedPriority, value)
-  }
-
-  const updateFilters = (status: TaskStatus | "", priority: TaskPriority | "", assignee: string) => {
-    const filters: any = {}
-    if (status) filters.status = [status]
-    if (priority) filters.priority = [priority]
-    if (assignee) filters.assignee = assignee
-    onFilterChange(filters)
   }
 
   const clearFilters = () => {
     setSelectedStatus("")
     setSelectedPriority("")
-    setSelectedAssignee("")
-    onFilterChange({})
+    setSelectedAssignee("");
   }
 
   const hasFilters = selectedStatus || selectedPriority || selectedAssignee
