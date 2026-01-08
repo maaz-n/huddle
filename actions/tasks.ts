@@ -1,10 +1,10 @@
 "use server";
 
 import { db } from "@/db";
-import { tasks, activityLogs } from "@/db/schema";
+import { tasks, activityLogs, workspaceMembers, user } from "@/db/schema";
 import { logActivity } from "@/lib/activity";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
-import { GetFilteredTasks } from "@/types/types";
+import { GetFilteredTasks, UserType } from "@/types/types";
 import { eq } from "drizzle-orm";
 
 export async function getTasks(filter: GetFilteredTasks) {
@@ -188,4 +188,37 @@ export async function assignTask(
     entityId: taskId,
     action: `Assigned to ${assigneeId}`,
   })
+}
+
+export async function getAdminUsers(): Promise<UserType[]> {
+  try {
+    const admins = await db.query.workspaceMembers.findMany({
+      where: (workspaceMembers, { eq }) => eq(workspaceMembers.role, "admin")
+    });
+
+    const adminUserIds = admins.map(admin => admin.userId);
+
+
+    if (adminUserIds.length === 0) {
+      return [];
+    }
+
+    const users = await db.query.user.findMany({
+      where: (user, { inArray }) => inArray(user.id, adminUserIds)
+    });
+
+    return users;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getUser(id: string) {
+  try {
+    return await db.query.user.findFirst({
+      where: eq(user.id, id)
+    })
+  } catch (error) {
+    throw error;
+  }
 }
