@@ -7,26 +7,26 @@ import { requireWorkspaceAccess } from "@/lib/workspace-access";
 import { eq } from "drizzle-orm";
 
 
-export async function createTask(input: {
-  workspaceId: string;
-  title: string;
-}) {
+export async function createTask(
+  workspaceId: string,
+  title: string,
+) {
   const { user } = await requireWorkspaceAccess(
-    input.workspaceId,
+    workspaceId,
     "member"
   );
 
-  await db.insert(tasks).values({
-    workspaceId: input.workspaceId,
-    title: input.title,
+  const [insertedTask] = await db.insert(tasks).values({
+    workspaceId: workspaceId,
+    title: title,
     createdBy: user.id,
-  });
+  }).returning();
 
   await logActivity({
-    workspaceId: input.workspaceId,
+    workspaceId: workspaceId,
     actorId: user.id,
     entityType: "task",
-    entityId: tasks[0].id,
+    entityId: insertedTask.id,
     action: "Task created",
   });
 }
@@ -53,8 +53,14 @@ export async function updateTaskStatus(
     done: [],
   };
 
-  if (!allowedTransitions[task.status].includes(newStatus)) {
-    throw new Error(`Invalid status transition: ${task.status} → ${newStatus}`);
+  // EDITED USING COPILOT
+  const currentStatus = task.status;
+  if (currentStatus == null) {
+    throw new Error("Task has no status");
+  }
+
+  if (!allowedTransitions[currentStatus].includes(newStatus)) {
+    throw new Error(`Invalid status transition: ${currentStatus} → ${newStatus}`);
   }
 
   // Update status
