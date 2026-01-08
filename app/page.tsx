@@ -1,65 +1,151 @@
-import Image from "next/image";
+import { Plus, Eye, Cog } from "lucide-react"
+import { AppLayout } from "@/components/app-layout"
+import { TaskStatusCard } from "@/components/task-status-card"
+import { ActivityLogItem } from "@/components/activity-log-item"
+import { QuickActionButton } from "@/components/quick-action-button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { getCurrentUser } from "@/actions/auth"
 
-export default function Home() {
+const mockTasks = [
+  { status: "todo" as const, count: 8 },
+  { status: "in_progress" as const, count: 5 },
+  { status: "blocked" as const, count: 2 },
+  { status: "done" as const, count: 12 },
+]
+
+const mockActivityLogs = [
+  {
+    id: "1",
+    actor: { name: "John Doe", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=John" },
+    action: "completed",
+    entityType: "task",
+    entityName: "Fix login button",
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+  },
+  {
+    id: "2",
+    actor: { name: "Jane Smith", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jane" },
+    action: "created",
+    entityType: "task",
+    entityName: "Design homepage redesign",
+    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
+  },
+  {
+    id: "3",
+    actor: { name: "Bob Johnson", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob" },
+    action: "updated",
+    entityType: "task",
+    entityName: "API rate limiting",
+    timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000),
+  },
+  {
+    id: "4",
+    actor: { name: "John Doe", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=John" },
+    action: "assigned to",
+    entityType: "task",
+    entityName: "Database migration",
+    timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+  },
+  {
+    id: "5",
+    actor: { name: "Jane Smith", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jane" },
+    action: "marked as blocked",
+    entityType: "task",
+    entityName: "Third-party integration",
+    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+  },
+]
+
+export default async function DashboardPage() {
+
+  const user = await getCurrentUser();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <AppLayout user={user}>
+      <div className="py-8 px-6 space-y-8">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold">Hello {user?.name} 👋</h1>
+          <p className="text-muted-foreground mt-2">Overview of your tasks and activity</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Task Status Cards */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Tasks by Status</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {mockTasks.map((task) => (
+              <TaskStatusCard
+                key={task.status}
+                title={
+                  task.status === "todo"
+                    ? "To Do"
+                    : task.status === "in_progress"
+                      ? "In Progress"
+                      : task.status === "blocked"
+                        ? "Blocked"
+                        : "Done"
+                }
+                count={task.count}
+                status={task.status}
+              />
+            ))}
+          </div>
         </div>
-      </main>
-    </div>
-  );
+
+        {/* Assigned to me and Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Assigned to me */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Assigned to Me</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="p-3 bg-secondary rounded-lg">
+                      <p className="text-sm font-medium">Task {i}</p>
+                      <p className="text-xs text-muted-foreground mt-1">In Progress</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* <QuickActionButton icon={Plus} label="Create Task" className="bg-primary hover:bg-primary/90" />
+                  <QuickActionButton icon={Eye} label="View Tasks" variant="outline" />
+                  <QuickActionButton icon={Cog} label="Go to Settings" variant="outline" /> */}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Recent Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 divide-y">
+                {mockActivityLogs.map((log) => (
+                  <ActivityLogItem key={log.id} {...log} />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </AppLayout>
+  )
 }
