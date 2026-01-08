@@ -4,8 +4,36 @@ import { db } from "@/db";
 import { tasks, activityLogs } from "@/db/schema";
 import { logActivity } from "@/lib/activity";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
+import { GetFilteredTasks } from "@/types/types";
 import { eq } from "drizzle-orm";
 
+export async function getTasks(filter: GetFilteredTasks) {
+  try {
+    if (!filter.status && !filter.priority && !filter.assignee) {
+      return await db.query.tasks.findMany()
+    } else {
+      return await db.query.tasks.findMany({
+        where: (tasks, { eq, and }) => {
+          const conditions = [];
+
+          if (filter.status) {
+            conditions.push(eq(tasks.status, filter.status));
+          }
+          if (filter.priority) {
+            conditions.push(eq(tasks.priority, filter.priority));
+          }
+          if (filter.assignee) {
+            conditions.push(eq(tasks.assigneeId, filter.assignee));
+          }
+
+          return and(...conditions)
+        }
+      })
+    }
+  } catch (error) {
+
+  }
+}
 
 export async function createTask(
   workspaceId: string,
@@ -63,7 +91,6 @@ export async function updateTaskStatus(
     throw new Error(`Invalid status transition: ${currentStatus} → ${newStatus}`);
   }
 
-  // Update status
   await db.update(tasks)
     .set({ status: newStatus, updatedAt: new Date() })
     .where(eq(tasks.id, taskId));
@@ -82,7 +109,7 @@ export async function updateTaskTitle(
   taskId: string,
   workspaceId: string,
   newTitle: string,
-){
+) {
   const { user } = await requireWorkspaceAccess(workspaceId, "member");
   const task = await db.query.tasks.findFirst({
     where: eq(tasks.id, taskId)
@@ -96,7 +123,7 @@ export async function updateTaskTitle(
       updatedAt: new Date(),
     }
   )
-  .where(eq(tasks.id, taskId))
+    .where(eq(tasks.id, taskId))
 
   await logActivity({
     workspaceId: workspaceId,
@@ -112,7 +139,7 @@ export async function updateTaskDescription(
   taskId: string,
   workspaceId: string,
   newDescription: string,
-){
+) {
   const { user } = await requireWorkspaceAccess(workspaceId, "member");
   const task = await db.query.tasks.findFirst({
     where: eq(tasks.id, taskId)
@@ -142,7 +169,7 @@ export async function assignTask(
   assigneeId: string
 ) {
   const { user } = await requireWorkspaceAccess(workspaceId, "admin");
-  
+
   const task = await db.query.tasks.findFirst({
     where: eq(tasks.id, taskId)
   })
