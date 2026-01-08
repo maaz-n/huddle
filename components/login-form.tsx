@@ -11,10 +11,11 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { FormEventHandler, useState } from "react"
+import { useState } from "react"
 import { login } from "@/actions/auth"
 import { toast } from "sonner"
 import { Loader2Icon } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export function LoginForm({
   className,
@@ -25,6 +26,8 @@ export function LoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const router = useRouter()
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -32,6 +35,7 @@ export function LoginForm({
       const response = await login(email, password);
       if (response.success) {
         toast.success(response.message);
+        router.push("/");
       } else {
         toast.error(response.message);
       }
@@ -122,7 +126,7 @@ export function LoginForm({
                 </Button>
               </Field>
               <FieldDescription className="text-center">
-                Don&apos;t have an account? <a href="#">Sign up</a>
+                Don&apos;t have an account? <a href="/signup">Sign up</a>
               </FieldDescription>
             </FieldGroup>
           </form>
