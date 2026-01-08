@@ -5,6 +5,7 @@ import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSearchParams, usePathname, useRouter } from "next/navigation"
+import { UserType } from "@/types/types"
 
 type TaskStatus = "todo" | "in_progress" | "blocked" | "done"
 type TaskPriority = "low" | "medium" | "high"
@@ -28,7 +29,7 @@ const assignees = [
   { value: "3", label: "Bob Johnson" },
 ]
 
-export function FilterBar() {
+export function FilterBar({adminUsers}: {adminUsers: UserType[]}) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter()
@@ -113,15 +114,17 @@ export function FilterBar() {
       </Select>
 
       <Select value={selectedAssignee} onValueChange={handleAssigneeChange}>
-        <SelectTrigger className="w-40">
+        <SelectTrigger className="w-40" disabled={adminUsers.length == 0}>
           <SelectValue placeholder="Filter by assignee" />
         </SelectTrigger>
         <SelectContent>
-          {assignees.map((assignee) => (
-            <SelectItem key={assignee.value} value={assignee.value}>
-              {assignee.label}
+          { adminUsers.length>0 && 
+          adminUsers.map((admin) => (
+            admin && <SelectItem key={admin.id} value={admin.id}>
+              {admin.name}
             </SelectItem>
-          ))}
+          ))
+          }
         </SelectContent>
       </Select>
 
