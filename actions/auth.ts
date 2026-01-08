@@ -11,9 +11,25 @@ export const login = async (email: string, password: string) => {
             },
         });
 
-        return { success: true, message: "Logged in!" }
+        return { success: true, message: "Login successfull!" }
     } catch (error) {
         const e = error as Error
         return { success: false, message: e.message }
     }
 }
+
+export const signup = async (name: string, email: string, password: string) => {
+    try {
+        await auth.api.signUpEmail({
+            body: {
+                name, email, password
+            }
+        })
+
+        return { success: true, message: "Account created!" }
+    } catch (error) {
+        const e = error as Error
+        return { success: false, message: e.message }
+    }
+}
+
