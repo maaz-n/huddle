@@ -1,8 +1,9 @@
+import { randomUUID } from "crypto";
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
@@ -26,7 +27,7 @@ export const session = pgTable(
       .notNull(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
   },
@@ -39,7 +40,7 @@ export const account = pgTable(
     id: text("id").primaryKey(),
     accountId: text("account_id").notNull(),
     providerId: text("provider_id").notNull(),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     accessToken: text("access_token"),
@@ -74,23 +75,23 @@ export const verification = pgTable(
 );
 
 export const workspaces = pgTable("workspaces", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
   name: text("name").notNull(),
-  ownerId: uuid("owner_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  ownerId: text("owner_id").notNull().references(() => user.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const workspaceMembers = pgTable("workspace_members", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  workspaceId: uuid("workspace_id").notNull(),
-  userId: text("user_id").notNull(),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
   role: text("role").$type<"admin" | "member" | "viewer">().notNull(),
   joinedAt: timestamp("joined_at").defaultNow(),
 });
 
 export const tasks = pgTable("tasks", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  workspaceId: uuid("workspace_id").notNull(),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description"),
   status: text("status")
@@ -99,18 +100,18 @@ export const tasks = pgTable("tasks", {
   priority: text("priority")
     .$type<"low" | "medium" | "high">()
     .default("medium"),
-  assigneeId: uuid("assignee_id"),
-  createdBy: uuid("created_by").notNull(),
+  assigneeId: text("assignee_id").references(() => user.id, { onDelete: 'cascade' }),
+  createdBy: text("created_by").notNull().references(() => user.id, { onDelete: 'cascade' }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const activityLogs = pgTable("activity_logs", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  workspaceId: uuid("workspace_id").notNull(),
-  actorId: uuid("actor_id").notNull(),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade"}),
+  actorId: text("actor_id").notNull().references(() => user.id, { onDelete: 'cascade' }),
   entityType: text("entity_type").notNull(),
-  entityId: uuid("entity_id").notNull(),
+  entityId: text("entity_id").notNull(),
   action: text("action").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
