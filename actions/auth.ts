@@ -1,6 +1,7 @@
 "use server"
 
 import { auth } from "@/lib/auth"
+import { headers } from "next/headers";
 
 export const login = async (email: string, password: string) => {
     try {
@@ -31,5 +32,19 @@ export const signup = async (name: string, email: string, password: string) => {
         const e = error as Error
         return { success: false, message: e.message }
     }
+}
+
+export const getCurrentUser = async () => {
+    try {
+        const session = await auth.api.getSession({
+        headers: await headers(),
+    });
+
+    return session?.user
+
+    } catch (error) {
+        throw new Error("Could not fetch user!");    
+    }
+    
 }
 
