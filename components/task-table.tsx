@@ -1,27 +1,11 @@
-"use client"
-
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { TaskRow } from "./task-row"
+import { TasksWithAssignees } from "@/types/types"
 
-interface Task {
-  id: string
-  title: string
-  assignee: {
-    name: string
-    image?: string
-  }
-  status: "todo" | "in_progress" | "blocked" | "done"
-  priority: "low" | "medium" | "high"
-  updatedAt: Date
-}
 
-interface TaskTableProps {
-  tasks: Task[]
-  onTaskClick: (task: Task) => void
-}
 
-export function TaskTable({ tasks, onTaskClick }: TaskTableProps) {
-  if (tasks.length === 0) {
+export function TaskTable({ tasksWithAssignees, onTaskSelect }: { tasksWithAssignees: TasksWithAssignees[], onTaskSelect: (task: TasksWithAssignees) => void }) {
+  if (tasksWithAssignees.length === 0) {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground">No tasks found. Create one to get started.</p>
@@ -42,8 +26,8 @@ export function TaskTable({ tasks, onTaskClick }: TaskTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tasks.map((task) => (
-            <TaskRow key={task.id} task={task} onClick={() => onTaskClick(task)} />
+          {tasksWithAssignees.map((task) => (
+            <TaskRow key={task.id} task={task} onClick={() => onTaskSelect(task)}/>
           ))}
         </TableBody>
       </Table>
