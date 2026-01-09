@@ -94,16 +94,16 @@ export const tasks = pgTable("tasks", {
   workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description"),
-  status: text("status")
+  status: text("status").notNull()
     .$type<"todo" | "in_progress" | "blocked" | "done">()
     .default("todo"),
-  priority: text("priority")
+  priority: text("priority").notNull()
     .$type<"low" | "medium" | "high">()
     .default("medium"),
-  assigneeId: text("assignee_id").references(() => user.id, { onDelete: 'cascade' }),
+  assigneeId: text("assignee_id").notNull().references(() => user.id, { onDelete: 'cascade' }),
   createdBy: text("created_by").notNull().references(() => user.id, { onDelete: 'cascade' }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const activityLogs = pgTable("activity_logs", {
@@ -134,3 +134,10 @@ export const accountRelations = relations(account, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const taskRelations = relations(tasks, ({ one }) => ({
+  user: one(user, {
+    fields: [tasks.assigneeId],
+    references: [user.id]
+  })
+}))
