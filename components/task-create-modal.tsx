@@ -8,31 +8,30 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { InsertTask, Workspace } from "@/types/types"
 
 interface TaskCreateModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreateTask: (task: {
-    title: string
-    description: string
-    status: "todo" | "in_progress" | "blocked" | "done"
-    priority: "low" | "medium" | "high"
-    assigneeId: string
-  }) => void
+  onCreateTask: (task: InsertTask) => void
+  workspaces: Workspace[]
 }
 
 const assignees = [
   { value: "1", label: "John Doe" },
   { value: "2", label: "Jane Smith" },
   { value: "3", label: "Bob Johnson" },
+  { value: "Gv7hzEfibxl3tmJUPAAw4QhZ2z54KvKX", label: "Real user" }
 ]
 
-export function TaskCreateModal({ open, onOpenChange, onCreateTask }: TaskCreateModalProps) {
+export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaces }: TaskCreateModalProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [status, setStatus] = useState<"todo" | "in_progress" | "blocked" | "done">("todo")
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
   const [assigneeId, setAssigneeId] = useState("1")
+  const [workspaceId, setWorkspaceId] = useState("1")
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,6 +41,7 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask }: TaskCreate
       status,
       priority,
       assigneeId,
+      workspaceId
     })
     setTitle("")
     setDescription("")
@@ -83,6 +83,19 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask }: TaskCreate
           </div>
 
           <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="status">Workspace</Label>
+              <Select value={workspaceId} onValueChange={(value: any) => setWorkspaceId(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {workspaces.map((workspace) => (
+                    <SelectItem key={workspace.id} value={workspace.id}>{workspace.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div>
               <Label htmlFor="status">Status</Label>
               <Select value={status} onValueChange={(value: any) => setStatus(value)}>
