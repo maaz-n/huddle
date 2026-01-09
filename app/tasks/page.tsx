@@ -1,5 +1,5 @@
 import { AppLayout } from "@/components/app-layout"
-import { getAdminUsers, getTasks } from "@/actions/tasks"
+import { getAdminUsers, getTasks, getWorkspaces } from "@/actions/tasks"
 import TaskClient from "@/components/task-client"
 
 
@@ -16,16 +16,14 @@ export default async function TasksPage(props: any) {
 
   const adminUsers = await getAdminUsers();
 
-  const handleCreateTask = (data: any) => {
-    console.log("Creating task:", data)
-    // In a real app, this would call an API
-  }
+  const workspaces = await getWorkspaces();
 
   return (
     <AppLayout>
       <TaskClient
       adminUsers={adminUsers}
       tasksWithAssignees={tasksWithAssignees}
+      workspaces={workspaces}
       />
     </AppLayout>
   )
