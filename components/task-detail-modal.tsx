@@ -3,23 +3,10 @@
 import { formatDistanceToNow } from "date-fns"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { TaskBadge } from "./task-badge"
-
-interface Task {
-  id: string
-  title: string
-  description: string
-  assignee: {
-    name: string
-    image?: string
-  }
-  status: "todo" | "in_progress" | "blocked" | "done"
-  priority: "low" | "medium" | "high"
-  createdAt: Date
-  updatedAt: Date
-}
+import { TasksWithAssignees } from "@/types/types"
 
 interface TaskDetailModalProps {
-  task: Task | null
+  task: TasksWithAssignees | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }
@@ -51,7 +38,7 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
             </div>
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-2">Assignee</h3>
-              <p className="text-sm">{task.assignee.name}</p>
+              <p className="text-sm">{task.user.name}</p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-muted-foreground mb-2">Created</h3>
