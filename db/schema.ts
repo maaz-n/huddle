@@ -78,7 +78,7 @@ export const workspaces = pgTable("workspaces", {
   id: text("id").primaryKey().$defaultFn(() => randomUUID()),
   name: text("name").notNull(),
   ownerId: text("owner_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const workspaceMembers = pgTable("workspace_members", {
