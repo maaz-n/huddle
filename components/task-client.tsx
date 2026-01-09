@@ -1,20 +1,41 @@
 "use client"
 
-import { TasksWithAssignees, UserType } from '@/types/types'
+import { InsertTask, TasksWithAssignees, UserType, Workspace } from '@/types/types'
 import { FilterBar } from './filter-bar'
 import { TaskTable } from './task-table'
 import { useState } from 'react'
 import { Button } from './ui/button'
 import { Plus } from 'lucide-react'
 import { TaskDetailModal } from './task-detail-modal'
+import { TaskCreateModal } from './task-create-modal'
+import { createTask } from '@/actions/tasks'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
-const TaskClient = ({ adminUsers, tasksWithAssignees }: { adminUsers: UserType[], tasksWithAssignees: TasksWithAssignees[] }) => {
+const TaskClient = ({ adminUsers, tasksWithAssignees, workspaces }: { adminUsers: UserType[], tasksWithAssignees: TasksWithAssignees[], workspaces: Workspace[] }) => {
 
-    const [selectedTask, setSelectedTask] = useState<(typeof tasksWithAssignees)[0] | null>(null)
-    const [taskDetailOpen, setTaskDetailOpen] = useState(false)
-    const [taskCreateOpen, setTaskCreateOpen] = useState(false)
+    const [selectedTask, setSelectedTask] = useState<(typeof tasksWithAssignees)[0] | null>(null);
+    const [taskDetailOpen, setTaskDetailOpen] = useState(false);
+    const [taskCreateOpen, setTaskCreateOpen] = useState(false);
 
-    console.log(selectedTask)
+    const router = useRouter()
+
+      const handleCreateTask = async (data: InsertTask) => {
+        try {
+            const { workspaceId, title, description, status, priority, assigneeId } = data;
+            const response = await createTask(workspaceId, title, description, status, priority, assigneeId);
+            
+            if(response.success) {
+                toast.success(response.message)
+                router.refresh()
+            } else {
+                toast.error(response.message)
+            }
+
+        } catch (error) {
+            console.error(error)
+        }
+  }
 
     return (
         <div className="py-8 px-6 space-y-6">
@@ -44,7 +65,7 @@ const TaskClient = ({ adminUsers, tasksWithAssignees }: { adminUsers: UserType[]
           open={taskDetailOpen}
           onOpenChange={setTaskDetailOpen}
         />
-            {/* <TaskCreateModal open={taskCreateOpen} onOpenChange={setTaskCreateOpen} onCreateTask={handleCreateTask} /> */}
+            <TaskCreateModal open={taskCreateOpen} onOpenChange={setTaskCreateOpen} onCreateTask={handleCreateTask} workspaces={workspaces}/>
         </div>
     )
 }
