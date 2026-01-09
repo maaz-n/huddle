@@ -10,7 +10,18 @@ import { eq } from "drizzle-orm";
 export async function getTasks(filter: GetFilteredTasks) {
   try {
     if (!filter.status && !filter.priority && !filter.assignee) {
-      return await db.query.tasks.findMany()
+      return await db.query.tasks.findMany({
+        with: {
+          user: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+              image: true
+            }
+          },
+        }
+      })
     } else {
       return await db.query.tasks.findMany({
         where: (tasks, { eq, and }) => {
@@ -27,17 +38,30 @@ export async function getTasks(filter: GetFilteredTasks) {
           }
 
           return and(...conditions)
+        },
+
+        with: {
+          user: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+              image: true
+            }
+          },
         }
       })
     }
   } catch (error) {
-
+    console.error(error);
+    return []
   }
 }
 
 export async function createTask(
   workspaceId: string,
   title: string,
+  assigneeId: string
 ) {
   const { user } = await requireWorkspaceAccess(
     workspaceId,
@@ -48,6 +72,7 @@ export async function createTask(
     workspaceId: workspaceId,
     title: title,
     createdBy: user.id,
+    assigneeId: assigneeId
   }).returning();
 
   await logActivity({
