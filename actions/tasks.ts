@@ -1,11 +1,12 @@
 "use server";
 
 import { db } from "@/db";
-import { tasks, activityLogs, workspaceMembers, user } from "@/db/schema";
+import { tasks, activityLogs, user, workspaces } from "@/db/schema";
 import { logActivity } from "@/lib/activity";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
 import { GetFilteredTasks, UserType } from "@/types/types";
 import { eq } from "drizzle-orm";
+import { getCurrentUser } from "./auth";
 
 export async function getTasks(filter: GetFilteredTasks) {
   try {
@@ -61,6 +62,9 @@ export async function getTasks(filter: GetFilteredTasks) {
 export async function createTask(
   workspaceId: string,
   title: string,
+  description: string | null,
+  status: "todo" | "in_progress" | "blocked" | "done",
+  priority: "low" | "medium" | "high",
   assigneeId: string
 ) {
   const { user } = await requireWorkspaceAccess(
@@ -68,9 +72,14 @@ export async function createTask(
     "member"
   );
 
+  try {
+
   const [insertedTask] = await db.insert(tasks).values({
     workspaceId: workspaceId,
     title: title,
+    description: description,
+    status: status,
+    priority: priority,
     createdBy: user.id,
     assigneeId: assigneeId
   }).returning();
@@ -82,6 +91,14 @@ export async function createTask(
     entityId: insertedTask.id,
     action: "Task created",
   });
+
+  return {success: true, message: "Task created!"}
+
+  } catch (error) {
+    const e = error as Error;
+    return {success: false, message: e.message}
+
+  }
 }
 
 export async function updateTaskStatus(
@@ -246,4 +263,14 @@ export async function getUser(id: string) {
   } catch (error) {
     throw error;
   }
+}
+
+export const getWorkspaces = async () => {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return [];
+  const workspaces = db.query.workspaces.findMany({
+    where: (workspaces, { eq }) => eq(workspaces.ownerId, currentUser.id)
+  })
+
+  return workspaces
 }
