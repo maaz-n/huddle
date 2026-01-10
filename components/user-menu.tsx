@@ -11,10 +11,24 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { UserAvatar } from "./user-avatar"
 import { UserType } from "@/types/types"
+import { authClient } from "@/lib/auth-client"
+import { useRouter } from "next/navigation"
 
-export function UserMenu({user}: {user: UserType}) {
+export function UserMenu({ user }: { user: UserType }) {
 
-  if(!user) throw new Error("Could not fetch user")
+  if (!user) throw new Error("Could not fetch user");
+
+  const router = useRouter()
+
+    async function handleLogout() {
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            router.push("/login");
+          },
+        },
+      });
+    }
 
   return (
     <DropdownMenu>
@@ -38,7 +52,7 @@ export function UserMenu({user}: {user: UserType}) {
           <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="gap-2 text-destructive">
+        <DropdownMenuItem className="gap-2 text-destructive" onClick={handleLogout}>
           <LogOut className="h-4 w-4" />
           <span>Logout</span>
         </DropdownMenuItem>
