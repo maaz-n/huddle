@@ -4,6 +4,7 @@ import { useState } from "react"
 import { ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Workspace } from "@/types/types"
 
 const workspaces = [
   { id: "1", name: "Engineering" },
@@ -11,7 +12,7 @@ const workspaces = [
   { id: "3", name: "Marketing" },
 ]
 
-export function WorkspaceSwitcher() {
+export function WorkspaceSwitcher({workspaces}: {workspaces: Workspace[]}) {
   const [currentWorkspace, setCurrentWorkspace] = useState(workspaces[0])
 
   return (
