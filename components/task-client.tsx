@@ -13,13 +13,16 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { WorkspaceCreateModal } from './workspace-create-modal'
 import { createWorkspace } from '@/actions/workspace'
+import { useAppData } from './app-data-provider'
 
-const TaskClient = ({ adminUsers, tasksWithAssignees, workspaces }: { adminUsers: UserType[], tasksWithAssignees: TasksWithAssignees[], workspaces: Workspace[] }) => {
+const TaskClient = ({ adminUsers, tasksWithAssignees }: { adminUsers: UserType[], tasksWithAssignees: TasksWithAssignees[]}) => {
 
     const [selectedTask, setSelectedTask] = useState<(typeof tasksWithAssignees)[0] | null>(null);
     const [taskDetailOpen, setTaskDetailOpen] = useState(false);
     const [taskCreateOpen, setTaskCreateOpen] = useState(false);
     const [workspaceCreateOpen, setWorkspaceCreateOpen] = useState(false);
+
+    const { workspaces } = useAppData()
 
     const router = useRouter()
 
@@ -93,7 +96,7 @@ const TaskClient = ({ adminUsers, tasksWithAssignees, workspaces }: { adminUsers
             />
             <TaskCreateModal open={taskCreateOpen} onOpenChange={setTaskCreateOpen} onCreateTask={handleCreateTask} workspaces={workspaces} />
 
-            <WorkspaceCreateModal open={workspaceCreateOpen} onOpenChange={setWorkspaceCreateOpen} onCreateWorkspace={handleCreateWorkspace} workspaces={workspaces} />
+            <WorkspaceCreateModal open={workspaceCreateOpen} onOpenChange={setWorkspaceCreateOpen} onCreateWorkspace={handleCreateWorkspace} />
         </div>
     )
 }
