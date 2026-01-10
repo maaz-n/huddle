@@ -4,15 +4,17 @@ import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { WorkspaceSwitcher } from "./workspace-switcher"
 import { UserMenu } from "./user-menu"
-import { UserType } from "@/types/types"
+import { useAppData } from "./app-data-provider"
 
 interface HeaderProps {
   sidebarOpen: boolean
   setSidebarOpen: (open: boolean) => void,
-  user: UserType
 }
 
-export function Header({ sidebarOpen, setSidebarOpen, user }: HeaderProps) {
+export function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
+
+    const { user, workspaces } = useAppData()
+
   return (
     <header className="border-b bg-card">
       <div className="flex items-center justify-between h-16 px-6">
@@ -21,13 +23,13 @@ export function Header({ sidebarOpen, setSidebarOpen, user }: HeaderProps) {
             <Menu className="h-5 w-5" />
           </Button>
           <div className="hidden lg:block">
-            <WorkspaceSwitcher />
+            <WorkspaceSwitcher workspaces={workspaces}/>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
           <div className="lg:hidden">
-            <WorkspaceSwitcher />
+            <WorkspaceSwitcher workspaces={workspaces}/>
           </div>
           <UserMenu user={user}/>
         </div>
