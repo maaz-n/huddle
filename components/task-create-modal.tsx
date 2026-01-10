@@ -29,8 +29,8 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaces }
   const [description, setDescription] = useState("")
   const [status, setStatus] = useState<"todo" | "in_progress" | "blocked" | "done">("todo")
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
-  const [assigneeId, setAssigneeId] = useState("1")
-  const [workspaceId, setWorkspaceId] = useState("1")
+  const [assigneeId, setAssigneeId] = useState("")
+  const [workspaceId, setWorkspaceId] = useState("")
 
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -87,7 +87,7 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaces }
               <Label htmlFor="status">Workspace</Label>
               <Select value={workspaceId} onValueChange={(value: any) => setWorkspaceId(value)}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder={"Select Workspace"}/>
                 </SelectTrigger>
                 <SelectContent>
                   {workspaces.map((workspace) => (
@@ -129,7 +129,7 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaces }
               <Label htmlFor="assignee">Assignee</Label>
               <Select value={assigneeId} onValueChange={setAssigneeId}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder={"Select Assignee"}/>
                 </SelectTrigger>
                 <SelectContent>
                   {assignees.map((assignee) => (
