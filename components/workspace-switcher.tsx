@@ -9,11 +9,17 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 
 export function WorkspaceSwitcher({ workspaces }: { workspaces: Workspace[] }) {
 
+  function getCurrentWorkspace(){
+    const searchParams = useSearchParams();
+    const workspaceId = searchParams.get("workspace");
+    const workspace = workspaces.filter((workspace) => workspace.id === workspaceId);
+    return workspace[0]
+  }
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { push } = useRouter();
-  const [currentWorkspace, setCurrentWorkspace] = useState(workspaces[0])
-  
+  const [currentWorkspace, setCurrentWorkspace] = useState(getCurrentWorkspace())
+
   
   useEffect(() => {
     const params = new URLSearchParams(searchParams)
