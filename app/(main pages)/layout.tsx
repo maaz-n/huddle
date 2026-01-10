@@ -7,10 +7,11 @@ const MainPagesLayout = async ({children} : {children: React.ReactNode}) => {
 
     const workspaces = await getWorkspaces();
     const user = await getCurrentUser();
+
     if(!user) throw Error("User not logged in!")
 
   return (
-    <AppDataProvider user={user} workspaces={workspaces}>
+    <AppDataProvider user={user} workspaces={workspaces} >
         {children}
     </AppDataProvider>
   )

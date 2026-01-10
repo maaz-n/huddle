@@ -1,20 +1,26 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Workspace } from "@/types/types"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 
-const workspaces = [
-  { id: "1", name: "Engineering" },
-  { id: "2", name: "Product" },
-  { id: "3", name: "Marketing" },
-]
+export function WorkspaceSwitcher({ workspaces }: { workspaces: Workspace[] }) {
 
-export function WorkspaceSwitcher({workspaces}: {workspaces: Workspace[]}) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { push } = useRouter();
   const [currentWorkspace, setCurrentWorkspace] = useState(workspaces[0])
-
+  
+  
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams)
+    params.set("workspace", currentWorkspace.id)
+    push(`${pathname}?${params.toString()}`, { scroll: false })
+  }, [currentWorkspace])
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
