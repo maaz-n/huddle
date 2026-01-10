@@ -14,20 +14,10 @@ interface TaskCreateModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onCreateWorkspace: (name: string) => void
-  workspaces: Workspace[]
 }
 
-const assignees = [
-  { value: "1", label: "John Doe" },
-  { value: "2", label: "Jane Smith" },
-  { value: "3", label: "Bob Johnson" },
-  { value: "Gv7hzEfibxl3tmJUPAAw4QhZ2z54KvKX", label: "Real user" }
-]
-
-export function WorkspaceCreateModal({ open, onOpenChange, onCreateWorkspace, workspaces }: TaskCreateModalProps) {
+export function WorkspaceCreateModal({ open, onOpenChange, onCreateWorkspace }: TaskCreateModalProps) {
   const [name, setName] = useState("")
-
-
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
