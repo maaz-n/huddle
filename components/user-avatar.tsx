@@ -13,7 +13,7 @@ export function UserAvatar({ user, className }: UserAvatarProps) {
 
   return (
     <Avatar className={className}>
-      <AvatarImage src={user.image || "/placeholder.png"} alt={user?.name} />
+      <AvatarImage src={user.image || "/placeholder.png"} alt={user.name} />
     </Avatar>
   )
 }
