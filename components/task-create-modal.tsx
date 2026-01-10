@@ -8,30 +8,22 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
-import { InsertTask, Workspace } from "@/types/types"
+import { InsertTask, WorkspaceUser } from "@/types/types"
 
 interface TaskCreateModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreateTask: (task: InsertTask) => void
-  workspaces: Workspace[]
+  onCreateTask: (task: InsertTask) => void,
+  workspaceUsers: WorkspaceUser[],
+  workspaceId: string
 }
 
-const assignees = [
-  { value: "1", label: "John Doe" },
-  { value: "2", label: "Jane Smith" },
-  { value: "3", label: "Bob Johnson" },
-  { value: "Gv7hzEfibxl3tmJUPAAw4QhZ2z54KvKX", label: "Real user" }
-]
-
-export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaces }: TaskCreateModalProps) {
+export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUsers, workspaceId }: TaskCreateModalProps) {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [status, setStatus] = useState<"todo" | "in_progress" | "blocked" | "done">("todo")
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
   const [assigneeId, setAssigneeId] = useState("")
-  const [workspaceId, setWorkspaceId] = useState("")
-
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -84,19 +76,6 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaces }
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="status">Workspace</Label>
-              <Select value={workspaceId} onValueChange={(value: any) => setWorkspaceId(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder={"Select Workspace"}/>
-                </SelectTrigger>
-                <SelectContent>
-                  {workspaces.map((workspace) => (
-                    <SelectItem key={workspace.id} value={workspace.id}>{workspace.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
               <Label htmlFor="status">Status</Label>
               <Select value={status} onValueChange={(value: any) => setStatus(value)}>
                 <SelectTrigger>
@@ -132,9 +111,9 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaces }
                   <SelectValue placeholder={"Select Assignee"}/>
                 </SelectTrigger>
                 <SelectContent>
-                  {assignees.map((assignee) => (
-                    <SelectItem key={assignee.value} value={assignee.value}>
-                      {assignee.label}
+                  {workspaceUsers.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

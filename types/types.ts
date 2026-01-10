@@ -48,3 +48,10 @@ export type Workspace = {
   ownerId: string,
   createdAt: Date
 }
+
+export type WorkspaceUser = {
+    id: string
+    name: string
+    email: string
+    role: string
+}

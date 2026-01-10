@@ -1,6 +1,6 @@
 "use client"
 
-import { InsertTask, TasksWithAssignees, UserType, Workspace } from '@/types/types'
+import { InsertTask, TasksWithAssignees, UserType, WorkspaceUser } from '@/types/types'
 import { FilterBar } from './filter-bar'
 import { TaskTable } from './task-table'
 import { useState } from 'react'
@@ -15,14 +15,12 @@ import { WorkspaceCreateModal } from './workspace-create-modal'
 import { createWorkspace } from '@/actions/workspace'
 import { useAppData } from './app-data-provider'
 
-const TaskClient = ({ adminUsers, tasksWithAssignees }: { adminUsers: UserType[], tasksWithAssignees: TasksWithAssignees[]}) => {
+const TaskClient = ({ adminUsers, tasksWithAssignees, workspaceUsers, workspaceId }: { adminUsers: UserType[], tasksWithAssignees: TasksWithAssignees[], workspaceUsers: WorkspaceUser[], workspaceId: string}) => {
 
     const [selectedTask, setSelectedTask] = useState<(typeof tasksWithAssignees)[0] | null>(null);
     const [taskDetailOpen, setTaskDetailOpen] = useState(false);
     const [taskCreateOpen, setTaskCreateOpen] = useState(false);
     const [workspaceCreateOpen, setWorkspaceCreateOpen] = useState(false);
-
-    const { workspaces } = useAppData()
 
     const router = useRouter()
 
@@ -94,7 +92,7 @@ const TaskClient = ({ adminUsers, tasksWithAssignees }: { adminUsers: UserType[]
                 open={taskDetailOpen}
                 onOpenChange={setTaskDetailOpen}
             />
-            <TaskCreateModal open={taskCreateOpen} onOpenChange={setTaskCreateOpen} onCreateTask={handleCreateTask} workspaces={workspaces} />
+            <TaskCreateModal open={taskCreateOpen} onOpenChange={setTaskCreateOpen} onCreateTask={handleCreateTask} workspaceId={workspaceId} workspaceUsers={workspaceUsers}/>
 
             <WorkspaceCreateModal open={workspaceCreateOpen} onOpenChange={setWorkspaceCreateOpen} onCreateWorkspace={handleCreateWorkspace} />
         </div>
