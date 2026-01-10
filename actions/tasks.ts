@@ -8,10 +8,11 @@ import { GetFilteredTasks, UserType } from "@/types/types";
 import { eq } from "drizzle-orm";
 import { getCurrentUser } from "./auth";
 
-export async function getTasks(filter: GetFilteredTasks) {
+export async function getTasks(workspaceId: string, filter: GetFilteredTasks) {
   try {
     if (!filter.status && !filter.priority && !filter.assignee) {
       return await db.query.tasks.findMany({
+        where: (tasks, { eq }) => eq(tasks.workspaceId, workspaceId),
         with: {
           user: {
             columns: {

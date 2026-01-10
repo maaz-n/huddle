@@ -6,6 +6,9 @@ import TaskClient from "@/components/task-client"
 export default async function TasksPage(props: any) {
 
   const searchParams = await props.searchParams;
+  const workspaceId = searchParams.workspace;
+
+  console.log(workspaceId)
 
   const filter = {
     status: searchParams.status || "",
@@ -13,7 +16,7 @@ export default async function TasksPage(props: any) {
     assignee: searchParams.assignee || "",
   }
 
-  const tasksWithAssignees = await getTasks(filter);
+  const tasksWithAssignees = await getTasks(workspaceId, filter);
 
   const adminUsers = await getAdminUsers();
 
