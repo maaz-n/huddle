@@ -9,24 +9,21 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 
 export function WorkspaceSwitcher({ workspaces }: { workspaces: Workspace[] }) {
 
-  function getCurrentWorkspace(){
-    const searchParams = useSearchParams();
-    const workspaceId = searchParams.get("workspace");
-    const workspace = workspaces.filter((workspace) => workspace.id === workspaceId);
-    return workspace[0]
-  }
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { push } = useRouter();
-  const [currentWorkspace, setCurrentWorkspace] = useState(getCurrentWorkspace())
+  const [currentWorkspace, setCurrentWorkspace] = useState(() => {
+    const workspaceId = searchParams.get("workspace");
+    return workspaces.find(w => w.id === workspaceId) || workspaces[0];
+  });
 
-  
+
   useEffect(() => {
     const params = new URLSearchParams(searchParams)
     params.set("workspace", currentWorkspace.id)
     push(`${pathname}?${params.toString()}`, { scroll: false })
   }, [currentWorkspace])
-  
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
