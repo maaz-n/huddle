@@ -5,7 +5,7 @@ import { tasks, activityLogs, user, workspaces } from "@/db/schema";
 import { logActivity } from "@/lib/activity";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
 import { GetFilteredTasks, UserType } from "@/types/types";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { getCurrentUser } from "./auth";
 
 export async function getTasks(workspaceId: string, filter: GetFilteredTasks) {
@@ -264,4 +264,15 @@ export async function getUser(id: string) {
   } catch (error) {
     throw error;
   }
+}
+
+export async function getTaskStats(workspaceId: string) {
+  return await db
+    .select({
+      status: tasks.status,
+      count: sql<number>`count(*)`,
+    })
+    .from(tasks)
+    .where(eq(tasks.workspaceId, workspaceId))
+    .groupBy(tasks.status)
 }
