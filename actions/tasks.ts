@@ -60,6 +60,24 @@ export async function getTasks(workspaceId: string, filter: GetFilteredTasks) {
   }
 }
 
+export async function getMyTasks(workspaceId: string) {
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser) return [];
+    const workspaceTasks = await db.query.tasks.findMany({
+      where: (tasks, { eq, and }) => and(
+        eq(tasks.workspaceId, workspaceId),
+        eq(tasks.assigneeId, currentUser.id)
+      )
+    })
+    return workspaceTasks;
+
+  } catch (error) {
+    console.error(error)
+    return [];
+  }
+}
+
 export async function createTask(
   workspaceId: string,
   title: string,
@@ -75,29 +93,29 @@ export async function createTask(
 
   try {
 
-  const [insertedTask] = await db.insert(tasks).values({
-    workspaceId: workspaceId,
-    title: title,
-    description: description,
-    status: status,
-    priority: priority,
-    createdBy: user.id,
-    assigneeId: assigneeId
-  }).returning();
+    const [insertedTask] = await db.insert(tasks).values({
+      workspaceId: workspaceId,
+      title: title,
+      description: description,
+      status: status,
+      priority: priority,
+      createdBy: user.id,
+      assigneeId: assigneeId
+    }).returning();
 
-  await logActivity({
-    workspaceId: workspaceId,
-    actorId: user.id,
-    entityType: "task",
-    entityId: insertedTask.id,
-    action: "Task created",
-  });
+    await logActivity({
+      workspaceId: workspaceId,
+      actorId: user.id,
+      entityType: "task",
+      entityId: insertedTask.id,
+      action: "Task created",
+    });
 
-  return {success: true, message: "Task created!"}
+    return { success: true, message: "Task created!" }
 
   } catch (error) {
     const e = error as Error;
-    return {success: false, message: e.message}
+    return { success: false, message: e.message }
 
   }
 }

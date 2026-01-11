@@ -4,11 +4,8 @@ import { TaskStatusCard } from "@/components/task-status-card"
 import { ActivityLogItem } from "@/components/activity-log-item"
 import { QuickActionButton } from "@/components/quick-action-button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getCurrentUser } from "@/actions/auth"
-import { UserType, Workspace } from "@/types/types"
-import { useAppData } from "@/components/app-data-provider"
 import UserGreeting from "@/components/user-greeting"
-import { getTaskStats } from "@/actions/tasks"
+import { getMyTasks, getTaskStats } from "@/actions/tasks"
 
 const mockTasks = [
   { status: "todo" as const, count: 8 },
@@ -82,7 +79,7 @@ export default async function DashboardPage(props: any) {
     }
   })
 
-  console.log(normalizedStats)
+  const myTasks = await getMyTasks(workspaceId);
 
   return (
     <AppLayout>
@@ -121,10 +118,16 @@ export default async function DashboardPage(props: any) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="p-3 bg-secondary rounded-lg">
-                      <p className="text-sm font-medium">Task {i}</p>
-                      <p className="text-xs text-muted-foreground mt-1">In Progress</p>
+                  {myTasks.map((task) => (
+                    <div key={task.id} className="p-3 bg-secondary rounded-lg">
+                      <p className="text-sm font-medium">{task.title}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{task.status === "todo"
+                        ? "To Do"
+                        : task.status === "in_progress"
+                          ? "In Progress"
+                          : task.status === "blocked"
+                            ? "Blocked"
+                            : "Done"}</p>
                     </div>
                   ))}
                 </div>
