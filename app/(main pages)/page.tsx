@@ -6,56 +6,7 @@ import { QuickActionButton } from "@/components/quick-action-button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import UserGreeting from "@/components/user-greeting"
 import { getMyTasks, getTaskStats } from "@/actions/tasks"
-
-const mockTasks = [
-  { status: "todo" as const, count: 8 },
-  { status: "in_progress" as const, count: 5 },
-  { status: "blocked" as const, count: 2 },
-  { status: "done" as const, count: 12 },
-]
-
-const mockActivityLogs = [
-  {
-    id: "1",
-    actor: { name: "John Doe", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=John" },
-    action: "completed",
-    entityType: "task",
-    entityName: "Fix login button",
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-  },
-  {
-    id: "2",
-    actor: { name: "Jane Smith", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jane" },
-    action: "created",
-    entityType: "task",
-    entityName: "Design homepage redesign",
-    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
-  },
-  {
-    id: "3",
-    actor: { name: "Bob Johnson", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob" },
-    action: "updated",
-    entityType: "task",
-    entityName: "API rate limiting",
-    timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000),
-  },
-  {
-    id: "4",
-    actor: { name: "John Doe", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=John" },
-    action: "assigned to",
-    entityType: "task",
-    entityName: "Database migration",
-    timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: "5",
-    actor: { name: "Jane Smith", image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jane" },
-    action: "marked as blocked",
-    entityType: "task",
-    entityName: "Third-party integration",
-    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-  },
-]
+import { getRecentActivity } from "@/actions/activity"
 
 const STATUSES = [
   "todo",
@@ -81,11 +32,12 @@ export default async function DashboardPage(props: any) {
 
   const myTasks = await getMyTasks(workspaceId);
 
+  const recentActivity = await getRecentActivity(workspaceId)
+
   return (
     <AppLayout>
       <div className="py-8 px-6 space-y-8">
         <UserGreeting />
-        {/* Task Status Cards */}
         <div>
           <h2 className="text-xl font-semibold mb-4">Tasks by Status</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -108,9 +60,7 @@ export default async function DashboardPage(props: any) {
           </div>
         </div>
 
-        {/* Assigned to me and Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Assigned to me */}
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
@@ -135,7 +85,6 @@ export default async function DashboardPage(props: any) {
             </Card>
           </div>
 
-          {/* Quick Actions */}
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
@@ -152,7 +101,6 @@ export default async function DashboardPage(props: any) {
           </div>
         </div>
 
-        {/* Recent Activity */}
         <div>
           <Card>
             <CardHeader>
@@ -160,7 +108,7 @@ export default async function DashboardPage(props: any) {
             </CardHeader>
             <CardContent>
               <div className="space-y-2 divide-y">
-                {mockActivityLogs.map((log) => (
+                {recentActivity.map((log) => (
                   <ActivityLogItem key={log.id} {...log} />
                 ))}
               </div>

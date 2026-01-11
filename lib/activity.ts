@@ -7,6 +7,9 @@ export async function logActivity(params: {
   entityType: "task" | "workspace";
   entityId: string;
   action: string;
+  metadata: {
+    entityName: string
+  }
 }) {
   await db.insert(activityLogs).values({
     workspaceId: params.workspaceId,
@@ -14,5 +17,6 @@ export async function logActivity(params: {
     entityType: params.entityType,
     entityId: params.entityId,
     action: params.action,
+    metadata: params.metadata
   });
 }

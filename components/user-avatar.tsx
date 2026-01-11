@@ -1,9 +1,9 @@
 "use client"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
-import { UserType } from "@/types/types"
+import { Actor, UserType } from "@/types/types"
 
 interface UserAvatarProps {
-  user: UserType,
+  user: UserType | Actor,
   className?: string
 }
 

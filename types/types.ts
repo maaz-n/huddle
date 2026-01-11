@@ -50,8 +50,13 @@ export type Workspace = {
 }
 
 export type WorkspaceUser = {
-    id: string
-    name: string
-    email: string
-    role: string
+  id: string
+  name: string
+  email: string
+  role: string
+}
+
+export type Actor = {
+  name: string,
+  image: string | null
 }

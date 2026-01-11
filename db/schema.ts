@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index, jsonb } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -113,7 +113,10 @@ export const activityLogs = pgTable("activity_logs", {
   entityType: text("entity_type").notNull(),
   entityId: text("entity_id").notNull(),
   action: text("action").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+  metadata: jsonb("metadata").$type<{
+    entityName?: string 
+  }>(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const userRelations = relations(user, ({ many }) => ({

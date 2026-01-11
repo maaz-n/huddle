@@ -108,7 +108,8 @@ export async function createTask(
       actorId: user.id,
       entityType: "task",
       entityId: insertedTask.id,
-      action: "Task created",
+      action: "Task created",  
+      metadata: {entityName: insertedTask.title}
     });
 
     return { success: true, message: "Task created!" }
@@ -192,7 +193,7 @@ export async function updateTaskTitle(
     entityType: "task",
     entityId: taskId,
     action: "Title updated",
-
+    metadata: {entityName: task.title}
   })
 }
 
@@ -221,7 +222,8 @@ export async function updateTaskDescription(
     entityType: "task",
     entityId: taskId,
     action: "Description updated",
-  })
+    metadata: {entityName: task.title}
+  });
 }
 
 export async function assignTask(
@@ -248,7 +250,8 @@ export async function assignTask(
     entityType: "task",
     entityId: taskId,
     action: `Assigned to ${assigneeId}`,
-  })
+    metadata: {entityName: task.title}
+  });
 }
 
 export async function getAdminUsers(): Promise<UserType[]> {
