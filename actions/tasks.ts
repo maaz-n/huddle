@@ -265,13 +265,3 @@ export async function getUser(id: string) {
     throw error;
   }
 }
-
-export const getWorkspaces = async () => {
-  const currentUser = await getCurrentUser();
-  if (!currentUser) return [];
-  const workspaces = db.query.workspaces.findMany({
-    where: (workspaces, { eq }) => eq(workspaces.ownerId, currentUser.id)
-  })
-
-  return workspaces
-}

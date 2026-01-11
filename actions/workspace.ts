@@ -18,6 +18,16 @@ export const createWorkspace = async (name: string) => {
     }
 }
 
+export const getWorkspaces = async () => {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) return [];
+  const workspaces = db.query.workspaces.findMany({
+    where: (workspaces, { eq }) => eq(workspaces.ownerId, currentUser.id)
+  })
+
+  return workspaces
+}
+
 export const getWorkspaceUsers = async (workspaceId: string) => {
     return await db.select({
         id: user.id,
