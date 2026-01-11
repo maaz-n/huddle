@@ -108,14 +108,18 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
               <Label htmlFor="assignee">Assignee</Label>
               <Select value={assigneeId} onValueChange={setAssigneeId}>
                 <SelectTrigger>
-                  <SelectValue placeholder={"Select Assignee"}/>
+                  <SelectValue placeholder={workspaceUsers.length > 0 ? "Select Assignee" : "No User"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {workspaceUsers.map((user) => (
+                  {workspaceUsers.length > 0 ? workspaceUsers.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.name}
                     </SelectItem>
-                  ))}
+                  )) :
+                    (
+                      <p className="text-sm text-muted-foreground">No users in workspace</p>
+                    )
+                  }
                 </SelectContent>
               </Select>
             </div>
