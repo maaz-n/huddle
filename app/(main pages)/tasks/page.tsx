@@ -1,7 +1,7 @@
 import { AppLayout } from "@/components/app-layout"
 import { getAdminUsers, getTasks } from "@/actions/tasks"
 import TaskClient from "@/components/task-client"
-import { getWorkspaces, getWorkspaceUsers } from "@/actions/workspace";
+import { getWorkspacesWithRoles, getWorkspaceUsers } from "@/actions/workspace";
 import { redirect } from "next/navigation";
 
 export default async function TasksPage(props: any) {
@@ -10,8 +10,8 @@ export default async function TasksPage(props: any) {
   let workspaceId = searchParams.workspace;
 
   if(!workspaceId){
-    const workspaces = await getWorkspaces();
-    workspaceId = workspaces[0].id;
+    const workspaces = await getWorkspacesWithRoles();
+    workspaceId = workspaces[0].workspaceId;
     redirect(`/tasks?workspace=${workspaceId}`)
   }
 

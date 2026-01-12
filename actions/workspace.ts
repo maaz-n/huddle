@@ -18,14 +18,16 @@ export const createWorkspace = async (name: string) => {
     }
 }
 
-export const getWorkspaces = async () => {
-  const currentUser = await getCurrentUser();
-  if (!currentUser) return [];
-  const workspaces = db.query.workspaces.findMany({
-    where: (workspaces, { eq }) => eq(workspaces.ownerId, currentUser.id)
-  })
+export const getWorkspacesWithRoles = async () => {
+    const currentUser = await getCurrentUser();
+    if (!currentUser) return [];
+    const workspaceswithRoles = await db.select({
+        workspaceId: workspaces.id,
+        workspaceName: workspaces.name,
+        role: workspaceMembers.role
+    }).from(workspaceMembers).where(eq(workspaceMembers.userId, currentUser.id)).innerJoin(workspaces, eq(workspaceMembers.workspaceId, workspaces.id))
 
-  return workspaces
+    return workspaceswithRoles
 }
 
 export const getWorkspaceUsers = async (workspaceId: string) => {

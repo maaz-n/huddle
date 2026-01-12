@@ -42,11 +42,10 @@ export type InsertTask = {
   assigneeId: string
 }
 
-export type Workspace = {
-  id: string,
-  name: string,
-  ownerId: string,
-  createdAt: Date
+export type WorkspaceWithRole = {
+  workspaceId: string,
+  workspaceName: string,
+  role: "owner" | "admin" | "member"
 }
 
 export type WorkspaceUser = {

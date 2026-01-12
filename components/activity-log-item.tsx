@@ -18,7 +18,7 @@ function getActivityText(action: string) {
     case "Task created":
       return ' created a task: '
     case "Task assigned":
-      return ' assigned a task: '
+      return ' was assigned a task: '
     case "Status updated":
       return ' moved a task: '
     default:
