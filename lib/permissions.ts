@@ -1,9 +1,9 @@
-type Role = "admin" | "member" | "viewer";
+type Role = "admin" | "member" | "owner";
 
 export function canManageTasks(role: Role) {
   return role === "admin" || role === "member";
 }
 
 export function canManageWorkspace(role: Role) {
-  return role === "admin";
+  return role === "admin" || role === "owner";
 }

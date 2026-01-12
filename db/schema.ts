@@ -85,7 +85,7 @@ export const workspaceMembers = pgTable("workspace_members", {
   id: text("id").primaryKey().$defaultFn(() => randomUUID()),
   workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
   userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-  role: text("role").$type<"admin" | "member" | "viewer">().notNull(),
+  role: text("role").$type<"admin" | "member" | "owner">().notNull(),
   joinedAt: timestamp("joined_at").defaultNow(),
 });
 

@@ -3,17 +3,17 @@ import { workspaceMembers } from "@/db/schema";
 import { requireUser } from "@/lib/authguard";
 import { eq, and } from "drizzle-orm";
 
-type Role = "admin" | "member" | "viewer";
+type Role = "admin" | "member" | "owner";
 
 const rolePriority: Record<Role, number> = {
-  viewer: 1,
-  member: 2,
-  admin: 3,
+  member: 1,
+  admin: 2,
+  owner: 3,
 };
 
 export async function requireWorkspaceAccess(
   workspaceId: string,
-  minimumRole: Role = "viewer"
+  minimumRole: Role = "member"
 ) {
   const user = await requireUser();
 

@@ -10,7 +10,7 @@ export const createWorkspace = async (name: string) => {
         const user = await getCurrentUser();
         if (!user) throw ("User not logged in!")
         const workspace = await db.insert(workspaces).values({ name: name, ownerId: user.id }).returning();
-        await db.insert(workspaceMembers).values({ workspaceId: workspace[0].id, userId: user.id, role: "admin" })
+        await db.insert(workspaceMembers).values({ workspaceId: workspace[0].id, userId: user.id, role: "owner" })
         return { success: true, message: "Workspace created!" }
     } catch (error) {
         console.error(error)
