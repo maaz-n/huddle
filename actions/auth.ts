@@ -1,6 +1,9 @@
 "use server"
 
+import { db } from "@/db";
+import { user, workspaceMembers } from "@/db/schema";
 import { auth } from "@/lib/auth"
+import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
 export const login = async (email: string, password: string) => {
@@ -23,7 +26,7 @@ export const signup = async (name: string, email: string, password: string) => {
     try {
         await auth.api.signUpEmail({
             body: {
-                name, email, password
+                name, email, password,
             }
         })
 
@@ -40,7 +43,21 @@ export const getCurrentUser = async () => {
         headers: await headers(),
     });
 
-    return session?.user
+    if(!session) return;
+    const userId = session.user.id;
+
+    const realUser = await db.select({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        image: user.image,
+        role: workspaceMembers.role
+    })
+    .from(user)
+    .innerJoin(workspaceMembers, eq(workspaceMembers.userId, user.id))
+    .where(eq(user.id, userId));
+
+    return realUser[0]
 
     } catch (error) {
         throw new Error("Could not fetch user!");    
