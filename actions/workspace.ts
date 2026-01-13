@@ -35,7 +35,8 @@ export const getWorkspaceUsers = async (workspaceId: string) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: workspaceMembers.role
+        role: workspaceMembers.role,
+        image: user.image
     })
         .from(user)
         .innerJoin(workspaceMembers, eq(workspaceMembers.userId, user.id))

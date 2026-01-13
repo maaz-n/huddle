@@ -5,7 +5,6 @@ import { UserAvatar } from './user-avatar'
 import { Label } from '@radix-ui/react-label'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
-import { useAppData } from './app-data-provider'
 import { useState } from 'react'
 import { updateUser } from '@/actions/user'
 import { toast } from 'sonner'
@@ -43,7 +42,7 @@ function UserProfile({ user }: { user: UserType }) {
                 <CardTitle>Profile Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                <form action={handleUpdate}>
+                <form onSubmit={handleUpdate}>
                     <div className="flex items-start gap-6">
                         <UserAvatar user={user} className="h-16 w-16" />
                         <div className="flex-1 space-y-4">
@@ -55,7 +54,7 @@ function UserProfile({ user }: { user: UserType }) {
                                 <Label htmlFor="email">Email</Label>
                                 <Input id="email" type="email" defaultValue={user.email} disabled />
                             </div>
-                            <Button className="bg-primary hover:bg-primary/90" disabled={loading}>
+                            <Button className="bg-primary hover:bg-primary/90" disabled={loading || name === user.name}>
                                 {loading ? <Loader2 className='h-4 w-4 animate-spin' /> : "Save Changes"}
                             </Button>
                         </div>
