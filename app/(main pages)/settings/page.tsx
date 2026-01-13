@@ -10,6 +10,7 @@ import { redirect } from "next/navigation"
 import UserProfile from "@/components/user-profile"
 import { getCurrentUser } from "@/actions/auth"
 import AddMemberSection from "@/components/add-member-section"
+import MembersSection from "@/components/members-section"
 
 const mockUser = {
     name: "John Doe",
@@ -63,39 +64,7 @@ export default async function SettingsPage(props: any) {
 
                 <Card>
                     <AddMemberSection workspaceId={workspaceId}/>
-                    <CardContent>
-                        <div className="space-y-3">
-                            {users.map((user) => (
-                                <div key={user.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                                    <div className="flex items-center gap-4">
-                                        <UserAvatar user={{ name: user.name, image: user.image }} className="h-8 w-8" />
-                                        <div>
-                                            <p className="font-medium text-sm">{user.name}</p>
-                                            <p className="text-xs text-muted-foreground">{user.email}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <select defaultValue={user.role} className={`
-                                                text-sm border border-border rounded px-2 py-1
-                                                disabled:opacity-50 
-                                                disabled:cursor-not-allowed 
-                                                disabled:bg-muted 
-                                                disabled:text-muted-foreground
-                                            `} disabled={user.id === currentUser.id} >
-                                            <option value="admin">Owner</option>
-                                            <option value="member">Admin</option>
-                                            <option value="viewer">Viewer</option>
-                                        </select>
-                                        {user.id !== currentUser.id && (
-                                            <button className="p-1 hover:bg-secondary rounded transition-colors">
-                                                <X className="h-4 w-4 text-destructive" />
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
+                    <MembersSection users={users} currentUser={currentUser}/>
                 </Card>
 
                 <Card>
