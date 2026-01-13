@@ -9,6 +9,7 @@ import { getWorkspacesWithRoles, getWorkspaceUsers } from "@/actions/workspace"
 import { redirect } from "next/navigation"
 import UserProfile from "@/components/user-profile"
 import { getCurrentUser } from "@/actions/auth"
+import AddMemberSection from "@/components/add-member-section"
 
 const mockUser = {
     name: "John Doe",
@@ -53,25 +54,15 @@ export default async function SettingsPage(props: any) {
     return (
         <AppLayout>
             <div className="py-8 px-6 space-y-8 max-w-4xl">
-                {/* Header */}
                 <div>
                     <h1 className="text-3xl font-bold">Settings</h1>
                     <p className="text-muted-foreground mt-2">Manage workspace and profile settings</p>
                 </div>
 
-                {/* User Profile Settings */}
                 <UserProfile user={currentUser} />
 
-                {/* Workspace Members */}
                 <Card>
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardTitle>Workspace Members</CardTitle>
-                            <Button variant="outline" size="sm">
-                                Add Member
-                            </Button>
-                        </div>
-                    </CardHeader>
+                    <AddMemberSection workspaceId={workspaceId}/>
                     <CardContent>
                         <div className="space-y-3">
                             {users.map((user) => (
@@ -107,7 +98,6 @@ export default async function SettingsPage(props: any) {
                     </CardContent>
                 </Card>
 
-                {/* Workspace Settings */}
                 <Card>
                     <CardHeader>
                         <CardTitle>Workspace Settings</CardTitle>
@@ -124,7 +114,6 @@ export default async function SettingsPage(props: any) {
                     </CardContent>
                 </Card>
 
-                {/* Danger Zone */}
                 <Card className="border-destructive">
                     <CardHeader>
                         <CardTitle className="text-destructive">Danger Zone</CardTitle>
