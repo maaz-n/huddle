@@ -12,10 +12,16 @@ function MembersSection({ users, currentUser }: { users: UserType[], currentUser
 
     const [role, setRole] = useState<Role>("member");
 
+    const sortedUsers = [...users].sort((a, b) => {
+        if (a.role === 'owner') return -1;
+        if (b.role === 'owner') return 1;
+        return 0;
+    }
+    )
     return (
         <CardContent>
             <div className="space-y-3">
-                {users.map((user: any) => (
+                {sortedUsers.map((user: any) => (
                     <div key={user.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
                         <div className="flex items-center gap-4">
                             <UserAvatar user={{ name: user.name, image: user.image }} className="h-8 w-8" />
