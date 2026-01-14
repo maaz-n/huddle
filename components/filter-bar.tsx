@@ -5,7 +5,7 @@ import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSearchParams, usePathname, useRouter } from "next/navigation"
-import { UserType } from "@/types/types"
+import { UserTypeNew } from "@/types/types"
 
 type TaskStatus = "todo" | "in_progress" | "blocked" | "done"
 type TaskPriority = "low" | "medium" | "high"
@@ -23,13 +23,7 @@ const priorities: { value: TaskPriority; label: string }[] = [
   { value: "high", label: "High" },
 ]
 
-const assignees = [
-  { value: "1", label: "John Doe" },
-  { value: "2", label: "Jane Smith" },
-  { value: "3", label: "Bob Johnson" },
-]
-
-export function FilterBar({adminUsers}: {adminUsers: UserType[]}) {
+export function FilterBar({users}: {users: UserTypeNew[]}) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter()
@@ -114,12 +108,12 @@ export function FilterBar({adminUsers}: {adminUsers: UserType[]}) {
       </Select>
 
       <Select value={selectedAssignee} onValueChange={handleAssigneeChange}>
-        <SelectTrigger className="w-40" disabled={adminUsers.length == 0}>
+        <SelectTrigger className="w-40" disabled={users.length == 0}>
           <SelectValue placeholder="Filter by assignee" />
         </SelectTrigger>
         <SelectContent>
-          { adminUsers.length>0 && 
-          adminUsers.map((admin) => (
+          { users.length>0 && 
+          users.map((admin) => (
             admin && <SelectItem key={admin.id} value={admin.id}>
               {admin.name}
             </SelectItem>

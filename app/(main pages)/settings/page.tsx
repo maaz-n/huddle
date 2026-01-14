@@ -12,30 +12,6 @@ import { getCurrentUser } from "@/actions/auth"
 import AddMemberSection from "@/components/add-member-section"
 import MembersSection from "@/components/members-section"
 
-const mockUser = {
-    name: "John Doe",
-    email: "john@example.com",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
-}
-
-const mockMembers = [
-    { id: "1", name: "John Doe", email: "john@example.com", role: "admin", image: mockUser.image },
-    {
-        id: "2",
-        name: "Jane Smith",
-        email: "jane@example.com",
-        role: "member",
-        image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jane",
-    },
-    {
-        id: "3",
-        name: "Bob Johnson",
-        email: "bob@example.com",
-        role: "member",
-        image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob",
-    },
-]
-
 export default async function SettingsPage(props: any) {
 
     const searchParams = await props.searchParams;

@@ -1,6 +1,6 @@
 "use client"
 
-import { InsertTask, TasksWithAssignees, UserType, WorkspaceUser } from '@/types/types'
+import { InsertTask, TasksWithAssignees, UserType, UserTypeNew, WorkspaceUser } from '@/types/types'
 import { FilterBar } from './filter-bar'
 import { TaskTable } from './task-table'
 import { useState } from 'react'
@@ -15,7 +15,7 @@ import { WorkspaceCreateModal } from './workspace-create-modal'
 import { createWorkspace } from '@/actions/workspace'
 import { useAppData } from './app-data-provider'
 
-const TaskClient = ({ adminUsers, tasksWithAssignees, workspaceUsers, workspaceId }: { adminUsers: UserType[], tasksWithAssignees: TasksWithAssignees[], workspaceUsers: WorkspaceUser[], workspaceId: string}) => {
+const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId }: { users: UserTypeNew[], tasksWithAssignees: TasksWithAssignees[], workspaceUsers: WorkspaceUser[], workspaceId: string}) => {
 
     const [selectedTask, setSelectedTask] = useState<(typeof tasksWithAssignees)[0] | null>(null);
     const [taskDetailOpen, setTaskDetailOpen] = useState(false);
@@ -77,7 +77,7 @@ const TaskClient = ({ adminUsers, tasksWithAssignees, workspaceUsers, workspaceI
                 </div>
             </div>
 
-            <FilterBar adminUsers={adminUsers} />
+            <FilterBar users={users} />
 
             <TaskTable
                 onTaskSelect={(task: TasksWithAssignees) => {

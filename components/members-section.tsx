@@ -3,12 +3,12 @@
 import { CardContent } from './ui/card'
 import { UserAvatar } from './user-avatar'
 import { X } from 'lucide-react'
-import { UserType } from '@/types/types'
+import { UserTypeNew } from '@/types/types'
 import { useState } from 'react'
 
 type Role = 'admin' | 'member';
 
-function MembersSection({ users, currentUser }: { users: UserType[], currentUser: UserType }) {
+function MembersSection({ users, currentUser }: { users: UserTypeNew[], currentUser: UserTypeNew }) {
 
     const [role, setRole] = useState<Role>("member");
 

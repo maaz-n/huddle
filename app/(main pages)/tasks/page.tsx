@@ -1,5 +1,5 @@
 import { AppLayout } from "@/components/app-layout"
-import { getAdminUsers, getTasks } from "@/actions/tasks"
+import { getUsers, getTasks } from "@/actions/tasks"
 import TaskClient from "@/components/task-client"
 import { getWorkspacesWithRoles, getWorkspaceUsers } from "@/actions/workspace";
 import { redirect } from "next/navigation";
@@ -23,14 +23,14 @@ export default async function TasksPage(props: any) {
 
   const tasksWithAssignees = await getTasks(workspaceId, filter);
 
-  const adminUsers = await getAdminUsers();
+  const allUsers = await getUsers(workspaceId);
 
   const workspaceUsers = await getWorkspaceUsers(workspaceId)
 
   return (
     <AppLayout>
       <TaskClient
-      adminUsers={adminUsers}
+      users={allUsers}
       tasksWithAssignees={tasksWithAssignees}
       workspaceUsers={workspaceUsers}
       workspaceId={workspaceId}
