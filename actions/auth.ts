@@ -3,7 +3,7 @@
 import { db } from "@/db";
 import { user, workspaceMembers } from "@/db/schema";
 import { auth } from "@/lib/auth"
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
 export const login = async (email: string, password: string) => {
@@ -51,10 +51,8 @@ export const getCurrentUser = async () => {
         name: user.name,
         email: user.email,
         image: user.image,
-        role: workspaceMembers.role
     })
     .from(user)
-    .innerJoin(workspaceMembers, eq(workspaceMembers.userId, user.id))
     .where(eq(user.id, userId));
 
     return realUser[0]
@@ -64,4 +62,22 @@ export const getCurrentUser = async () => {
     }
     
 }
+
+export const getUserWorkspaceRole = async (workspaceId: string) => {
+  const currentUser = await getCurrentUser()
+  if (!currentUser) return null
+
+  const result = await db
+    .select({ role: workspaceMembers.role })
+    .from(workspaceMembers)
+    .where(
+      and(
+        eq(workspaceMembers.userId, currentUser.id),
+        eq(workspaceMembers.workspaceId, workspaceId)
+      )
+    )
+
+  return result[0]?.role ?? null
+}
+
 
