@@ -7,18 +7,19 @@ import { Button } from './ui/button';
 import { addMember } from '@/actions/user';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { UserTypeNew } from '@/types/types';
 
-export default function AddMemberSection({workspaceId}: {workspaceId: string}) {
+export default function AddMemberSection({ workspaceId, currentUser }: { workspaceId: string, currentUser: UserTypeNew }) {
     const [isOpen, setIsOpen] = useState(false);
 
     const router = useRouter()
 
     const handleAddMember = async (email: string, role: string) => {
         const response = await addMember(workspaceId, role, email);
-        if(response.success) {
+        if (response.success) {
             toast.success(response.message);
             router.refresh();
-            
+
         } else {
             toast.error(response.message)
         }
@@ -29,9 +30,11 @@ export default function AddMemberSection({workspaceId}: {workspaceId: string}) {
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <CardTitle>Workspace Members</CardTitle>
-                    <Button variant="outline" size="sm" onClick={() => setIsOpen(true)}>
-                        Add Member
-                    </Button>
+                    {currentUser.role === "owner" || currentUser.role === "admin" &&
+                        <Button variant="outline" size="sm" onClick={() => setIsOpen(true)}>
+                            Add Member
+                        </Button>
+                    }
                 </div>
             </CardHeader>
 

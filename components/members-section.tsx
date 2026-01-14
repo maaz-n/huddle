@@ -36,19 +36,20 @@ function MembersSection({ users, currentUser }: { users: UserTypeNew[], currentU
                                 {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                             </div>
                             : 
+
                             <select defaultValue={user.role} className={`
                                                 text-sm border border-border rounded px-2 py-1
                                                 disabled:opacity-50 
                                                 disabled:cursor-not-allowed 
                                                 disabled:bg-muted 
                                                 disabled:text-muted-foreground
-                                            `} disabled={user.id === currentUser.id} onChange={(e) => setRole(e.target.value as Role)}>
+                                            `} disabled={currentUser.role === 'member'} onChange={(e) => setRole(e.target.value as Role)}>
                                 <option value="admin">Admin</option>
                                 <option value="member">Member</option>
                             </select>
                             }
                             
-                            {user.id !== currentUser.id && (
+                            {currentUser.role === "owner" && (
                                 <button className="p-1 hover:bg-secondary rounded transition-colors">
                                     <X className="h-4 w-4 text-destructive" />
                                 </button>

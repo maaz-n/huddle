@@ -39,7 +39,7 @@ export default async function SettingsPage(props: any) {
                 <UserProfile user={currentUser} />
 
                 <Card>
-                    <AddMemberSection workspaceId={workspaceId}/>
+                    <AddMemberSection workspaceId={workspaceId} currentUser={currentUser}/>
                     <MembersSection users={users} currentUser={currentUser}/>
                 </Card>
 
