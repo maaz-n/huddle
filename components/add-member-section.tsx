@@ -34,7 +34,7 @@ export default function AddMemberSection({ workspaceId, userRole }: AddMemberPro
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <CardTitle>Workspace Members</CardTitle>
-                    {userRole === "owner" || userRole === "admin" &&
+                    {userRole !== "member" &&
                         <Button variant="outline" size="sm" onClick={() => setIsOpen(true)}>
                             Add Member
                         </Button>

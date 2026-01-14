@@ -3,7 +3,7 @@
 import { db } from "@/db"
 import { user, workspaceMembers, workspaces } from "@/db/schema"
 import { getCurrentUser } from "./auth"
-import { eq } from "drizzle-orm"
+import { and, eq } from "drizzle-orm"
 
 export const createWorkspace = async (name: string) => {
     try {
@@ -64,5 +64,20 @@ export const updateWorkspaceName = async (workspaceId: string, newName: string) 
     } catch (error) {
         console.error(error);
         return { success: false, message: "Could not update worspace name" }
+    }
+}
+
+export const removeUser = async (workspaceId: string, userId: string) => {
+    try {
+        await db.delete(workspaceMembers)
+                .where(and(
+                    eq(workspaceMembers.workspaceId, workspaceId),
+                    eq(workspaceMembers.userId, userId)
+                ))
+        
+        return { success: true, message: "User removed from workspace!" }
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: "Could not remove user from workspace" }
     }
 }
