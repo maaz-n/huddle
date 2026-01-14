@@ -9,10 +9,10 @@ import { useState } from 'react'
 import { updateUser } from '@/actions/user'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
-import { UserType } from '@/types/types'
+import { UserTypeNew } from '@/types/types'
 import { useRouter } from 'next/navigation'
 
-function UserProfile({ user }: { user: UserType }) {
+function UserProfile({ user }: { user: UserTypeNew }) {
 
     const [loading, setLoading] = useState(false);
     const [name, setName] = useState(user.name);

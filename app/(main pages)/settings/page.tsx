@@ -5,12 +5,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { UserAvatar } from "@/components/user-avatar"
 import { X } from "lucide-react"
-import { getWorkspacesWithRoles, getWorkspaceUsers } from "@/actions/workspace"
+import { getWorkspace, getWorkspacesWithRoles, getWorkspaceUsers } from "@/actions/workspace"
 import { redirect } from "next/navigation"
 import UserProfile from "@/components/user-profile"
 import { getCurrentUser, getUserWorkspaceRole } from "@/actions/auth"
 import AddMemberSection from "@/components/add-member-section"
 import MembersSection from "@/components/members-section"
+import WorkspaceSettingsSection from "@/components/workspace-settings-section"
 
 export default async function SettingsPage(props: any) {
 
@@ -30,6 +31,8 @@ export default async function SettingsPage(props: any) {
 
     const users = await getWorkspaceUsers(workspaceId);
 
+    const workspace = await getWorkspace(workspaceId)
+
     return (
         <AppLayout>
             <div className="py-8 px-6 space-y-8 max-w-4xl">
@@ -41,25 +44,11 @@ export default async function SettingsPage(props: any) {
                 <UserProfile user={currentUser} />
 
                 <Card>
-                    <AddMemberSection workspaceId={workspaceId} userRole={userRole}/>
-                    <MembersSection users={users} userRole={userRole}/>
+                    <AddMemberSection workspaceId={workspaceId} userRole={userRole} />
+                    <MembersSection users={users} userRole={userRole} />
                 </Card>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Workspace Settings</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div>
-                            <Label htmlFor="workspace-name">Workspace Name</Label>
-                            <Input id="workspace-name" defaultValue="Engineering" />
-                        </div>
-                        <div className="flex gap-2">
-                            <Button className="bg-primary hover:bg-primary/90">Save Changes</Button>
-                            <Button variant="outline">Reset</Button>
-                        </div>
-                    </CardContent>
-                </Card>
+                <WorkspaceSettingsSection userRole={userRole} workspace={workspace}/>
 
                 <Card className="border-destructive">
                     <CardHeader>

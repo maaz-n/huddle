@@ -60,6 +60,12 @@ export type WorkspaceUser = {
   role: string
 }
 
+export type Workspace = {
+  id: string;
+  name: string,
+  ownerId: string,
+}
+
 export type Actor = {
   name: string,
   image: string | null

@@ -30,6 +30,17 @@ export const getWorkspacesWithRoles = async () => {
     return workspaceswithRoles
 }
 
+export const getWorkspace = async (workspaceId: string) => {
+    const response = await db.select({
+        id: workspaces.id,
+        name: workspaces.name,
+        ownerId: workspaces.ownerId
+    })
+                    .from(workspaces)
+                    .where(eq(workspaces.id, workspaceId))
+    return response[0]
+}
+
 export const getWorkspaceUsers = async (workspaceId: string) => {
     return await db.select({
         id: user.id,
@@ -41,4 +52,17 @@ export const getWorkspaceUsers = async (workspaceId: string) => {
         .from(user)
         .innerJoin(workspaceMembers, eq(workspaceMembers.userId, user.id))
         .where(eq(workspaceMembers.workspaceId, workspaceId))
+}
+
+export const updateWorkspaceName = async (workspaceId: string, newName: string) => {
+    try {
+        await db.update(workspaces).set({
+            name: newName,
+        }).where(eq(workspaces.id, workspaceId))
+
+        return { success: true, message: "Workspace name updated!" }
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: "Could not update worspace name" }
+    }
 }
