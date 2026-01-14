@@ -3,12 +3,12 @@
 import { CardContent } from './ui/card'
 import { UserAvatar } from './user-avatar'
 import { X } from 'lucide-react'
-import { UserTypeNew } from '@/types/types'
+import { UserWithRole } from '@/types/types'
 import { useState } from 'react'
 
 type Role = 'admin' | 'member';
 
-function MembersSection({ users, currentUser }: { users: UserTypeNew[], currentUser: UserTypeNew }) {
+function MembersSection({ users, userRole }: { users: UserWithRole[], userRole: string | null}) {
 
     const [role, setRole] = useState<Role>("member");
 
@@ -43,13 +43,13 @@ function MembersSection({ users, currentUser }: { users: UserTypeNew[], currentU
                                                 disabled:cursor-not-allowed 
                                                 disabled:bg-muted 
                                                 disabled:text-muted-foreground
-                                            `} disabled={currentUser.role === 'member'} onChange={(e) => setRole(e.target.value as Role)}>
+                                            `} disabled={userRole === 'member'} onChange={(e) => setRole(e.target.value as Role)}>
                                 <option value="admin">Admin</option>
                                 <option value="member">Member</option>
                             </select>
                             }
                             
-                            {currentUser.role === "owner" && (
+                            {userRole === "owner" && user.role !== "owner" && (
                                 <button className="p-1 hover:bg-secondary rounded transition-colors">
                                     <X className="h-4 w-4 text-destructive" />
                                 </button>

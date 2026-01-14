@@ -8,7 +8,7 @@ import { X } from "lucide-react"
 import { getWorkspacesWithRoles, getWorkspaceUsers } from "@/actions/workspace"
 import { redirect } from "next/navigation"
 import UserProfile from "@/components/user-profile"
-import { getCurrentUser } from "@/actions/auth"
+import { getCurrentUser, getUserWorkspaceRole } from "@/actions/auth"
 import AddMemberSection from "@/components/add-member-section"
 import MembersSection from "@/components/members-section"
 
@@ -26,6 +26,8 @@ export default async function SettingsPage(props: any) {
     const currentUser = await getCurrentUser();
     if (!currentUser) return;
 
+    const userRole = await getUserWorkspaceRole(workspaceId);
+
     const users = await getWorkspaceUsers(workspaceId);
 
     return (
@@ -39,8 +41,8 @@ export default async function SettingsPage(props: any) {
                 <UserProfile user={currentUser} />
 
                 <Card>
-                    <AddMemberSection workspaceId={workspaceId} currentUser={currentUser}/>
-                    <MembersSection users={users} currentUser={currentUser}/>
+                    <AddMemberSection workspaceId={workspaceId} userRole={userRole}/>
+                    <MembersSection users={users} userRole={userRole}/>
                 </Card>
 
                 <Card>
