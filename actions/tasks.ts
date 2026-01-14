@@ -1,10 +1,10 @@
 "use server";
 
 import { db } from "@/db";
-import { tasks, activityLogs, user, workspaces } from "@/db/schema";
+import { tasks, activityLogs, user, workspaceMembers } from "@/db/schema";
 import { logActivity } from "@/lib/activity";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
-import { GetFilteredTasks, UserType } from "@/types/types";
+import { GetFilteredTasks, UserTypeNew } from "@/types/types";
 import { eq, sql } from "drizzle-orm";
 import { getCurrentUser } from "./auth";
 
@@ -22,7 +22,8 @@ export async function getTasks(workspaceId: string, filter: GetFilteredTasks) {
               image: true
             }
           },
-        }
+        },
+        orderBy: ( tasks, { desc } ) => desc(tasks.updatedAt)
       })
     } else {
       return await db.query.tasks.findMany({
@@ -108,8 +109,8 @@ export async function createTask(
       actorId: user.id,
       entityType: "task",
       entityId: insertedTask.id,
-      action: "Task created",  
-      metadata: {entityName: insertedTask.title}
+      action: "Task created",
+      metadata: { entityName: insertedTask.title }
     });
 
     return { success: true, message: "Task created!" }
@@ -193,7 +194,7 @@ export async function updateTaskTitle(
     entityType: "task",
     entityId: taskId,
     action: "Title updated",
-    metadata: {entityName: task.title}
+    metadata: { entityName: task.title }
   })
 }
 
@@ -222,7 +223,7 @@ export async function updateTaskDescription(
     entityType: "task",
     entityId: taskId,
     action: "Description updated",
-    metadata: {entityName: task.title}
+    metadata: { entityName: task.title }
   });
 }
 
@@ -250,28 +251,25 @@ export async function assignTask(
     entityType: "task",
     entityId: taskId,
     action: `Assigned to ${assigneeId}`,
-    metadata: {entityName: task.title}
+    metadata: { entityName: task.title }
   });
 }
 
-export async function getAdminUsers(): Promise<UserType[]> {
+export async function getUsers(workspaceId: string): Promise<UserTypeNew[]> {
   try {
-    const admins = await db.query.workspaceMembers.findMany({
-      where: (workspaceMembers, { eq }) => eq(workspaceMembers.role, "admin")
-    });
 
-    const adminUserIds = admins.map(admin => admin.userId);
-
-
-    if (adminUserIds.length === 0) {
-      return [];
-    }
-
-    const users = await db.query.user.findMany({
-      where: (user, { inArray }) => inArray(user.id, adminUserIds)
-    });
-
+    const users = await db.select({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      image: user.image,
+      role: workspaceMembers.role
+    })
+      .from(user)
+      .innerJoin(workspaceMembers, eq(workspaceMembers.userId, user.id))
+      .where(eq(workspaceMembers.workspaceId, workspaceId))
     return users;
+
   } catch (error) {
     throw error;
   }
