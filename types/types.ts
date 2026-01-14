@@ -8,6 +8,14 @@ export type UserType = {
   image?: string | null | undefined;
 }
 
+export type UserTypeNew = {
+  id: string;
+  name: string;
+  email: string;
+  role: "owner" | "admin" | "member";
+  image?: string | null | undefined;
+}
+
 export type GetFilteredTasks = {
   status: "todo" | "in_progress" | "blocked" | "done",
   priority: "low" | "medium" | "high",
