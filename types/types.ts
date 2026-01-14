@@ -1,19 +1,16 @@
-export type UserType = {
-  id: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  email: string;
-  emailVerified?: boolean;
-  name: string;
-  image?: string | null | undefined;
-}
-
 export type UserTypeNew = {
   id: string;
   name: string;
   email: string;
-  role: "owner" | "admin" | "member";
   image?: string | null | undefined;
+}
+
+export type UserWithRole = {
+  id: string;
+  name: string;
+  email: string;
+  image?: string | null | undefined;
+  role: "owner" | "admin" | "member" | null
 }
 
 export type GetFilteredTasks = {
