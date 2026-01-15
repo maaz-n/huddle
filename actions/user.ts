@@ -2,7 +2,8 @@
 
 import { db } from "@/db";
 import { user, workspaceMembers } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
+import { getCurrentUser } from "./auth";
 
 export async function updateUser(newName: string, email: string){
     try {
@@ -30,15 +31,30 @@ export async function getUserByEmail(email: string){
 }
 
 export async function addMember(workspaceId: string, role: string, email: string){
-    const user = await getUserByEmail(email);
+    const targetUser = await getUserByEmail(email);
 
-    if(!user || !user.id) return { success: false, message: `User of email ${email} not found!` }
+    const currentUser = await getCurrentUser();
+    if(!currentUser) return { success: false, message: "Unauthorized!" };
+    
+    
+    if(!targetUser || !targetUser.id) return { success: false, message: `User of email ${email} not found!` }
+
+    const currentUserRole = await db.select({role: workspaceMembers.role})
+                                .from(workspaceMembers)
+                                .where(and(
+                                    eq(workspaceMembers.workspaceId, workspaceId),
+                                    eq(workspaceMembers.userId, currentUser.id)
+                                ))
+
+    if(currentUserRole[0].role === "admin" && role === "admin") {
+        return { success: false, message: "Admins can only add members" }
+    }
 
     try {
         await db.insert(workspaceMembers).values({
-            userId: user.id,
+            userId: targetUser.id,
             workspaceId: workspaceId,
-            role: role as "admin" | "owner" | "member"
+            role: role as "admin" | "member" | "owner"
         })
 
         return { success: true, message: "User added to workspace" }
