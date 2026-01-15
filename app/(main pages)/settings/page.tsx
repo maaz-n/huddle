@@ -1,10 +1,6 @@
 import { AppLayout } from "@/components/app-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { UserAvatar } from "@/components/user-avatar"
-import { X } from "lucide-react"
 import { getWorkspace, getWorkspacesWithRoles, getWorkspaceUsers } from "@/actions/workspace"
 import { redirect } from "next/navigation"
 import UserProfile from "@/components/user-profile"
@@ -27,7 +23,7 @@ export default async function SettingsPage(props: any) {
     const currentUser = await getCurrentUser();
     if (!currentUser) return;
 
-    const userRole = await getUserWorkspaceRole(workspaceId);
+    const currentUserRole = await getUserWorkspaceRole(workspaceId);
 
     const users = await getWorkspaceUsers(workspaceId);
 
@@ -44,11 +40,11 @@ export default async function SettingsPage(props: any) {
                 <UserProfile user={currentUser} />
 
                 <Card>
-                    <AddMemberSection workspaceId={workspaceId} userRole={userRole} />
-                    <MembersSection users={users} userRole={userRole} workspaceId={workspace.id}/>
+                    <AddMemberSection workspaceId={workspaceId} currentUserRole={currentUserRole} />
+                    <MembersSection users={users} currentUserRole={currentUserRole} workspaceId={workspace.id}/>
                 </Card>
 
-                <WorkspaceSettingsSection userRole={userRole} workspace={workspace}/>
+                <WorkspaceSettingsSection currentUserRole={currentUserRole} workspace={workspace}/>
 
                 <Card className="border-destructive">
                     <CardHeader>

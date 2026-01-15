@@ -36,8 +36,8 @@ export const getWorkspace = async (workspaceId: string) => {
         name: workspaces.name,
         ownerId: workspaces.ownerId
     })
-                    .from(workspaces)
-                    .where(eq(workspaces.id, workspaceId))
+        .from(workspaces)
+        .where(eq(workspaces.id, workspaceId))
     return response[0]
 }
 
@@ -70,14 +70,32 @@ export const updateWorkspaceName = async (workspaceId: string, newName: string) 
 export const removeUser = async (workspaceId: string, userId: string) => {
     try {
         await db.delete(workspaceMembers)
-                .where(and(
-                    eq(workspaceMembers.workspaceId, workspaceId),
-                    eq(workspaceMembers.userId, userId)
-                ))
-        
+            .where(and(
+                eq(workspaceMembers.workspaceId, workspaceId),
+                eq(workspaceMembers.userId, userId)
+            ))
+
         return { success: true, message: "User removed from workspace!" }
     } catch (error) {
         console.error(error);
         return { success: false, message: "Could not remove user from workspace" }
+    }
+}
+
+export const updateUserRole = async (workspaceId: string, userId: string, newRole: "admin" | "member" | "owner") => {
+    try {
+        await db.update(workspaceMembers).set({
+            role: newRole,
+        })
+            .where(and(
+                eq(workspaceMembers.workspaceId, workspaceId),
+                eq(workspaceMembers.userId, userId)
+            ))
+
+        return { success: true, message: "User role updated!" }
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: "Could not update user role" }
+
     }
 }

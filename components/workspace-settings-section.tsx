@@ -12,11 +12,11 @@ import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 
 interface WorkspaceSettingsSectionProps {
-    userRole: string | null,
+    currentUserRole: string | null,
     workspace: Workspace
 }
 
-function WorkspaceSettingsSection({ userRole, workspace }: WorkspaceSettingsSectionProps) {
+function WorkspaceSettingsSection({ currentUserRole, workspace }: WorkspaceSettingsSectionProps) {
 
     const [name, setName] = useState(workspace.name);
     const [isLoading, setIsLoading] = useState(false);
@@ -50,9 +50,9 @@ function WorkspaceSettingsSection({ userRole, workspace }: WorkspaceSettingsSect
 
                     <div className="space-y-2">
                         <Label htmlFor="workspace-name">Workspace Name</Label>
-                        <Input id="workspace-name" value={name} onChange={(e) => setName(e.target.value)} disabled={userRole !== "owner"} className="disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground" />
+                        <Input id="workspace-name" value={name} onChange={(e) => setName(e.target.value)} disabled={currentUserRole !== "owner"} className="disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground" />
                     </div>
-                    <Button className="bg-primary hover:bg-primary/90" disabled={userRole !== "owner" || name === workspace.name || isLoading}>
+                    <Button className="bg-primary hover:bg-primary/90" disabled={currentUserRole !== "owner" || name === workspace.name || isLoading}>
                     {isLoading ? <div className='flex gap-2'>
                         <Loader2 className='h-4 w-4 animate-spin'/>
                         <span>Updating</span>

@@ -10,10 +10,10 @@ import { useRouter } from 'next/navigation';
 
 interface AddMemberProps {
     workspaceId: string,
-    userRole: "owner" | "admin" | "member" | null
+    currentUserRole: "owner" | "admin" | "member" | null
 }
 
-export default function AddMemberSection({ workspaceId, userRole }: AddMemberProps) {
+export default function AddMemberSection({ workspaceId, currentUserRole }: AddMemberProps) {
     const [isOpen, setIsOpen] = useState(false);
 
     const router = useRouter()
@@ -34,7 +34,7 @@ export default function AddMemberSection({ workspaceId, userRole }: AddMemberPro
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <CardTitle>Workspace Members</CardTitle>
-                    {userRole !== "member" &&
+                    {currentUserRole !== "member" &&
                         <Button variant="outline" size="sm" onClick={() => setIsOpen(true)}>
                             Add Member
                         </Button>
