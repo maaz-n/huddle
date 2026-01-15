@@ -1,6 +1,6 @@
 "use client"
 
-import { UserWithRole } from '@/types/types';
+import { UserTypeNew, UserWithRole } from '@/types/types';
 import { useRouter } from 'next/navigation';
 import { UserAvatar } from './user-avatar';
 import { Button } from './ui/button';
@@ -14,16 +14,23 @@ interface MemeberRowProps {
     currentUserRole: string | null,
     workspaceId: string,
     onRemove: (userId: string) => Promise<void>,
-    isLoading: boolean
+    isLoading: boolean,
+    currentUser: UserTypeNew
 }
 
 type UserRole = "admin" | "member"
 
-function MemberRow({ user, currentUserRole, workspaceId, onRemove, isLoading }: MemeberRowProps) {
+function MemberRow({ user, currentUserRole, workspaceId, onRemove, isLoading, currentUser }: MemeberRowProps) {
 
     const [pendingRole, setPendingRole] = useState(user.role as UserRole);
     const [isUpdating, setIsUpdating] = useState(false);
     const router = useRouter();
+
+    const isSelf = user.id === currentUser.id;
+    const isOwner = currentUserRole === 'owner';
+
+    const canChangeRole = isOwner && !isSelf;
+
 
     const handleRoleUpdate = async () => {
         setIsUpdating(true);
@@ -52,30 +59,45 @@ function MemberRow({ user, currentUserRole, workspaceId, onRemove, isLoading }: 
 
             <div className="flex items-center gap-3">
                 {user.role === 'owner' ? (
-                    <div className='text-sm border border-border rounded px-2 py-1 opacity-50 cursor-not-allowed bg-muted text-muted-foreground'>
+                    <div className={`text-sm border border-border rounded px-2 py-1 bg-secondary text-secondary-foreground ${isSelf && "font-medium"}`}>
                         Owner
+                        {isSelf && " (You)"}
                     </div>
                 ) : (
+                    <div className="flex items-center gap-3">
+                {canChangeRole ? (
                     <div className="flex items-center gap-2">
                         <select 
-                            value={pendingRole ?? "member"}
-                            className="text-sm border border-border rounded px-2 py-1 disabled:opacity-50"
-                            disabled={currentUserRole === 'member' || isUpdating}
+                            value={pendingRole}
+                            className="text-sm border border-border rounded px-2 py-1"
                             onChange={(e) => setPendingRole(e.target.value as UserRole)}
                         >
                             <option value="admin">Admin</option>
                             <option value="member">Member</option>
                         </select>
-
-                        {hasChanged && (
+                        
+                        {pendingRole !== user.role && (
                             <Button size="sm" onClick={handleRoleUpdate} disabled={isUpdating}>
-                                {isUpdating ? <Loader2 className="h-3 w-3 animate-spin" /> : "Update"}
+                                {isUpdating ? <Loader2 className='h-3 w-3 animate-spin'/> : "Update"}
                             </Button>
                         )}
                     </div>
+                ) : (
+                    <div className={`text-sm px-2.5 py-0.5 rounded bg-secondary text-secondary-foreground border border-border ${isSelf && "font-medium"}`}>
+                        {pendingRole.charAt(0).toUpperCase() + pendingRole.slice(1)}
+                        {isSelf && " (You)"}
+                    </div>
                 )}
 
-                {currentUserRole === "owner" && user.role !== "owner" && (
+                {(isOwner || (currentUserRole === 'admin' && user.role === 'member')) && !isSelf && (
+                    <button onClick={() => onRemove(user.id)}>
+                         <X className="h-4 w-4 text-destructive" />
+                    </button>
+                )}
+            </div>
+                )}
+
+                {/* {currentUserRole === "owner" && user.role !== "owner" && (
                     <button 
                         className="p-1 hover:bg-secondary rounded transition-colors" 
                         onClick={() => onRemove(user.id)} 
@@ -83,7 +105,7 @@ function MemberRow({ user, currentUserRole, workspaceId, onRemove, isLoading }: 
                     >
                         {isLoading ? <Loader2 className='h-4 w-4 text-destructive animate-spin' /> : <X className="h-4 w-4 text-destructive" />}
                     </button>
-                )}
+                )} */}
             </div>
         </div>
     );

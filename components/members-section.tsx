@@ -1,7 +1,7 @@
 "use client"
 
 import { CardContent } from './ui/card'
-import { UserWithRole } from '@/types/types'
+import { UserTypeNew, UserWithRole } from '@/types/types'
 import { useState } from 'react'
 import { removeUser } from '@/actions/workspace'
 import { toast } from 'sonner'
@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation'
 import MemberRow from './member-row'
 
 
-function MembersSection({ users, currentUserRole, workspaceId }: { users: UserWithRole[], currentUserRole: string | null, workspaceId: string }) {
+function MembersSection({ users, currentUserRole, workspaceId, currentUser }: { users: UserWithRole[], currentUserRole: string | null, workspaceId: string, currentUser: UserTypeNew }) {
 
     const [role, setRole] = useState("member"); // <--- ROLE CHANGING LOGIC NOT IMPLEMENTED YET
     const [isLoading, setIsLoading] = useState(false);
@@ -22,8 +22,6 @@ function MembersSection({ users, currentUserRole, workspaceId }: { users: UserWi
         return 0;
     }
     )
-
-    console.log(currentUserRole)
 
     async function handleRemoveUser(userId: string) {
         try {
@@ -46,7 +44,7 @@ function MembersSection({ users, currentUserRole, workspaceId }: { users: UserWi
         <CardContent>
             <div className="space-y-3">
                 {sortedUsers.map((user: any) => (
-                    <MemberRow key={user.id} user={user} currentUserRole={currentUserRole} workspaceId={workspaceId} onRemove={handleRemoveUser} isLoading={isLoading}/>
+                    <MemberRow key={user.id} user={user} currentUserRole={currentUserRole} workspaceId={workspaceId} onRemove={handleRemoveUser} isLoading={isLoading} currentUser={currentUser}/>
                 ))}
             </div>
         </CardContent>
