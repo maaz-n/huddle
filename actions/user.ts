@@ -46,6 +46,10 @@ export async function addMember(workspaceId: string, role: string, email: string
                                     eq(workspaceMembers.userId, currentUser.id)
                                 ))
 
+    if(currentUser.id = targetUser.id) {
+        return { success: false, message: "You cannot add yourself" }
+    }
+
     if(currentUserRole[0].role === "admin" && role === "admin") {
         return { success: false, message: "Admins can only add members" }
     }
