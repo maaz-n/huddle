@@ -1,6 +1,6 @@
 "use client"
 
-import { UserType, WorkspaceWithRole } from "@/types/types"
+import { UserTypeNew, WorkspaceWithRole } from "@/types/types"
 import { createContext, useContext } from "react"
 
 const AppDataContext = createContext<any>(null)
@@ -10,7 +10,7 @@ export const AppDataProvider = ({
   workspaces,
   children,
 }: {
-  user: UserType
+  user: UserTypeNew
   workspaces: WorkspaceWithRole[]
   children: React.ReactNode
 }) => {

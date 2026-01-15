@@ -27,9 +27,6 @@ function MemberRow({ user, currentUserRole, workspaceId, onRemove, isLoading }: 
 
     const handleRoleUpdate = async () => {
         setIsUpdating(true);
-        
-        // console.log(pendingRole)
-
         const response = await updateUserRole(workspaceId, user.id, pendingRole);
         if(response.success){
             toast.success(response.message);

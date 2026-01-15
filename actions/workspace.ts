@@ -82,20 +82,62 @@ export const removeUser = async (workspaceId: string, userId: string) => {
     }
 }
 
-export const updateUserRole = async (workspaceId: string, userId: string, newRole: "admin" | "member" | "owner") => {
+export const updateUserRole = async (
+    workspaceId: string,
+    targetUserId: string,
+    newRole: "admin" | "member" | "owner"
+) => {
     try {
-        await db.update(workspaceMembers).set({
-            role: newRole,
-        })
+        const currentUser = await getCurrentUser();
+        if (!currentUser) return { success: false, message: "Unauthorized" };
+
+        const [executingMember, targetMember] = await Promise.all([
+            db.query.workspaceMembers.findFirst({
+                where: and(
+                    eq(workspaceMembers.workspaceId, workspaceId),
+                    eq(workspaceMembers.userId, currentUser.id)
+                )
+            }),
+            db.query.workspaceMembers.findFirst({
+                where: and(
+                    eq(workspaceMembers.workspaceId, workspaceId),
+                    eq(workspaceMembers.userId, targetUserId)
+                )
+            })
+        ]);
+
+        if (!executingMember || !targetMember) {
+            return { success: false, message: "Member not found" };
+        }
+
+
+        if (currentUser.id === targetUserId) {
+            return { success: false, message: "You cannot change your own role" };
+        }
+
+        if (executingMember.role === "admin" && targetMember.role === "admin") {
+            return { success: false, message: "Admins cannot manage other Admins" };
+        }
+
+        if (executingMember.role === "admin" && newRole === "owner") {
+            return { success: false, message: "Only Owners can appoint new Owners" };
+        }
+
+        if (executingMember.role === "member") {
+            return { success: false, message: "Permission denied" };
+        }
+
+        await db.update(workspaceMembers)
+            .set({ role: newRole })
             .where(and(
                 eq(workspaceMembers.workspaceId, workspaceId),
-                eq(workspaceMembers.userId, userId)
-            ))
+                eq(workspaceMembers.userId, targetUserId)
+            ));
 
-        return { success: true, message: "User role updated!" }
+        return { success: true, message: "Role updated successfully" };
+
     } catch (error) {
         console.error(error);
-        return { success: false, message: "Could not update user role" }
-
+        return { success: false, message: "An error occurred" };
     }
 }
