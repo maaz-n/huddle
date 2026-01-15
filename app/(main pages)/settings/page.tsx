@@ -8,6 +8,7 @@ import { getCurrentUser, getUserWorkspaceRole } from "@/actions/auth"
 import AddMemberSection from "@/components/add-member-section"
 import MembersSection from "@/components/members-section"
 import WorkspaceSettingsSection from "@/components/workspace-settings-section"
+import DeleteWorkspaceButton from "@/components/delete-workspace-button"
 
 export default async function SettingsPage(props: any) {
 
@@ -46,18 +47,13 @@ export default async function SettingsPage(props: any) {
 
                 <WorkspaceSettingsSection currentUserRole={currentUserRole} workspace={workspace}/>
 
-                <Card className="border-destructive">
+                <Card>
                     <CardHeader>
-                        <CardTitle className="text-destructive">Danger Zone</CardTitle>
+                        <CardTitle>Delete Workspace</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="text-sm text-muted-foreground mb-4">Irreversible actions. Proceed with caution.</p>
-                        <Button
-                            variant="outline"
-                            className="border-destructive text-destructive hover:bg-destructive/10 bg-transparent"
-                        >
-                            Delete Workspace
-                        </Button>
+                        <DeleteWorkspaceButton workspaceId={workspace.id}/>
                     </CardContent>
                 </Card>
             </div>

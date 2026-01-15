@@ -141,3 +141,30 @@ export const updateUserRole = async (
         return { success: false, message: "An error occurred" };
     }
 }
+
+export const deleteWorkspace = async (workspaceId: string) => {
+    try {
+
+        const currentUser = await getCurrentUser();
+        if (!currentUser) return { success: false, message: "Unauthorized" }
+
+        const memberRecord = await db.query.workspaceMembers.findFirst({
+            where: and(
+                eq(workspaceMembers.workspaceId, workspaceId),
+                eq(workspaceMembers.userId, user.id)
+            )
+        });
+
+        if(!memberRecord || memberRecord.role !== "owner") {
+            return { success: false, message: "Only owner can delete workspace" }
+        }
+
+        await db.delete(workspaces)
+            .where(eq(workspaces.id, workspaceId));
+
+        return { success: true, message: "Workspace deleted!" }
+    } catch (error) {
+        console.error(error);
+        return { success: false, message: "Error deleting workspace" }
+    }
+}
