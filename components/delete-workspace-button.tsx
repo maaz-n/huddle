@@ -14,7 +14,7 @@ function DeleteWorkspaceButton({ workspaceId }: { workspaceId: string }) {
         const response = await deleteWorkspace(workspaceId);
         if (response.success) {
             toast.success(response.message);
-            router.refresh()
+            router.push("/")
         } else {
             toast.error(response.message)
         }
