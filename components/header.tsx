@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { WorkspaceSwitcher } from "./workspace-switcher"
 import { UserMenu } from "./user-menu"
 import { useAppData } from "./app-data-provider"
+import { ModeToggle } from "./theme-toggle"
 
 interface HeaderProps {
   sidebarOpen: boolean
@@ -31,7 +32,10 @@ export function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
           <div className="lg:hidden">
             <WorkspaceSwitcher workspaces={workspaces}/>
           </div>
+          <div className="flex items-center gap-2">
+          <ModeToggle/>
           <UserMenu user={user}/>
+          </div>
         </div>
       </div>
     </header>
