@@ -18,23 +18,27 @@ export function WorkspaceSwitcher({ workspaces }: { workspaces: WorkspaceWithRol
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { push } = useRouter();
-  const [currentWorkspace, setCurrentWorkspace] = useState(() => {
-    const workspaceId = searchParams.get("workspace");
-    return workspaces.find(w => w.workspaceId === workspaceId) || workspaces[0];
-  });
+  const workspaceIdFromUrl = searchParams.get("workspace");
 
+  const activeWorkspace = workspaces.find(w => w.workspaceId === workspaceIdFromUrl) 
+    || workspaces[0] 
+    || null;
 
   useEffect(() => {
-    const params = new URLSearchParams(searchParams)
-    params.set("workspace", currentWorkspace.workspaceId)
-    push(`${pathname}?${params.toString()}`, { scroll: false })
-  }, [currentWorkspace])
+    if (workspaces.length > 0 && !workspaceIdFromUrl) {
+      const params = new URLSearchParams(searchParams);
+      params.set("workspace", workspaces[0].workspaceId);
+      push(`${pathname}?${params.toString()}`, { scroll: false });
+    }
+  }, [workspaces, workspaceIdFromUrl, pathname, push]);
+
+  if (!activeWorkspace) return null;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="gap-2 bg-transparent">
-          {currentWorkspace.workspaceName}
+          {activeWorkspace.workspaceName}
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -42,8 +46,12 @@ export function WorkspaceSwitcher({ workspaces }: { workspaces: WorkspaceWithRol
         {workspaces.map((workspace) => (
           <DropdownMenuItem
             key={workspace.workspaceId}
-            onClick={() => setCurrentWorkspace(workspace)}
-            className={currentWorkspace.workspaceId === workspace.workspaceId ? "bg-secondary" : ""}
+            onClick={() => {
+              const params = new URLSearchParams(searchParams);
+              params.set("workspace", workspace.workspaceId);
+              push(`${pathname}?${params.toString()}`);
+            }}
+            className={activeWorkspace.workspaceId === workspace.workspaceId ? "bg-secondary" : ""}
           >
             <div className="flex w-full items-center justify-between">
               <span>{workspace.workspaceName}</span>
