@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import UserGreeting from "@/components/user-greeting"
 import { getMyTasks, getTaskStats } from "@/actions/tasks"
 import { getRecentActivity } from "@/actions/activity"
+import { getWorkspacesWithRoles } from "@/actions/workspace"
+import { redirect } from "next/navigation"
 
 const STATUSES = [
   "todo",
@@ -18,7 +20,14 @@ const STATUSES = [
 export default async function DashboardPage(props: any) {
 
   const searchParams = await props.searchParams;
-  const workspaceId = searchParams.workspace
+  const workspaceId = searchParams.workspace;
+
+  if (!workspaceId) {
+          const workspaces = await getWorkspacesWithRoles();
+          if(workspaces.length === 0) redirect("/onboarding")
+          const newWorkspaceId = workspaces[0].workspaceId;
+          redirect(`/?workspace=${newWorkspaceId}`)
+      }
 
   const tasksStatsFromDb = await getTaskStats(workspaceId);
   const normalizedStats = STATUSES.map(status => {

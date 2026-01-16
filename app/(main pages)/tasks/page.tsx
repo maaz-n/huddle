@@ -11,6 +11,7 @@ export default async function TasksPage(props: any) {
 
   if(!workspaceId){
     const workspaces = await getWorkspacesWithRoles();
+    if(workspaces.length === 0) redirect("/onboarding")
     workspaceId = workspaces[0].workspaceId;
     redirect(`/tasks?workspace=${workspaceId}`)
   }
