@@ -11,7 +11,7 @@ export const createWorkspace = async (name: string) => {
         if (!user) throw ("User not logged in!")
         const workspace = await db.insert(workspaces).values({ name: name, ownerId: user.id }).returning();
         await db.insert(workspaceMembers).values({ workspaceId: workspace[0].id, userId: user.id, role: "owner" })
-        return { success: true, message: "Workspace created!" }
+        return { success: true, message: "Workspace created!", workspace: workspace[0] }
     } catch (error) {
         console.error(error)
         return { success: false, message: "There was an error creating the workspace" }
@@ -151,7 +151,7 @@ export const deleteWorkspace = async (workspaceId: string) => {
         const memberRecord = await db.query.workspaceMembers.findFirst({
             where: and(
                 eq(workspaceMembers.workspaceId, workspaceId),
-                eq(workspaceMembers.userId, user.id)
+                eq(workspaceMembers.userId, currentUser.id)
             )
         });
 
