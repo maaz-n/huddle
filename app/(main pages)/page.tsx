@@ -118,7 +118,7 @@ export default async function DashboardPage(props: any) {
             <CardContent>
               <div className="space-y-2 divide-y">
                 {recentActivity.map((log) => (
-                  <ActivityLogItem key={log.id} {...log} />
+                  <ActivityLogItem key={log.id} log={log} />
                 ))}
               </div>
             </CardContent>

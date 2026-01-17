@@ -109,7 +109,7 @@ export async function createTask(
       actorId: user.id,
       entityType: "task",
       entityId: insertedTask.id,
-      action: "Task created",
+      action: "TASK_CREATE",
       metadata: { entityName: insertedTask.title }
     });
 
@@ -128,8 +128,7 @@ export async function updateTaskStatus(
   newStatus: "todo" | "in_progress" | "blocked" | "done"
 ) {
   const { user, role } = await requireWorkspaceAccess(workspaceId, "member");
-  
-  // Fetch current status
+
   const task = await db.query.tasks.findFirst({
     where: eq(tasks.id, taskId),
   });
@@ -140,7 +139,6 @@ export async function updateTaskStatus(
 
   if(!canChange) return { success: false, message: "Unauthorized" }
 
-  // EDITED USING COPILOT
   const currentStatus = task.status;
   if (currentStatus == null) {
     return { success: false, message: "Task has no status" }
@@ -150,13 +148,16 @@ export async function updateTaskStatus(
     .set({ status: newStatus, updatedAt: new Date() })
     .where(eq(tasks.id, taskId));
 
-  // Log activity
   await db.insert(activityLogs).values({
     workspaceId,
     actorId: user.id,
     entityType: "task",
     entityId: taskId,
-    action: `Status changed: ${task.status} → ${newStatus}`,
+    action: "TASK_STATUS_CHANGE",
+    metadata: {
+      oldStatus: task.status,
+      newStatus: newStatus,
+    }
   });
 
   return { success: true, message: "Task status updated!" }
@@ -244,7 +245,7 @@ export async function assignTask(
     actorId: user.id,
     entityType: "task",
     entityId: taskId,
-    action: `Assigned to ${assigneeId}`,
+    action: `TASK_ASSIGNED`,
     metadata: { entityName: task.title }
   });
 }

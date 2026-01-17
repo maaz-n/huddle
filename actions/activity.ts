@@ -27,5 +27,6 @@ export async function getRecentActivity(workspaceId: string) {
         entityType: log.entityType,
         entityName: log.metadata?.entityName ?? "",
         timestamp: log.createdAt,
+        metadata: log.metadata
     }))
 }

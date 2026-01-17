@@ -114,7 +114,9 @@ export const activityLogs = pgTable("activity_logs", {
   entityId: text("entity_id").notNull(),
   action: text("action").notNull(),
   metadata: jsonb("metadata").$type<{
-    entityName?: string 
+    entityName?: string,
+    oldStatus?: string,
+    newStatus?: string
   }>(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
