@@ -127,31 +127,23 @@ export async function updateTaskStatus(
   workspaceId: string,
   newStatus: "todo" | "in_progress" | "blocked" | "done"
 ) {
-  const { user } = await requireWorkspaceAccess(workspaceId, "member");
-
+  const { user, role } = await requireWorkspaceAccess(workspaceId, "member");
+  
   // Fetch current status
   const task = await db.query.tasks.findFirst({
     where: eq(tasks.id, taskId),
   });
+  
+  if (!task) return { success: false, message: "Task not found" }
+  
+  const canChange = task.assigneeId === user.id || role !== "member"
 
-  if (!task) throw new Error("Task not found");
-
-  // Validate transition
-  const allowedTransitions: Record<string, string[]> = {
-    todo: ["in_progress", "blocked"],
-    in_progress: ["blocked", "done"],
-    blocked: ["in_progress"],
-    done: [],
-  };
+  if(!canChange) return { success: false, message: "Unauthorized" }
 
   // EDITED USING COPILOT
   const currentStatus = task.status;
   if (currentStatus == null) {
-    throw new Error("Task has no status");
-  }
-
-  if (!allowedTransitions[currentStatus].includes(newStatus)) {
-    throw new Error(`Invalid status transition: ${currentStatus} → ${newStatus}`);
+    return { success: false, message: "Task has no status" }
   }
 
   await db.update(tasks)
@@ -166,6 +158,8 @@ export async function updateTaskStatus(
     entityId: taskId,
     action: `Status changed: ${task.status} → ${newStatus}`,
   });
+
+  return { success: true, message: "Task status updated!" }
 }
 
 export async function updateTaskTitle(

@@ -3,6 +3,7 @@ import { getUsers, getTasks } from "@/actions/tasks"
 import TaskClient from "@/components/task-client"
 import { getWorkspacesWithRoles, getWorkspaceUsers } from "@/actions/workspace";
 import { redirect } from "next/navigation";
+import { getCurrentUser, getUserWorkspaceRole } from "@/actions/auth";
 
 export default async function TasksPage(props: any) {
 
@@ -26,7 +27,11 @@ export default async function TasksPage(props: any) {
 
   const allUsers = await getUsers(workspaceId);
 
-  const workspaceUsers = await getWorkspaceUsers(workspaceId)
+  const workspaceUsers = await getWorkspaceUsers(workspaceId);
+
+  const currentUser = await getCurrentUser();
+  if(!currentUser) return null;
+  const currentUserRole = await getUserWorkspaceRole(workspaceId);
 
   return (
     <AppLayout>
@@ -35,6 +40,8 @@ export default async function TasksPage(props: any) {
       tasksWithAssignees={tasksWithAssignees}
       workspaceUsers={workspaceUsers}
       workspaceId={workspaceId}
+      currentUser={currentUser}
+      currentUserRole={currentUserRole}
       />
     </AppLayout>
   )

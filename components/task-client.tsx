@@ -1,6 +1,6 @@
 "use client"
 
-import { InsertTask, TasksWithAssignees, UserType, UserTypeNew, WorkspaceUser } from '@/types/types'
+import { InsertTask, TasksWithAssignees, UserTypeNew, WorkspaceUser } from '@/types/types'
 import { FilterBar } from './filter-bar'
 import { TaskTable } from './task-table'
 import { useState } from 'react'
@@ -13,9 +13,17 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { WorkspaceCreateModal } from './workspace-create-modal'
 import { createWorkspace } from '@/actions/workspace'
-import { useAppData } from './app-data-provider'
 
-const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId }: { users: UserTypeNew[], tasksWithAssignees: TasksWithAssignees[], workspaceUsers: WorkspaceUser[], workspaceId: string}) => {
+interface TaskClientProps {
+    users: UserTypeNew[]
+    tasksWithAssignees: TasksWithAssignees[]
+    workspaceUsers: WorkspaceUser[],
+    workspaceId: string
+    currentUser: UserTypeNew,
+    currentUserRole: string | null
+}
+
+const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, currentUser, currentUserRole }: TaskClientProps) => {
 
     const [selectedTask, setSelectedTask] = useState<(typeof tasksWithAssignees)[0] | null>(null);
     const [taskDetailOpen, setTaskDetailOpen] = useState(false);
@@ -91,8 +99,11 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId }: 
                 task={selectedTask}
                 open={taskDetailOpen}
                 onOpenChange={setTaskDetailOpen}
+                workspaceId={workspaceId}
+                currentUser={currentUser}
+                currentUserRole={currentUserRole}
             />
-            <TaskCreateModal open={taskCreateOpen} onOpenChange={setTaskCreateOpen} onCreateTask={handleCreateTask} workspaceId={workspaceId} workspaceUsers={workspaceUsers}/>
+            <TaskCreateModal open={taskCreateOpen} onOpenChange={setTaskCreateOpen} onCreateTask={handleCreateTask} workspaceId={workspaceId} workspaceUsers={workspaceUsers} />
 
             <WorkspaceCreateModal open={workspaceCreateOpen} onOpenChange={setWorkspaceCreateOpen} onCreateWorkspace={handleCreateWorkspace} />
         </div>
