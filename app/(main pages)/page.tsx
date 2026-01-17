@@ -77,7 +77,10 @@ export default async function DashboardPage(props: any) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {myTasks.map((task) => (
+                  {myTasks.length === 0 ? 
+                  <span className="text-muted-foreground text-sm flex justify-center">There are no tasks currently assigned to you</span>
+                  : 
+                  myTasks.map((task) => (
                     <div key={task.id} className="p-3 bg-secondary rounded-lg">
                       <p className="text-sm font-medium">{task.title}</p>
                       <p className="text-xs text-muted-foreground mt-1">{task.status === "todo"
@@ -88,7 +91,8 @@ export default async function DashboardPage(props: any) {
                             ? "Blocked"
                             : "Done"}</p>
                     </div>
-                  ))}
+                  ))
+                  }
                 </div>
               </CardContent>
             </Card>
@@ -117,9 +121,13 @@ export default async function DashboardPage(props: any) {
             </CardHeader>
             <CardContent>
               <div className="space-y-2 divide-y">
-                {recentActivity.map((log) => (
+                {recentActivity.length === 0 ? 
+                <span className="text-muted-foreground text-sm flex justify-center">The recent activity of your workspace will show here</span>
+                : 
+                recentActivity.map((log) => (
                   <ActivityLogItem key={log.id} log={log} />
-                ))}
+                ))
+                }
               </div>
             </CardContent>
           </Card>

@@ -39,7 +39,7 @@ function getActivityContent(log: LogProps) {
     case "TASK_STATUS_CHANGE":
       return (
         <span className="text-muted-foreground ml-1">
-          updated task: <span className="text-foreground font-medium">{formatStatus(oldStatus)}</span>
+          updated task status: <span className="text-foreground font-medium">{formatStatus(oldStatus)}</span>
           <span className="mx-1">→</span>
           <span className="text-foreground font-medium">{formatStatus(newStatus)}</span>
         </span>
