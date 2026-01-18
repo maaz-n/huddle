@@ -27,6 +27,7 @@ export type TasksWithAssignees = {
   status: "todo" | "in_progress" | "blocked" | "done",
   priority: "low" | "medium" | "high",
   assigneeId: string,
+  dueDate: string | null,
   createdBy: string,
   createdAt: Date,
   updatedAt: Date,

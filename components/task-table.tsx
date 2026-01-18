@@ -22,6 +22,7 @@ export function TaskTable({ tasksWithAssignees, onTaskSelect }: { tasksWithAssig
             <TableHead>Assignee</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Priority</TableHead>
+            <TableHead>Due Date</TableHead>
             <TableHead>Updated</TableHead>
           </TableRow>
         </TableHeader>

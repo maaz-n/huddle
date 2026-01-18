@@ -26,6 +26,9 @@ export function TaskRow({ task, onClick }: TaskRowProps) {
         <TaskBadge type="priority" value={task.priority} />
       </TableCell>
       <TableCell className="text-sm text-muted-foreground">
+        {task.dueDate?.split("T")[0]}
+      </TableCell>
+      <TableCell className="text-sm text-muted-foreground">
         {formatDistanceToNow(task.updatedAt, { addSuffix: true })}
       </TableCell>
     </TableRow>
