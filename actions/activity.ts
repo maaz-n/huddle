@@ -1,4 +1,7 @@
 import { db } from "@/db";
+import { and, eq, gte, lte, ne } from "drizzle-orm";
+import { startOfDay, endOfDay } from "date-fns";
+import { tasks } from "@/db/schema";
 
 export async function getRecentActivity(workspaceId: string) {
     const logs = await db.query.activityLogs.findMany({
@@ -29,4 +32,27 @@ export async function getRecentActivity(workspaceId: string) {
         timestamp: log.createdAt,
         metadata: log.metadata
     }))
+}
+
+
+export async function getDashboardStats(userId: string, workspaceId: string) {
+  const now = new Date();
+  
+  const todayStart = startOfDay(now).toISOString();
+  const todayEnd = endOfDay(now).toISOString(); 
+
+  const tasksDueToday = await db
+    .select()
+    .from(tasks)
+    .where(
+      and(
+        eq(tasks.assigneeId, userId),
+        eq(tasks.workspaceId, workspaceId),
+        gte(tasks.dueDate, todayStart),
+        lte(tasks.dueDate, todayEnd), 
+        ne(tasks.status, "done")   
+      )
+    );
+
+  return tasksDueToday.length;
 }

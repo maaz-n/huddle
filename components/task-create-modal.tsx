@@ -9,18 +9,17 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea" // Use Shadcn Textarea if available
+import { Textarea } from "@/components/ui/textarea"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 
-// Types
 import { InsertTask, WorkspaceUser } from "@/types/types"
 
 interface TaskCreateModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreateTask: (task: InsertTask) => Promise<void> // Changed to Promise for loading state
+  onCreateTask: (task: InsertTask) => Promise<void>
   workspaceUsers: WorkspaceUser[]
   workspaceId: string
 }

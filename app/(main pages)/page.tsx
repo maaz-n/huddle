@@ -6,9 +6,10 @@ import { QuickActionButton } from "@/components/quick-action-button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import UserGreeting from "@/components/user-greeting"
 import { getMyTasks, getTaskStats } from "@/actions/tasks"
-import { getRecentActivity } from "@/actions/activity"
+import { getDashboardStats, getRecentActivity } from "@/actions/activity"
 import { getWorkspacesWithRoles } from "@/actions/workspace"
 import { redirect } from "next/navigation"
+import { requireUser } from "@/lib/authguard"
 
 const STATUSES = [
   "todo",
@@ -41,12 +42,15 @@ export default async function DashboardPage(props: any) {
 
   const myTasks = await getMyTasks(workspaceId);
 
-  const recentActivity = await getRecentActivity(workspaceId)
+  const recentActivity = await getRecentActivity(workspaceId);
+
+  const { id } = await requireUser()
+  const dueTasks = await getDashboardStats(id, workspaceId)
 
   return (
     <AppLayout>
       <div className="py-8 px-6 space-y-8">
-        <UserGreeting />
+        <UserGreeting dueTasks={dueTasks}/>
         <div>
           <h2 className="text-xl font-semibold mb-4">Tasks by Status</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
