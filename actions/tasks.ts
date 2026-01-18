@@ -85,7 +85,8 @@ export async function createTask(
   description: string | null,
   status: "todo" | "in_progress" | "blocked" | "done",
   priority: "low" | "medium" | "high",
-  assigneeId: string
+  assigneeId: string,
+  dueDate: string | undefined
 ) {
   const { user } = await requireWorkspaceAccess(
     workspaceId,
@@ -100,8 +101,9 @@ export async function createTask(
       description: description,
       status: status,
       priority: priority,
+      dueDate: dueDate,
+      assigneeId: assigneeId,
       createdBy: user.id,
-      assigneeId: assigneeId
     }).returning();
 
     await logActivity({
@@ -116,8 +118,8 @@ export async function createTask(
     return { success: true, message: "Task created!" }
 
   } catch (error) {
-    const e = error as Error;
-    return { success: false, message: e.message }
+    console.error(error)
+    return { success: false, message: "Error creating task" }
 
   }
 }

@@ -34,8 +34,8 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, cu
 
     const handleCreateTask = async (data: InsertTask) => {
         try {
-            const { workspaceId, title, description, status, priority, assigneeId } = data;
-            const response = await createTask(workspaceId, title, description, status, priority, assigneeId);
+            const { workspaceId, title, description, status, priority, assigneeId, dueDate } = data;
+            const response = await createTask(workspaceId, title, description, status, priority, assigneeId, dueDate);
 
             if (response.success) {
                 toast.success(response.message)

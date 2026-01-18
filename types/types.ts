@@ -44,7 +44,8 @@ export type InsertTask = {
   description: string | null,
   status: "todo" | "in_progress" | "blocked" | "done",
   priority: "low" | "medium" | "high",
-  assigneeId: string
+  assigneeId: string,
+  dueDate: string | undefined
 }
 
 export type WorkspaceWithRole = {
