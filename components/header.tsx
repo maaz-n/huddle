@@ -51,13 +51,16 @@ export function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
             <Button onClick={() => setWorkspaceCreateOpen(true)} className="gap-2 bg-primary hover:bg-primary/90">
               <Plus className="h-2 w-2" />
             </Button>
-            <WorkspaceCreateModal open={workspaceCreateOpen} onOpenChange={setWorkspaceCreateOpen} onCreateWorkspace={handleCreateWorkspace} />
+            
           </div>
         </div>
 
         <div className="flex items-center gap-4">
           <div className="lg:hidden">
             <WorkspaceSwitcher workspaces={workspaces} />
+            <Button onClick={() => setWorkspaceCreateOpen(true)} className="gap-2 bg-primary hover:bg-primary/90">
+              <Plus className="h-2 w-2" />
+            </Button>
           </div>
           <div className="hidden sm:flex items-center gap-2">
             <ModeToggle />
@@ -65,6 +68,7 @@ export function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
           </div>
         </div>
       </div>
+      <WorkspaceCreateModal open={workspaceCreateOpen} onOpenChange={setWorkspaceCreateOpen} onCreateWorkspace={handleCreateWorkspace} />
     </header>
   )
 }
