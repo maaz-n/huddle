@@ -25,9 +25,8 @@ function DeleteWorkspaceButton({ workspaceId }: { workspaceId: string }) {
         <AlertDialog>
             <AlertDialogTrigger asChild>
                 <Button
-                    variant="outline"
-                    className="border-destructive text-destructive hover:bg-destructive/10 bg-transparent"
-                >
+                    variant="destructive"
+                >   
                     <div className='flex gap-2 items-center'>
                         Delete Workspace
                     </div>

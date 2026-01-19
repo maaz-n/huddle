@@ -76,15 +76,23 @@ export default async function SettingsPage(props: any) {
 
                 <WorkspaceSettingsSection currentUserRole={currentUserRole} workspace={workspace} />
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Delete Workspace</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground mb-4">Irreversible actions. Proceed with caution.</p>
+                <div className="py-12">
+                    <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 lg:justify-between lg:items-center">
+
+                        <div className="flex-none lg:w-[380px] space-y-2">
+                            <h2 className="text-xl font-bold tracking-tight text-foreground">
+                                Delete Workspace
+                            </h2>
+                            <p className="text-base text-muted-foreground leading-relaxed">
+                                Permanently remove this workspace and all associated data.
+                                This action is irreversible and cannot be recovered.
+                            </p>
+                        </div>
+
                         <DeleteWorkspaceButton workspaceId={workspace.id} />
-                    </CardContent>
-                </Card>
+
+                    </div>
+                </div>
             </div>
         </AppLayout>
     )
