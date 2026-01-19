@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import AddMemberModal from './add-member-modal';
-import { CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { addMember } from '@/actions/user';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { UserPlus } from 'lucide-react';
 
 interface AddMemberProps {
     workspaceId: string,
@@ -31,16 +31,17 @@ export default function AddMemberSection({ workspaceId, currentUserRole }: AddMe
 
     return (
         <>
-            <CardHeader>
-                <div className="flex items-center justify-between">
-                    <CardTitle>Workspace Members</CardTitle>
-                    {currentUserRole !== "member" &&
-                        <Button variant="outline" size="sm" onClick={() => setIsOpen(true)}>
-                            Add Member
-                        </Button>
-                    }
-                </div>
-            </CardHeader>
+            {currentUserRole !== "member" && (
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsOpen(true)}
+                    className="h-9 px-4 border-dashed hover:border-primary hover:text-primary transition-all"
+                >
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Add Member
+                </Button>
+            )}
 
             <AddMemberModal
                 isOpen={isOpen}

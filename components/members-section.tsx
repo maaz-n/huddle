@@ -1,6 +1,5 @@
 "use client"
 
-import { CardContent } from './ui/card'
 import { UserTypeNew, UserWithRole } from '@/types/types'
 import { useState } from 'react'
 import { removeUser } from '@/actions/workspace'
@@ -11,7 +10,6 @@ import MemberRow from './member-row'
 
 function MembersSection({ users, currentUserRole, workspaceId, currentUser }: { users: UserWithRole[], currentUserRole: string | null, workspaceId: string, currentUser: UserTypeNew }) {
 
-    const [role, setRole] = useState("member"); // <--- ROLE CHANGING LOGIC NOT IMPLEMENTED YET
     const [isLoading, setIsLoading] = useState(false);
 
     const router = useRouter();
@@ -41,13 +39,26 @@ function MembersSection({ users, currentUserRole, workspaceId, currentUser }: { 
 
     }
     return (
-        <CardContent>
-            <div className="space-y-3">
-                {sortedUsers.map((user: any) => (
-                    <MemberRow key={user.id} user={user} currentUserRole={currentUserRole} workspaceId={workspaceId} onRemove={handleRemoveUser} isLoading={isLoading} currentUser={currentUser}/>
-                ))}
-            </div>
-        </CardContent>
+        <div className="divide-y divide-border">
+            {sortedUsers.length > 0 ? (
+                sortedUsers.map((user: any) => (
+                    <div key={user.id} className="p-4 hover:bg-muted/30 transition-colors">
+                        <MemberRow
+                            user={user}
+                            currentUserRole={currentUserRole}
+                            workspaceId={workspaceId}
+                            onRemove={handleRemoveUser}
+                            isLoading={isLoading}
+                            currentUser={currentUser}
+                        />
+                    </div>
+                ))
+            ) : (
+                <div className="p-8 text-center text-sm text-muted-foreground">
+                    No members found in this workspace.
+                </div>
+            )}
+        </div>
     )
 }
 

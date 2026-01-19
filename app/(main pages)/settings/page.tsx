@@ -1,6 +1,5 @@
 import { AppLayout } from "@/components/app-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { getWorkspace, getWorkspacesWithRoles, getWorkspaceUsers } from "@/actions/workspace"
 import { redirect } from "next/navigation"
 import UserProfile from "@/components/user-profile"
@@ -17,7 +16,7 @@ export default async function SettingsPage(props: any) {
 
     if (!workspaceId) {
         const workspaces = await getWorkspacesWithRoles();
-        if(workspaces.length === 0) redirect("/onboarding")
+        if (workspaces.length === 0) redirect("/onboarding")
         workspaceId = workspaces[0].workspaceId;
         redirect(`/settings?workspace=${workspaceId}`)
     }
@@ -33,7 +32,7 @@ export default async function SettingsPage(props: any) {
 
     return (
         <AppLayout>
-            <div className="py-8 px-6 space-y-8 max-w-4xl">
+            <div className="py-8 px-6 space-y-8 max-w-5xl mx-auto">
                 <div>
                     <h1 className="text-3xl font-bold">Settings</h1>
                     <p className="text-muted-foreground mt-2">Manage workspace and profile settings</p>
@@ -41,12 +40,41 @@ export default async function SettingsPage(props: any) {
 
                 <UserProfile user={currentUser} />
 
-                <Card>
-                    <AddMemberSection workspaceId={workspaceId} currentUserRole={currentUserRole} />
-                    <MembersSection users={users} currentUserRole={currentUserRole} currentUser={currentUser} workspaceId={workspace.id}/>
-                </Card>
+                <div className="max-w-6xl mx-auto py-12 px-6">
+                    <div className="flex flex-col lg:flex-row gap-12 lg:gap-24">
 
-                <WorkspaceSettingsSection currentUserRole={currentUserRole} workspace={workspace}/>
+                        <div className="flex-none lg:w-[380px] space-y-2">
+                            <h2 className="text-xl font-bold tracking-tight text-foreground">
+                                Workspace Members
+                            </h2>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                Manage your team’s access, roles, and workspace invitations.
+                                Invite new collaborators to work on projects together.
+                            </p>
+                        </div>
+
+                        <div className="flex-1 min-w-0 space-y-6">
+                            <div className="flex justify-end">
+                                <AddMemberSection
+                                    workspaceId={workspaceId}
+                                    currentUserRole={currentUserRole}
+                                />
+                            </div>
+
+                            <div className="rounded-2xl border bg-card shadow-sm overflow-hidden border-border/60">
+                                <MembersSection
+                                    users={users}
+                                    currentUserRole={currentUserRole}
+                                    currentUser={currentUser}
+                                    workspaceId={workspace.id}
+                                />
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <WorkspaceSettingsSection currentUserRole={currentUserRole} workspace={workspace} />
 
                 <Card>
                     <CardHeader>
@@ -54,7 +82,7 @@ export default async function SettingsPage(props: any) {
                     </CardHeader>
                     <CardContent>
                         <p className="text-sm text-muted-foreground mb-4">Irreversible actions. Proceed with caution.</p>
-                        <DeleteWorkspaceButton workspaceId={workspace.id}/>
+                        <DeleteWorkspaceButton workspaceId={workspace.id} />
                     </CardContent>
                 </Card>
             </div>
