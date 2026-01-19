@@ -32,15 +32,15 @@ export default async function SettingsPage(props: any) {
 
     return (
         <AppLayout>
-            <div className="py-8 px-6 space-y-8 max-w-5xl mx-auto">
+            <div className="py-8 px-12 space-y-8 max-w-6xl mx-auto">
                 <div>
                     <h1 className="text-3xl font-bold">Settings</h1>
                     <p className="text-muted-foreground mt-2">Manage workspace and profile settings</p>
                 </div>
 
-                <UserProfile user={currentUser} />
 
-                <div className="max-w-6xl mx-auto py-12 px-6">
+                <div className="max-w-6xl mx-auto py-12">
+                    <UserProfile user={currentUser} />
                     <div className="flex flex-col lg:flex-row gap-12 lg:gap-24">
 
                         <div className="flex-none lg:w-[380px] space-y-2">

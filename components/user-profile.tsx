@@ -48,52 +48,72 @@ function UserProfile({ user }: { user: UserTypeNew }) {
             <CardContent className="px-0 pt-6">
                 <form onSubmit={handleUpdate} className="divide-y divide-border">
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 py-6 gap-4">
-                        <div>
-                            <Label className="text-base">Profile Picture</Label>
-                            <p className="text-sm text-muted-foreground">Your picture for workspaces.</p>
+                    <div className="flex flex-col lg:flex-row py-8 gap-12 lg:gap-24">
+                        <div className="flex-none lg:w-[380px] space-y-1">
+                            <Label className="text-base font-semibold">Profile Picture</Label>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                Your personal branding across all workspaces.
+                            </p>
                         </div>
-                                <UserAvatar user={user} className="h-20 w-20 ring-4 ring-background shadow-sm" />
+                        <UserAvatar user={user} className="h-20 w-20 ring-4 ring-background shadow-md" />
+
+
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 py-6 gap-4">
-                        <div>
-                            <Label htmlFor="name" className="text-base">Display Name</Label>
-                            <p className="text-sm text-muted-foreground">Your display name.</p>
+                    <div className="flex flex-col lg:flex-row py-8 gap-12 lg:gap-24">
+                        <div className="flex-none lg:w-[380px] space-y-1">
+                            <Label htmlFor="name" className="text-base font-semibold">Display Name</Label>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                This name will be visible to your teammates.
+                            </p>
                         </div>
-                        <div className="md:col-span-2">
+                        <div className="flex-1">
                             <Input
                                 id="name"
                                 defaultValue={user.name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="max-w-md h-10"
+                                className="max-w-md h-11 bg-muted/20"
+                                placeholder="Your full name"
                             />
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 py-6 gap-4">
-                        <div>
-                            <Label htmlFor="email" className="text-base">Email Address</Label>
-                            <p className="text-sm text-muted-foreground">Contact your admin to change this.</p>
+                    {/* Row 3: Email */}
+                    <div className="flex flex-col lg:flex-row py-8 gap-12 lg:gap-24">
+                        <div className="flex-none lg:w-[380px] space-y-1">
+                            <Label htmlFor="email" className="text-base font-semibold">Email Address</Label>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                The email associated with your account.
+                            </p>
                         </div>
-                        <div className="md:col-span-2">
+                        <div className="flex-1">
                             <Input
                                 id="email"
                                 type="email"
                                 defaultValue={user.email}
                                 disabled
-                                className="max-w-md h-10 bg-muted/50 border-dashed"
+                                className="max-w-md h-11 bg-muted/50 border-dashed cursor-not-allowed opacity-70"
                             />
+                            <p className="text-[11px] text-muted-foreground mt-2 italic">
+                                Email changes must be handled by your workspace administrator.
+                            </p>
                         </div>
                     </div>
 
-                    <div className="pt-6 flex justify-end">
+                    <div className="py-8 flex justify-end">
                         <Button
                             type="submit"
-                            className="px-8 shadow-lg shadow-primary/20"
+                            className="px-10 h-11 shadow-lg shadow-primary/20 transition-all hover:-translate-y-px"
                             disabled={loading || name === user.name}
                         >
-                            {loading ? <Loader2 className='h-4 w-4 animate-spin' /> : "Save Changes"}
+                            {loading ? (
+                                <>
+                                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                                    Saving...
+                                </>
+                            ) : (
+                                "Save Changes"
+                            )}
                         </Button>
                     </div>
 
