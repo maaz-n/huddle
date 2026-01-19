@@ -28,7 +28,6 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, cu
     const [selectedTask, setSelectedTask] = useState<(typeof tasksWithAssignees)[0] | null>(null);
     const [taskDetailOpen, setTaskDetailOpen] = useState(false);
     const [taskCreateOpen, setTaskCreateOpen] = useState(false);
-    const [workspaceCreateOpen, setWorkspaceCreateOpen] = useState(false);
 
     const router = useRouter()
 
@@ -49,22 +48,6 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, cu
         }
     }
 
-    const handleCreateWorkspace = async (name: string) => {
-        try {
-            const response = await createWorkspace(name);
-
-            if (response.success) {
-                toast.success(response.message);
-                router.refresh();
-            } else {
-                toast.error(response.message);
-            }
-
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
     return (
         <div className="py-8 px-6 space-y-6">
             <div className="flex items-center justify-between">
@@ -77,10 +60,6 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, cu
                     <Button onClick={() => setTaskCreateOpen(true)} className="gap-2 bg-primary hover:bg-primary/90">
                         <Plus className="h-4 w-4" />
                         New Task
-                    </Button>
-                    <Button onClick={() => setWorkspaceCreateOpen(true)} className="gap-2 bg-primary hover:bg-primary/90">
-                        <Plus className="h-4 w-4" />
-                        New Workspace
                     </Button>
                 </div>
             </div>
@@ -104,8 +83,6 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, cu
                 currentUserRole={currentUserRole}
             />
             <TaskCreateModal open={taskCreateOpen} onOpenChange={setTaskCreateOpen} onCreateTask={handleCreateTask} workspaceId={workspaceId} workspaceUsers={workspaceUsers} />
-
-            <WorkspaceCreateModal open={workspaceCreateOpen} onOpenChange={setWorkspaceCreateOpen} onCreateWorkspace={handleCreateWorkspace} />
         </div>
     )
 }
