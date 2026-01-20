@@ -1,8 +1,6 @@
 import { AppLayout } from "@/components/app-layout"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getWorkspace, getWorkspacesWithRoles, getWorkspaceUsers } from "@/actions/workspace"
 import { redirect } from "next/navigation"
-import UserProfile from "@/components/user-profile"
 import { getCurrentUser, getUserWorkspaceRole } from "@/actions/auth"
 import AddMemberSection from "@/components/add-member-section"
 import MembersSection from "@/components/members-section"
@@ -34,13 +32,12 @@ export default async function SettingsPage(props: any) {
         <AppLayout>
             <div className="py-8 px-12 space-y-8 max-w-6xl mx-auto">
                 <div>
-                    <h1 className="text-3xl font-bold">Settings</h1>
-                    <p className="text-muted-foreground mt-2">Manage workspace and profile settings</p>
+                    <h1 className="text-3xl font-bold">Workspace Settings</h1>
+                    <p className="text-muted-foreground mt-2">Manage your workspace settings</p>
                 </div>
 
 
                 <div className="max-w-6xl mx-auto py-12">
-                    <UserProfile user={currentUser} />
                     <div className="flex flex-col lg:flex-row gap-12 lg:gap-24">
 
                         <div className="flex-none lg:w-[380px] space-y-2">

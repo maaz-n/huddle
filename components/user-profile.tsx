@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
+import { Card, CardContent } from './ui/card'
 import { UserAvatar } from './user-avatar'
 import { Label } from '@radix-ui/react-label'
 import { Input } from './ui/input'
@@ -38,16 +38,8 @@ function UserProfile({ user }: { user: UserTypeNew }) {
 
     return (
         <Card className="border-none shadow-none bg-transparent">
-            <CardHeader className="px-0">
-                <CardTitle className="text-xl font-semibold">Profile Settings</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                    This is how others will see you on the platform.
-                </p>
-            </CardHeader>
-
-            <CardContent className="px-0 pt-6">
+            <CardContent className='my-0'>
                 <form onSubmit={handleUpdate} className="divide-y divide-border">
-
                     <div className="flex flex-col lg:flex-row py-8 gap-12 lg:gap-24">
                         <div className="flex-none lg:w-[380px] space-y-1">
                             <Label className="text-base font-semibold">Profile Picture</Label>
@@ -78,7 +70,6 @@ function UserProfile({ user }: { user: UserTypeNew }) {
                         </div>
                     </div>
 
-                    {/* Row 3: Email */}
                     <div className="flex flex-col lg:flex-row py-8 gap-12 lg:gap-24">
                         <div className="flex-none lg:w-[380px] space-y-1">
                             <Label htmlFor="email" className="text-base font-semibold">Email Address</Label>
