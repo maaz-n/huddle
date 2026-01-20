@@ -36,6 +36,8 @@ export default async function SettingsPage(props: any) {
                     <p className="text-muted-foreground mt-2">Manage your workspace settings</p>
                 </div>
 
+                <WorkspaceSettingsSection currentUserRole={currentUserRole} workspace={workspace} />
+
 
                 <div className="max-w-6xl mx-auto py-12">
                     <div className="flex flex-col lg:flex-row gap-12 lg:gap-24">
@@ -71,7 +73,6 @@ export default async function SettingsPage(props: any) {
                     </div>
                 </div>
 
-                <WorkspaceSettingsSection currentUserRole={currentUserRole} workspace={workspace} />
 
                 <div className="py-12">
                     <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 lg:justify-between lg:items-center">

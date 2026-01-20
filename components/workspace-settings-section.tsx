@@ -49,7 +49,7 @@ function WorkspaceSettingsSection({ currentUserRole, workspace }: WorkspaceSetti
                         Workspace Details
                     </h2>
                     <p className="text-base text-muted-foreground leading-relaxed">
-                        The name of your workspace and general organizational settings.
+                        The name of your workspace.
                         Only workspace owners can modify these details.
                     </p>
                 </div>
