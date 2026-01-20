@@ -1,8 +1,6 @@
-import { Plus, Eye, Cog } from "lucide-react"
 import { AppLayout } from "@/components/app-layout"
 import { TaskStatusCard } from "@/components/task-status-card"
 import { ActivityLogItem } from "@/components/activity-log-item"
-import { QuickActionButton } from "@/components/quick-action-button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import UserGreeting from "@/components/user-greeting"
 import { getMyTasks, getTaskStats } from "@/actions/tasks"
@@ -24,11 +22,11 @@ export default async function DashboardPage(props: any) {
   const workspaceId = searchParams.workspace;
 
   if (!workspaceId) {
-          const workspaces = await getWorkspacesWithRoles();
-          if(workspaces.length === 0) redirect("/onboarding")
-          const newWorkspaceId = workspaces[0].workspaceId;
-          redirect(`/?workspace=${newWorkspaceId}`)
-      }
+    const workspaces = await getWorkspacesWithRoles();
+    if (workspaces.length === 0) redirect("/onboarding")
+    const newWorkspaceId = workspaces[0].workspaceId;
+    redirect(`/?workspace=${newWorkspaceId}`)
+  }
 
   const tasksStatsFromDb = await getTaskStats(workspaceId);
   const normalizedStats = STATUSES.map(status => {
@@ -50,7 +48,7 @@ export default async function DashboardPage(props: any) {
   return (
     <AppLayout>
       <div className="py-8 px-6 space-y-8">
-        <UserGreeting dueTasks={dueTasks}/>
+        <UserGreeting dueTasks={dueTasks} />
         <div>
           <h2 className="text-xl font-semibold mb-4">Tasks by Status</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -81,61 +79,46 @@ export default async function DashboardPage(props: any) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {myTasks.length === 0 ? 
-                  <span className="text-muted-foreground text-sm flex justify-center">There are no tasks currently assigned to you</span>
-                  : 
-                  myTasks.map((task) => (
-                    <div key={task.id} className="p-3 bg-secondary rounded-lg">
-                      <p className="text-sm font-medium">{task.title}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{task.status === "todo"
-                        ? "To Do"
-                        : task.status === "in_progress"
-                          ? "In Progress"
-                          : task.status === "blocked"
-                            ? "Blocked"
-                            : "Done"}</p>
-                    </div>
-                  ))
+                  {myTasks.length === 0 ?
+                    <span className="text-muted-foreground text-sm flex justify-center">There are no tasks currently assigned to you</span>
+                    :
+                    myTasks.map((task) => (
+                      <div key={task.id} className="p-3 bg-secondary rounded-lg">
+                        <p className="text-sm font-medium">{task.title}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{task.status === "todo"
+                          ? "To Do"
+                          : task.status === "in_progress"
+                            ? "In Progress"
+                            : task.status === "blocked"
+                              ? "Blocked"
+                              : "Done"}</p>
+                      </div>
+                    ))
                   }
                 </div>
               </CardContent>
             </Card>
           </div>
-
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Quick Actions</CardTitle>
+                <CardTitle className="text-base">Recent Activity</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {/* <QuickActionButton icon={Plus} label="Create Task" className="bg-primary hover:bg-primary/90" />
-                  <QuickActionButton icon={Eye} label="View Tasks" variant="outline" />
-                  <QuickActionButton icon={Cog} label="Go to Settings" variant="outline" /> */}
+                <div className="space-y-2 divide-y">
+                  {recentActivity.length === 0 ?
+                    <span className="text-muted-foreground text-sm flex justify-center">The recent activity of your workspace will show here</span>
+                    :
+                    recentActivity.map((log) => (
+                      <ActivityLogItem key={log.id} log={log} />
+                    ))
+                  }
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
 
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 divide-y">
-                {recentActivity.length === 0 ? 
-                <span className="text-muted-foreground text-sm flex justify-center">The recent activity of your workspace will show here</span>
-                : 
-                recentActivity.map((log) => (
-                  <ActivityLogItem key={log.id} log={log} />
-                ))
-                }
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </AppLayout>
   )
