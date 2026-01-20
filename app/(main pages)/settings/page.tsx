@@ -31,7 +31,7 @@ export default async function SettingsPage(props: any) {
     return (
         <AppLayout>
             <div className="py-8 px-12 space-y-8 max-w-6xl mx-auto">
-                <div>
+                <div className="text-center sm:text-left">
                     <h1 className="text-3xl font-bold">Workspace Settings</h1>
                     <p className="text-muted-foreground mt-2">Manage your workspace settings</p>
                 </div>

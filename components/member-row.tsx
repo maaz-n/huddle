@@ -4,10 +4,11 @@ import { UserTypeNew, UserWithRole } from '@/types/types';
 import { useRouter } from 'next/navigation';
 import { UserAvatar } from './user-avatar';
 import { Button } from './ui/button';
-import { Loader2, X } from 'lucide-react';
+import { Loader2, Trash, X } from 'lucide-react';
 import { useState } from 'react';
 import { updateUserRole } from '@/actions/workspace';
 import { toast } from 'sonner';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from './ui/select';
 
 interface MemeberRowProps {
     user: UserWithRole,
@@ -35,7 +36,7 @@ function MemberRow({ user, currentUserRole, workspaceId, onRemove, isLoading, cu
     const handleRoleUpdate = async () => {
         setIsUpdating(true);
         const response = await updateUserRole(workspaceId, user.id, pendingRole);
-        if(response.success){
+        if (response.success) {
             toast.success(response.message);
             router.refresh()
         } else {
@@ -48,7 +49,7 @@ function MemberRow({ user, currentUserRole, workspaceId, onRemove, isLoading, cu
     const hasChanged = pendingRole !== user.role;
 
     return (
-        <div className="flex items-center justify-between p-4 border border-border rounded-lg">
+        <div className="flex flex-col gap-6 sm:flex-row items-center justify-between p-4 border border-border rounded-lg">
             <div className="flex items-center gap-4">
                 <UserAvatar user={{ name: user.name, image: user.image }} className="h-8 w-8" />
                 <div>
@@ -65,47 +66,43 @@ function MemberRow({ user, currentUserRole, workspaceId, onRemove, isLoading, cu
                     </div>
                 ) : (
                     <div className="flex items-center gap-3">
-                {canChangeRole ? (
-                    <div className="flex items-center gap-2">
-                        <select 
-                            value={pendingRole}
-                            className="text-sm border border-border rounded px-2 py-1"
-                            onChange={(e) => setPendingRole(e.target.value as UserRole)}
-                        >
-                            <option value="admin">Admin</option>
-                            <option value="member">Member</option>
-                        </select>
-                        
-                        {pendingRole !== user.role && (
-                            <Button size="sm" onClick={handleRoleUpdate} disabled={isUpdating}>
-                                {isUpdating ? <Loader2 className='h-3 w-3 animate-spin'/> : "Update"}
-                            </Button>
+                        {canChangeRole ? (
+                            <div className="flex items-center gap-2">
+                                <Select
+                                defaultValue={user.role as UserRole}
+                                onValueChange={(e) => setPendingRole(e as UserRole)}
+                                >
+                                    <SelectTrigger className="w-[180px] sm:w-[120px]">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectItem value="admin">Admin</SelectItem>
+                                            <SelectItem value="member">Member</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+
+                                {pendingRole !== user.role && (
+                                    <Button size="sm" onClick={handleRoleUpdate} disabled={isUpdating}>
+                                        {isUpdating ? <Loader2 className='h-3 w-3 animate-spin' /> : "Update"}
+                                    </Button>
+                                )}
+                            </div>
+                        ) : (
+                            <div className={`text-sm px-2.5 py-0.5 rounded bg-secondary text-secondary-foreground border border-border ${isSelf && "font-medium"}`}>
+                                {pendingRole.charAt(0).toUpperCase() + pendingRole.slice(1)}
+                                {isSelf && " (You)"}
+                            </div>
+                        )}
+
+                        {(isOwner || (currentUserRole === 'admin' && user.role === 'member')) && !isSelf && (
+                            <button onClick={() => onRemove(user.id)} className='p-1 bg-red-400 rounded-md'>
+                                <Trash className="h-4 w-4 text-white font-bold" />
+                            </button>
                         )}
                     </div>
-                ) : (
-                    <div className={`text-sm px-2.5 py-0.5 rounded bg-secondary text-secondary-foreground border border-border ${isSelf && "font-medium"}`}>
-                        {pendingRole.charAt(0).toUpperCase() + pendingRole.slice(1)}
-                        {isSelf && " (You)"}
-                    </div>
                 )}
-
-                {(isOwner || (currentUserRole === 'admin' && user.role === 'member')) && !isSelf && (
-                    <button onClick={() => onRemove(user.id)}>
-                         <X className="h-4 w-4 text-destructive" />
-                    </button>
-                )}
-            </div>
-                )}
-
-                {/* {currentUserRole === "owner" && user.role !== "owner" && (
-                    <button 
-                        className="p-1 hover:bg-secondary rounded transition-colors" 
-                        onClick={() => onRemove(user.id)} 
-                        disabled={isLoading}
-                    >
-                        {isLoading ? <Loader2 className='h-4 w-4 text-destructive animate-spin' /> : <X className="h-4 w-4 text-destructive" />}
-                    </button>
-                )} */}
             </div>
         </div>
     );
