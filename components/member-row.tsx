@@ -4,11 +4,12 @@ import { UserTypeNew, UserWithRole } from '@/types/types';
 import { useRouter } from 'next/navigation';
 import { UserAvatar } from './user-avatar';
 import { Button } from './ui/button';
-import { Loader2, Trash, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { updateUserRole } from '@/actions/workspace';
 import { toast } from 'sonner';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from './ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import RemoveWorkspaceUserButton from './remove-workspace-member-button';
 
 interface MemeberRowProps {
     user: UserWithRole,
@@ -83,7 +84,7 @@ function MemberRow({ user, currentUserRole, workspaceId, onRemove, isLoading, cu
                                     </SelectContent>
                                 </Select>
 
-                                {pendingRole !== user.role && (
+                                {hasChanged && (
                                     <Button size="sm" onClick={handleRoleUpdate} disabled={isUpdating}>
                                         {isUpdating ? <Loader2 className='h-3 w-3 animate-spin' /> : "Update"}
                                     </Button>
@@ -97,9 +98,7 @@ function MemberRow({ user, currentUserRole, workspaceId, onRemove, isLoading, cu
                         )}
 
                         {(isOwner || (currentUserRole === 'admin' && user.role === 'member')) && !isSelf && (
-                            <button onClick={() => onRemove(user.id)} className='p-1 bg-red-400 rounded-md'>
-                                <Trash className="h-4 w-4 text-white font-bold" />
-                            </button>
+                            <RemoveWorkspaceUserButton onRemove={onRemove} user={user}/>
                         )}
                     </div>
                 )}
