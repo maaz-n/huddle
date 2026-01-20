@@ -10,25 +10,26 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { UserAvatar } from "./user-avatar"
-import { UserType } from "@/types/types"
+import { UserTypeNew } from "@/types/types"
 import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
-export function UserMenu({ user }: { user: UserType }) {
+export function UserMenu({ user }: { user: UserTypeNew }) {
 
   if (!user) throw new Error("Could not fetch user");
 
   const router = useRouter()
 
-    async function handleLogout() {
-      await authClient.signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            router.push("/login");
-          },
+  async function handleLogout() {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/login");
         },
-      });
-    }
+      },
+    });
+  }
 
   return (
     <DropdownMenu>
@@ -44,12 +45,16 @@ export function UserMenu({ user }: { user: UserType }) {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="gap-2">
-          <User className="h-4 w-4" />
-          <span>Profile</span>
+          <Link href={"/profile"} className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            <span>Profile</span>
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem className="gap-2">
-          <Settings className="h-4 w-4" />
-          <span>Settings</span>
+          <Link href={"/settings"} className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            <span>Settings</span>
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="gap-2 text-destructive" onClick={handleLogout}>
