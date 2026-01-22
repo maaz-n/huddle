@@ -59,7 +59,7 @@ export function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
           <div className="lg:hidden">
             <WorkspaceSwitcher workspaces={workspaces} />
             <Button onClick={() => setWorkspaceCreateOpen(true)} className="gap-2 bg-primary hover:bg-primary/90">
-              <Plus className="h-2 w-2" />
+              <Plus/>
             </Button>
           </div>
           <div className="hidden sm:flex items-center gap-2">
