@@ -16,12 +16,14 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
   const pathname = usePathname();
   const dashboardHref = useWorkspaceHref("/")
   const tasksHref = useWorkspaceHref("/tasks")
+  const settingsHref = useWorkspaceHref("/settings")
+  const membersHref = useWorkspaceHref("/members")
 
   const navItems = [
     { label: "Dashboard", href: dashboardHref, basePath: "/", icon: LayoutDashboard },
     { label: "Tasks", href: tasksHref, basePath: "/tasks", icon: CheckSquare },
-    { label: "Workspace Settings", href: "/settings", basePath: "/settings", icon: Briefcase },
-    { label: "Members", href: "/members", basePath: "/members", icon: Users2 },
+    { label: "Workspace Settings", href: settingsHref, basePath: "/settings", icon: Briefcase },
+    { label: "Members", href: membersHref, basePath: "/members", icon: Users2 },
   ]
 
   const isProfileActive = pathname === "/profile"
