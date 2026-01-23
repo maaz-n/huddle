@@ -1,8 +1,6 @@
 "use client"
 
 import { UserTypeNew, UserWithRole } from "@/types/types"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { MembersTableRow } from "./members-table-row"
 
 interface MembersTableProps {
@@ -13,9 +11,6 @@ interface MembersTableProps {
 }
 
 export function MembersTable({ members, workspaceId, currentUserRole, user }: MembersTableProps) {
-
-    const [isLoading, setIsLoading] = useState(false)
-    const router = useRouter();
 
     return (
         <>  
@@ -30,7 +25,9 @@ export function MembersTable({ members, workspaceId, currentUserRole, user }: Me
                         </tr>
                     </thead>
                     <tbody>
-                        {members.map((member) => (
+
+                        { members.length > 0 ?
+                        members.map((member) => (
                             <MembersTableRow
                                 key={member.id}
                                 member={member}
@@ -38,7 +35,14 @@ export function MembersTable({ members, workspaceId, currentUserRole, user }: Me
                                 workspaceId={workspaceId}
                                 currentUser={user}
                             />
-                        ))}
+                        ))
+                    :
+                    <tr className="text-center">
+                        <td colSpan={4} className="py-5 text-muted-foreground/70 text-center">
+                            There are no members with that name...
+                        </td>
+                    </tr>
+                    }
                     </tbody>
                 </table>
             </div>
