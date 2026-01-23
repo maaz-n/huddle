@@ -1,8 +1,9 @@
 import { getCurrentUser, getUserWorkspaceRole } from '@/actions/auth';
 import { getWorkspacesWithRoles, getWorkspaceUsers } from '@/actions/workspace';
+import AddMemberSection from '@/components/add-member-section';
 import { AppLayout } from '@/components/app-layout'
 import { MembersTable } from '@/components/members-table';
-import { Input } from '@/components/ui/input';
+import { SearchInput } from '@/components/search-input';
 import { redirect } from 'next/navigation';
 
 async function MembersPage(props: any) {
@@ -26,16 +27,17 @@ async function MembersPage(props: any) {
 
     return (
         <AppLayout>
-            <div className="py-8 px-12 space-y-8 max-w-6xl mx-auto">
+            <div className="py-8 px-12 max-w-6xl mx-auto">
                 <div className="text-center sm:text-left">
                     <h1 className="text-3xl font-bold">Members</h1>
                     <p className="text-muted-foreground mt-2">Manage people in this workspace</p>
                 </div>
-                <div className='flex flex-col gap-2'>
-                    <Input className='w-1/3 ml-auto justify-end' placeholder='Search members in this workspace' />
-                    <div className="rounded-2xl border bg-card shadow-sm overflow-hidden border-border/60">
-                       <MembersTable members={users} workspaceId={workspaceId} currentUserRole={currentUserRole} user={currentUser}/>
-                    </div>
+                <div className='flex justify-between mt-14'>
+                    <SearchInput />
+                    <AddMemberSection workspaceId={workspaceId} currentUserRole={currentUserRole} />
+                </div>
+                <div className="mt-4">
+                    <MembersTable members={users} workspaceId={workspaceId} currentUserRole={currentUserRole} user={currentUser} />
                 </div>
             </div>
         </AppLayout>

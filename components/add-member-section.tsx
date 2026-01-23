@@ -33,10 +33,10 @@ export default function AddMemberSection({ workspaceId, currentUserRole }: AddMe
         <>
             {currentUserRole !== "member" && (
                 <Button
-                    variant="outline"
+                    variant="default"
                     size="sm"
                     onClick={() => setIsOpen(true)}
-                    className="h-9 px-4 border-dashed hover:border-primary hover:text-primary transition-all"
+                    className="h-9 px-4 transition-all"
                 >
                     <UserPlus className="mr-2 h-4 w-4" />
                     Add Member
