@@ -49,7 +49,7 @@ function MembersSection({ users, currentUserRole, workspaceId, currentUser }: { 
                             workspaceId={workspaceId}
                             onRemove={handleRemoveUser}
                             isLoading={isLoading}
-                            currentUser={currentUser}
+                             currentUser={currentUser}
                         />
                     </div>
                 ))
