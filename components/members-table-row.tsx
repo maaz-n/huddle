@@ -20,7 +20,7 @@ interface MemberRowProps {
     currentUser: UserTypeNew
 }
 
-type UserRole = "admin" | "member"
+type UserRole = "admin" | "member" | "owner"
 
 export function MembersTableRow({ member, workspaceId, currentUserRole, currentUser }: MemberRowProps) {
 
@@ -69,7 +69,7 @@ export function MembersTableRow({ member, workspaceId, currentUserRole, currentU
                     "capitalize font-semibold text-[10px] px-2 py-0",
                     member.role === "owner" && "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
                     member.role === "admin" && "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                  )}>
+                )}>
                     {member.role}
                 </Badge>
             </td>
@@ -78,11 +78,18 @@ export function MembersTableRow({ member, workspaceId, currentUserRole, currentU
                 <div className="flex items-center justify-end gap-2  transition-opacity">
 
                     <div className="flex items-center gap-3">
-                        {canChangeRole ? (
-                            <div className="flex items-center gap-2">
+
+                        <div className="flex items-center gap-2">
+                            {member.role === 'owner' ?
+                                <div className={`text-sm px-2.5 py-0.5 rounded bg-secondary text-secondary-foreground border border-border ${isSelf && "font-medium"}`}>
+                                    {pendingRole.charAt(0).toUpperCase() + pendingRole.slice(1)}
+                                    {isSelf && " (You)"}
+                                </div>
+                                :
                                 <Select
-                                defaultValue={member.role as UserRole}
-                                onValueChange={(e) => setPendingRole(e as UserRole)}
+                                    defaultValue={member.role as UserRole}
+                                    onValueChange={(e) => setPendingRole(e as UserRole)}
+                                    disabled={!canChangeRole}
                                 >
                                     <SelectTrigger className="w-[180px] sm:w-[120px]">
                                         <SelectValue />
@@ -95,21 +102,18 @@ export function MembersTableRow({ member, workspaceId, currentUserRole, currentU
                                     </SelectContent>
                                 </Select>
 
-                                {hasChanged && (
-                                    <Button size="sm" onClick={handleRoleUpdate} disabled={isUpdating}>
-                                        {isUpdating ? <Loader2 className='h-3 w-3 animate-spin' /> : "Update"}
-                                    </Button>
-                                )}
-                            </div>
-                        ) : (
-                            <div className={`text-sm px-2.5 py-0.5 rounded bg-secondary text-secondary-foreground border border-border ${isSelf && "font-medium"}`}>
-                                {pendingRole.charAt(0).toUpperCase() + pendingRole.slice(1)}
-                                {isSelf && " (You)"}
-                            </div>
-                        )}
+                            }
+                            {hasChanged &&
+                                <Button size="sm" onClick={handleRoleUpdate} disabled={isUpdating}>
+                                    {isUpdating ? <Loader2 className='h-3 w-3 animate-spin' /> : "Update"}
+                                </Button>
+                            }
+
+                        </div>
+
 
                         {(isOwner || (currentUserRole === 'admin' && member.role === 'member')) && !isSelf && (
-                            <RemoveWorkspaceUserButton user={member} workspaceId={workspaceId}/>
+                            <RemoveWorkspaceUserButton user={member} workspaceId={workspaceId} />
                         )}
                     </div>
                 </div>

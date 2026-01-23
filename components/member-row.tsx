@@ -98,7 +98,7 @@ function MemberRow({ user, currentUserRole, workspaceId, onRemove, isLoading, cu
                         )}
 
                         {(isOwner || (currentUserRole === 'admin' && user.role === 'member')) && !isSelf && (
-                            <RemoveWorkspaceUserButton onRemove={onRemove} user={user}/>
+                            <RemoveWorkspaceUserButton workspaceId={workspaceId} user={user}/>
                         )}
                     </div>
                 )}
