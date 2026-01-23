@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ChevronLeft, LayoutDashboard, CheckSquare, Briefcase, UserIcon } from "lucide-react"
+import { ChevronLeft, LayoutDashboard, CheckSquare, Briefcase, UserIcon, Users2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useWorkspaceHref } from "@/hooks/useWorkspaceHref"
@@ -21,6 +21,7 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
     { label: "Dashboard", href: dashboardHref, basePath: "/", icon: LayoutDashboard },
     { label: "Tasks", href: tasksHref, basePath: "/tasks", icon: CheckSquare },
     { label: "Workspace Settings", href: "/settings", basePath: "/settings", icon: Briefcase },
+    { label: "Members", href: "/members", basePath: "/members", icon: Users2 },
   ]
 
   const isProfileActive = pathname === "/profile"
