@@ -95,7 +95,7 @@ export const tasks = pgTable("tasks", {
   title: text("title").notNull(),
   description: text("description"),
   status: text("status").notNull()
-    .$type<"todo" | "in_progress" | "blocked" | "done">()
+    .$type<"todo" | "in_review" | "done">()
     .default("todo"),
   priority: text("priority").notNull()
     .$type<"low" | "medium" | "high">()

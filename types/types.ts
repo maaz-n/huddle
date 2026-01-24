@@ -14,7 +14,7 @@ export type UserWithRole = {
 }
 
 export type GetFilteredTasks = {
-  status: "todo" | "in_progress" | "blocked" | "done",
+  status: "todo" | "in_review" | "done",
   priority: "low" | "medium" | "high",
   assignee: string
 }
@@ -24,7 +24,7 @@ export type TasksWithAssignees = {
   workspaceId: string,
   title: string,
   description: string | null,
-  status: "todo" | "in_progress" | "blocked" | "done",
+  status: "todo" | "in_review" | "done",
   priority: "low" | "medium" | "high",
   assigneeId: string,
   dueDate: string | null,
@@ -43,7 +43,7 @@ export type InsertTask = {
   workspaceId: string,
   title: string,
   description: string | null,
-  status: "todo" | "in_progress" | "blocked" | "done",
+  status: "todo" | "in_review" | "done",
   priority: "low" | "medium" | "high",
   assigneeId: string,
   dueDate: string | undefined

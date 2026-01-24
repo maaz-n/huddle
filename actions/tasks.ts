@@ -83,7 +83,7 @@ export async function createTask(
   workspaceId: string,
   title: string,
   description: string | null,
-  status: "todo" | "in_progress" | "blocked" | "done",
+  status: "todo" | "in_review" | "done",
   priority: "low" | "medium" | "high",
   assigneeId: string,
   dueDate: string | undefined
@@ -127,7 +127,7 @@ export async function createTask(
 export async function updateTaskStatus(
   taskId: string,
   workspaceId: string,
-  newStatus: "todo" | "in_progress" | "blocked" | "done"
+  newStatus: "todo" | "in_review" | "done"
 ) {
   const { user, role } = await requireWorkspaceAccess(workspaceId, "member");
 

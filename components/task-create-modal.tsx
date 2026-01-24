@@ -28,7 +28,6 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [status, setStatus] = useState<string>("todo")
   const [priority, setPriority] = useState<string>("medium")
   const [assigneeId, setAssigneeId] = useState<string>("")
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined)
@@ -36,21 +35,20 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    
+
     try {
       await onCreateTask({
         title,
         description,
-        status: status as any,
+        status: "todo",
         priority: priority as any,
         assigneeId: assigneeId,
         workspaceId,
-        dueDate: dueDate?.toISOString() 
+        dueDate: dueDate?.toISOString()
       })
-      
+
       setTitle("")
       setDescription("")
-      setStatus("todo")
       setPriority("medium")
       setAssigneeId("")
       setDueDate(undefined)
@@ -98,21 +96,6 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
           </div>
 
           <div className="grid grid-cols-2 gap-x-8 gap-y-6 pt-2">
-            <div className="space-y-2">
-              <Label className="text-[10px] font-bold uppercase text-muted-foreground">Status</Label>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="bg-background">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todo">To Do</SelectItem>
-                  <SelectItem value="in_progress">In Progress</SelectItem>
-                  <SelectItem value="blocked">Blocked</SelectItem>
-                  <SelectItem value="done">Done</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
             <div className="space-y-2">
               <Label className="text-[10px] font-bold uppercase text-muted-foreground">Priority</Label>
               <Select value={priority} onValueChange={setPriority}>
