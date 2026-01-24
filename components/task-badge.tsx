@@ -2,13 +2,12 @@
 
 import { Badge } from "@/components/ui/badge"
 
-type TaskStatus = "todo" | "in_progress" | "blocked" | "done"
+type TaskStatus = "todo" | "in_review" | "done"
 type TaskPriority = "low" | "medium" | "high"
 
 const statusConfig: Record<TaskStatus, { label: string; className: string }> = {
   todo: { label: "To Do", className: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100" },
-  in_progress: { label: "In Progress", className: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100" },
-  blocked: { label: "Blocked", className: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100" },
+  in_review: { label: "In Review", className: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100" },
   done: { label: "Done", className: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" },
 }
 
