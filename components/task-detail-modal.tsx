@@ -53,7 +53,7 @@ const statusConfig = {
   "done": { label: "Done", icon: CheckCircle2, color: "text-green-500" },
 }
 
-type TaskStatusType = "todo" | "in_progress" | "blocked" | "done"
+type TaskStatusType = "todo" | "in_review" | "done"
 
 export function TaskDetailModal({ task, open, onOpenChange, workspaceId, currentUser, currentUserRole }: TaskDetailModalProps) {
   const [selectedStatus, setSelectedStatus] = useState<TaskStatusType>(task?.status ?? "todo")
@@ -117,7 +117,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
           <div className="w-full md:w-[280px] bg-muted/30 border-l border-border/50 p-6 space-y-6">
             <div className="space-y-5">
 
-              <div className="space-y-3">
+              {/* <div className="space-y-3">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Status</label>
                 <div className="space-y-2">
                   <Select 
@@ -163,9 +163,9 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                     </Button>
                   )}
                 </div>
-              </div>
+              </div> */}
 
-              <Separator />
+              {/* <Separator /> */}
 
               {/* Assignee */}
               <div className="space-y-3">

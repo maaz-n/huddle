@@ -1,9 +1,9 @@
+import { getUserWorkspaceRole } from '@/actions/auth';
 import { getMyTasks } from '@/actions/tasks'
 import { getWorkspacesWithRoles } from '@/actions/workspace';
 import { AppLayout } from '@/components/app-layout'
 import { MyTasksTable } from '@/components/my-tasks-table';
 import { redirect } from 'next/navigation';
-import React from 'react'
 
 async function MyTasksPage(props: any) {
 
@@ -17,6 +17,7 @@ async function MyTasksPage(props: any) {
         redirect(`/my-tasks?workspace=${workspaceId}`)
     }
     const myTasks = await getMyTasks(workspaceId)
+    const currentUserRole = await getUserWorkspaceRole(workspaceId)
 
     return (
         <AppLayout>
@@ -25,7 +26,7 @@ async function MyTasksPage(props: any) {
                     <h1 className="text-3xl font-bold">My Tasks</h1>
                     <p className="text-muted-foreground mt-2">Manage all your tasks</p>
                 </div>
-                <MyTasksTable tasks={myTasks} />
+                <MyTasksTable tasks={myTasks} workspaceId={workspaceId} currentUserRole={currentUserRole} />
 
             </div>
         </AppLayout>
