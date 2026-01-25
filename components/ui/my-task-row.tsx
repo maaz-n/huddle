@@ -10,28 +10,33 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import { UserTypeNew } from "@/types/types"
+import { TableCell, TableRow } from "./table"
 
 type nextStatusType = "todo" | "in_review" | "done"
 
 interface MyTaskRowProps {
-  task: {
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    workspaceId: string;
-    title: string;
-    description: string | null;
-    status: "todo" | "in_review" | "done";
-    priority: "low" | "medium" | "high";
-    dueDate: string | null;
-    assigneeId: string;
-    createdBy: string;
-  },
-  currentUserRole: string | null,
-  onStatusUpdate: (taskId: string, nextStatus: nextStatusType) => Promise<void>
+    task: {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        workspaceId: string;
+        title: string;
+        description: string | null;
+        status: "todo" | "in_review" | "done";
+        priority: "low" | "medium" | "high";
+        dueDate: string | null;
+        assigneeId: string;
+        createdBy: string;
+    },
+    currentUserRole: string | null,
+    currentUser: UserTypeNew,
+    onStatusUpdate: (taskId: string, nextStatus: nextStatusType) => Promise<void>,
+    workspaceId: string,
+    onClick: () => void
 }
 
-export function MyTaskRow({ task, currentUserRole, onStatusUpdate }: MyTaskRowProps) {
+export function MyTaskRow({ task, currentUserRole, onStatusUpdate, onClick }: MyTaskRowProps) {
     const [isUpdating, setIsUpdating] = useState(false)
 
     const handleComplete = async () => {
@@ -46,9 +51,8 @@ export function MyTaskRow({ task, currentUserRole, onStatusUpdate }: MyTaskRowPr
     }
 
     return (
-        <tr className="group border-b border-border/40 last:border-0 hover:bg-muted/30 transition-all">
-
-            <td className="px-6 py-4 max-w-[300px]">
+        <TableRow className="group border-b border-border/40 last:border-0 hover:bg-muted/30 transition-all" onClick={onClick}>
+            <TableCell className="px-6 py-4 max-w-[300px]">
                 <div className="flex items-center gap-3">
                     <button
                         onClick={handleComplete}
@@ -67,9 +71,9 @@ export function MyTaskRow({ task, currentUserRole, onStatusUpdate }: MyTaskRowPr
                         {task.title}
                     </span>
                 </div>
-            </td>
+            </TableCell>
 
-            <td className="px-6 py-4">
+            <TableCell className="px-6 py-4">
                 <div className="flex items-center gap-2">
                     <span className={cn(
                         "text-[11px] font-bold uppercase tracking-tighter",
@@ -79,9 +83,9 @@ export function MyTaskRow({ task, currentUserRole, onStatusUpdate }: MyTaskRowPr
                         {task.priority}
                     </span>
                 </div>
-            </td>
+            </TableCell>
 
-            <td className="px-6 py-4">
+            <TableCell className="px-6 py-4">
                 <Badge
                     variant="outline"
                     className={cn(
@@ -93,13 +97,13 @@ export function MyTaskRow({ task, currentUserRole, onStatusUpdate }: MyTaskRowPr
                 >
                     {task.status === "in_review" ? "IN REVIEW" : task.status.toUpperCase()}
                 </Badge>
-            </td>
+            </TableCell>
 
-            <td className="px-6 py-4 text-center">
+            <TableCell className="px-6 py-4 text-center">
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground transition-opacity">
-                    <Clock />
+                    <Clock className="h-4 w-4" />
                 </Button>
-            </td>
-        </tr>
+            </TableCell>
+        </TableRow>
     )
 }

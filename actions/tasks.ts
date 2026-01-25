@@ -69,7 +69,18 @@ export async function getMyTasks(workspaceId: string) {
       where: (tasks, { eq, and }) => and(
         eq(tasks.workspaceId, workspaceId),
         eq(tasks.assigneeId, currentUser.id)
-      )
+      ),
+      
+      with: {
+          user: {
+            columns: {
+              id: true,
+              name: true,
+              email: true,
+              image: true
+            }
+          },
+        }
     })
     return workspaceTasks;
 

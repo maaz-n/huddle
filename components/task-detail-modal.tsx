@@ -55,7 +55,6 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   const [isRequestingChange, setIsRequestingChange] = useState(false)
   const [revisionNote, setRevisionNote] = useState(task?.description ?? "")
 
-
   useEffect(() => {
     if (task) setSelectedStatus(task.status)
   }, [task, open])
@@ -65,7 +64,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   if (!task) return null
 
   const hasChanges = selectedStatus !== task.status
-  const canUserUpdate = task.user.id === currentUser.id || currentUserRole !== "member";
+  const canUserUpdate = task.user?.id === currentUser.id || currentUserRole !== "member";
 
   const handleUpdateStatus = async () => {
     setIsUpdating(true)
@@ -191,14 +190,13 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
 
               {/* <Separator /> */}
 
-              {/* Assignee */}
               <div className="space-y-3">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Assignee</label>
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground italic">
                     <UserAvatar user={task.user} />
                   </div>
-                  <span className="text-sm font-medium">{task.user.name}</span>
+                  <span className="text-sm font-medium">{task.user?.name}</span>
                 </div>
               </div>
 

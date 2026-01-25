@@ -5,6 +5,8 @@ import { MyTaskRow } from "./ui/my-task-row"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { getCurrentUser } from "@/actions/auth"
+import { TasksWithAssignees, UserTypeNew } from "@/types/types"
+import { useState } from "react"
 
 type nextStatusType = "todo" | "in_review" | "done"
 
@@ -23,16 +25,17 @@ interface MyTasksTableProps {
     createdBy: string;
   }[],
   currentUserRole: string | null,
-  workspaceId: string
+  workspaceId: string,
+  currentUser: UserTypeNew
+  onTaskSelect: (task: TasksWithAssignees) => void
 }
 
-export function MyTasksTable({ tasks, currentUserRole, workspaceId }: MyTasksTableProps) {
+export function MyTasksTable({ tasks, currentUserRole, currentUser, workspaceId, onTaskSelect }: MyTasksTableProps) {
   const router = useRouter()
 
   async function updateStatus(taskId: string, nextStatus: nextStatusType) {
     try {
       const user = await getCurrentUser()
-      console.log(taskId, workspaceId, nextStatus, user?.name)
       const response = await updateTaskStatus(taskId, workspaceId, nextStatus)
       if (response.success) {
         toast.success(response.message)
@@ -62,6 +65,10 @@ export function MyTasksTable({ tasks, currentUserRole, workspaceId }: MyTasksTab
               task={task}
               currentUserRole={currentUserRole}
               onStatusUpdate={updateStatus}
+              currentUser={currentUser}
+              workspaceId={workspaceId}
+              onClick={() => onTaskSelect(task)}
+              
             />
           ))}
         </tbody>

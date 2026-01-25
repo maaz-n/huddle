@@ -73,7 +73,6 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, cu
                 }}
                 tasksWithAssignees={tasksWithAssignees} />
 
-            {/* Modals */}
             <TaskDetailModal
                 task={selectedTask}
                 open={taskDetailOpen}
