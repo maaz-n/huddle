@@ -224,7 +224,13 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                     <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Actions</label>
                     <div className="flex items-center justify-between gap-2 mt-1">
                       <Toggle onPressedChange={setIsRequestingChange} className="px-5" variant={"outline"}>Request changes</Toggle>
-                      <Button disabled={isRequestingChange} onClick={handleUpdateStatus}>Mark as completed</Button>
+                      <Button disabled={isRequestingChange || isUpdating} onClick={handleUpdateStatus}>
+                        {isUpdating ? 
+                          <Loader2 className="h-2 w-2 animate-spin"/>
+                          :  
+                          "Mark as completed"
+                          }
+                      </Button>
                     </div>
                   </div>
                   {isRequestingChange &&
