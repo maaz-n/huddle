@@ -32,10 +32,12 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TasksWithAssignees, UserTypeNew } from "@/types/types"
-import { updateTaskStatus } from "@/actions/tasks"
+import { updateTaskDescription, updateTaskStatus } from "@/actions/tasks"
 import { UserAvatar } from "./user-avatar"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { Toggle } from "./ui/toggle"
+import { Textarea } from "./ui/textarea"
 
 interface TaskDetailModalProps {
   task: TasksWithAssignees | null,
@@ -58,6 +60,10 @@ type TaskStatusType = "todo" | "in_review" | "done"
 export function TaskDetailModal({ task, open, onOpenChange, workspaceId, currentUser, currentUserRole }: TaskDetailModalProps) {
   const [selectedStatus, setSelectedStatus] = useState<TaskStatusType>(task?.status ?? "todo")
   const [isUpdating, setIsUpdating] = useState(false)
+  const [isUpdating2, setIsUpdating2] = useState(false)
+  const [isRequestingChange, setIsRequestingChange] = useState(false)
+  const [newDescription, setNewDescription] = useState(task?.description ?? "")
+
 
   useEffect(() => {
     if (task) setSelectedStatus(task.status)
@@ -73,7 +79,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   const handleUpdateStatus = async () => {
     setIsUpdating(true)
     try {
-      const response = await updateTaskStatus(task.id, workspaceId, selectedStatus)
+      const response = await updateTaskStatus(task.id, workspaceId, "done")
       if (response.success) {
         toast.success(response.message);
         router.refresh()
@@ -86,9 +92,24 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
     }
   }
 
+  const sendForRevision = async () => {
+    try {
+      setIsUpdating2(true)
+      await updateTaskStatus(task.id, workspaceId, "todo");
+      await updateTaskDescription(task.id, workspaceId, newDescription)
+      toast.success("Task sent for revision")
+      router.refresh()
+    } catch (error) {
+      console.error(error)
+      toast.error("An error occured")
+    } finally {
+      setIsUpdating2(false)
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl p-0 overflow-hidden border-none shadow-2xl bg-background">
+      <DialogContent className="min-w-3xl p-0 overflow-hidden border-none shadow-2xl bg-background">
         <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
 
           <div className="flex-1 p-8 space-y-6 overflow-y-auto">
@@ -114,7 +135,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
             </div>
           </div>
 
-          <div className="w-full md:w-[280px] bg-muted/30 border-l border-border/50 p-6 space-y-6">
+          <div className="w-full md:w-[380px] bg-muted/30 border-l border-border/50 p-6 space-y-6">
             <div className="space-y-5">
 
               {/* <div className="space-y-3">
@@ -196,6 +217,41 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                   <span>Modified {formatDistanceToNow(task.updatedAt, { addSuffix: true })}</span>
                 </div>
               </div>
+
+              {currentUserRole !== "member" && task.status === "in_review" &&
+                <>
+                  <div className="pt-4">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Actions</label>
+                    <div className="flex items-center justify-between gap-2 mt-1">
+                      <Toggle onPressedChange={setIsRequestingChange} className="px-5" variant={"outline"}>Request changes</Toggle>
+                      <Button disabled={isRequestingChange} onClick={handleUpdateStatus}>Mark as completed</Button>
+                    </div>
+                  </div>
+                  {isRequestingChange &&
+                    <form onSubmit={sendForRevision}>
+
+                      <div className="space-y-3">
+                        <Textarea
+                          placeholder="Note..."
+                          required
+                          className="resize-none min-h-[100px]"
+                          onChange={(e) => setNewDescription(e.target.value)}
+                        />
+                        <Button className="w-full" type="submit" disabled={isUpdating2} >
+                          {isUpdating2 ? 
+                          <Loader2 className="h-2 w-2 animate-spin"/>
+                          :  
+                          "Send for revision"
+                          }
+                        </Button>
+                      </div>
+                    </form>
+
+                  }
+                </>
+
+              }
+
             </div>
           </div>
         </div>
