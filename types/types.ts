@@ -31,6 +31,7 @@ export type TasksWithAssignees = {
   createdBy: string,
   createdAt: Date,
   updatedAt: Date,
+  revisionNote: string | null,
   user: {
     id: string,
     name: string,

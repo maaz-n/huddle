@@ -100,6 +100,7 @@ export const tasks = pgTable("tasks", {
   priority: text("priority").notNull()
     .$type<"low" | "medium" | "high">()
     .default("medium"),
+    revisionNote: text("revision_note"),
   dueDate: text("due_date"),
   assigneeId: text("assignee_id").notNull().references(() => user.id, { onDelete: 'cascade' }),
   createdBy: text("created_by").notNull().references(() => user.id, { onDelete: 'cascade' }),

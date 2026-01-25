@@ -23,7 +23,7 @@ export async function getTasks(workspaceId: string, filter: GetFilteredTasks) {
             }
           },
         },
-        orderBy: ( tasks, { desc } ) => desc(tasks.updatedAt)
+        orderBy: (tasks, { desc }) => desc(tasks.updatedAt)
       })
     } else {
       return await db.query.tasks.findMany({
@@ -134,12 +134,12 @@ export async function updateTaskStatus(
   const task = await db.query.tasks.findFirst({
     where: eq(tasks.id, taskId),
   });
-  
+
   if (!task) return { success: false, message: "Task not found" }
-  
+
   const canChange = task.assigneeId === user.id || role !== "member"
 
-  if(!canChange) return { success: false, message: "Unauthorized" }
+  if (!canChange) return { success: false, message: "Unauthorized" }
 
   const currentStatus = task.status;
   if (currentStatus == null) {
@@ -221,6 +221,35 @@ export async function updateTaskDescription(
     entityId: taskId,
     action: "Description updated",
     metadata: { entityName: task.title }
+  });
+}
+
+export async function addRevisionNote(
+  taskId: string,
+  workspaceId: string,
+  note: string,
+) {
+  const { user } = await requireWorkspaceAccess(workspaceId, "member");
+  const task = await db.query.tasks.findFirst({
+    where: eq(tasks.id, taskId)
+  });
+
+  if (!task) throw new Error("No task found!")
+
+  await db.update(tasks).set(
+    {
+      revisionNote: note,
+      updatedAt: new Date(),
+    }
+  ).where(eq(tasks.id, taskId))
+
+  await logActivity({
+    workspaceId: workspaceId,
+    actorId: user.id,
+    entityType: "task",
+    entityId: taskId,
+    action: "Revision note added",
+    metadata: { entityName: note }
   });
 }
 

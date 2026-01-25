@@ -11,8 +11,6 @@ import {
   Circle,
   Loader2,
   AlertCircle,
-  Save,
-  LockIcon
 } from "lucide-react"
 
 import {
@@ -21,18 +19,11 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TasksWithAssignees, UserTypeNew } from "@/types/types"
-import { updateTaskDescription, updateTaskStatus } from "@/actions/tasks"
+import { addRevisionNote, updateTaskStatus } from "@/actions/tasks"
 import { UserAvatar } from "./user-avatar"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -62,7 +53,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   const [isUpdating, setIsUpdating] = useState(false)
   const [isUpdating2, setIsUpdating2] = useState(false)
   const [isRequestingChange, setIsRequestingChange] = useState(false)
-  const [newDescription, setNewDescription] = useState(task?.description ?? "")
+  const [revisionNote, setRevisionNote] = useState(task?.description ?? "")
 
 
   useEffect(() => {
@@ -96,7 +87,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
     try {
       setIsUpdating2(true)
       await updateTaskStatus(task.id, workspaceId, "todo");
-      await updateTaskDescription(task.id, workspaceId, newDescription)
+      await addRevisionNote(task.id, workspaceId, revisionNote)
       toast.success("Task sent for revision")
       router.refresh()
     } catch (error) {
@@ -109,7 +100,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="min-w-3xl p-0 overflow-hidden border-none shadow-2xl bg-background">
+      <DialogContent className="max-w-3xl md:min-w-2xl p-0 overflow-hidden border-none shadow-2xl bg-background">
         <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
 
           <div className="flex-1 p-8 space-y-6 overflow-y-auto">
@@ -133,7 +124,19 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                 {task.description || "No description provided."}
               </p>
             </div>
+            {task.revisionNote && (
+              <div className="mt-4 p-4 h-auto rounded-lg bg-red-50 border border-red-200 dark:bg-red-950/20 dark:border-red-900/50">
+                <div className="flex items-center gap-2 mb-1 text-red-600 dark:text-red-400">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="text-xs font-bold uppercase tracking-tight">Changes Requested</span>
+                </div>
+                <p className="text-sm text-red-700 dark:text-red-300 italic">
+                  "{task.revisionNote}"
+                </p>
+              </div>
+            )}
           </div>
+
 
           <div className="w-full md:w-[380px] bg-muted/30 border-l border-border/50 p-6 space-y-6">
             <div className="space-y-5">
@@ -225,11 +228,11 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                     <div className="flex items-center justify-between gap-2 mt-1">
                       <Toggle onPressedChange={setIsRequestingChange} className="px-5" variant={"outline"}>Request changes</Toggle>
                       <Button disabled={isRequestingChange || isUpdating} onClick={handleUpdateStatus}>
-                        {isUpdating ? 
-                          <Loader2 className="h-2 w-2 animate-spin"/>
-                          :  
+                        {isUpdating ?
+                          <Loader2 className="h-2 w-2 animate-spin" />
+                          :
                           "Mark as completed"
-                          }
+                        }
                       </Button>
                     </div>
                   </div>
@@ -241,13 +244,13 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                           placeholder="Note..."
                           required
                           className="resize-none min-h-[100px]"
-                          onChange={(e) => setNewDescription(e.target.value)}
+                          onChange={(e) => setRevisionNote(e.target.value)}
                         />
                         <Button className="w-full" type="submit" disabled={isUpdating2} >
-                          {isUpdating2 ? 
-                          <Loader2 className="h-2 w-2 animate-spin"/>
-                          :  
-                          "Send for revision"
+                          {isUpdating2 ?
+                            <Loader2 className="h-2 w-2 animate-spin" />
+                            :
+                            "Send for revision"
                           }
                         </Button>
                       </div>
