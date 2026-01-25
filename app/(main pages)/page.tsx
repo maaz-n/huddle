@@ -11,8 +11,7 @@ import { requireUser } from "@/lib/authguard"
 
 const STATUSES = [
   "todo",
-  "in_progress",
-  "blocked",
+  "in_review",
   "done",
 ] as const
 
@@ -58,11 +57,9 @@ export default async function DashboardPage(props: any) {
                 title={
                   task.status === "todo"
                     ? "To Do"
-                    : task.status === "in_progress"
-                      ? "In Progress"
-                      : task.status === "blocked"
-                        ? "Blocked"
-                        : "Done"
+                    : task.status === "in_review"
+                      ? "In Review"
+                      : "Done"
                 }
                 count={task.count}
                 status={task.status}
@@ -87,11 +84,9 @@ export default async function DashboardPage(props: any) {
                         <p className="text-sm font-medium">{task.title}</p>
                         <p className="text-xs text-muted-foreground mt-1">{task.status === "todo"
                           ? "To Do"
-                          : task.status === "in_progress"
-                            ? "In Progress"
-                            : task.status === "blocked"
-                              ? "Blocked"
-                              : "Done"}</p>
+                          : task.status === "in_review"
+                            ? "In Review"
+                            : "Done"}</p>
                       </div>
                     ))
                   }

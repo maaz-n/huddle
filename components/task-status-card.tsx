@@ -6,7 +6,7 @@ import { TaskBadge } from "./task-badge"
 interface TaskStatusCardProps {
   title: string
   count: number
-  status: "todo" | "in_progress" | "blocked" | "done"
+  status: "todo" | "in_review" | "done"
 }
 
 export function TaskStatusCard({ title, count, status }: TaskStatusCardProps) {
