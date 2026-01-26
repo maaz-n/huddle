@@ -6,7 +6,6 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { getCurrentUser } from "@/actions/auth"
 import { TasksWithAssignees, UserTypeNew } from "@/types/types"
-import { useState } from "react"
 
 type nextStatusType = "todo" | "in_review" | "done"
 
@@ -59,18 +58,26 @@ export function MyTasksTable({ tasks, currentUserRole, currentUser, workspaceId,
           </tr>
         </thead>
         <tbody>
-          {tasks.map((task: any) => (
-            <MyTaskRow
-              key={task.id}
-              task={task}
-              currentUserRole={currentUserRole}
-              onStatusUpdate={updateStatus}
-              currentUser={currentUser}
-              workspaceId={workspaceId}
-              onClick={() => onTaskSelect(task)}
-              
-            />
-          ))}
+          {tasks.length > 0 ?
+
+            tasks.map((task: any) => (
+              <MyTaskRow
+                key={task.id}
+                task={task}
+                currentUserRole={currentUserRole}
+                onStatusUpdate={updateStatus}
+                currentUser={currentUser}
+                workspaceId={workspaceId}
+                onClick={() => onTaskSelect(task)}
+
+              />
+            )) :
+            <tr className="text-center">
+              <td colSpan={4} className="py-5 text-muted-foreground/70 text-center">
+                There are no tasks currently assigned to you.
+              </td>
+            </tr>
+          }
         </tbody>
       </table>
     </div>
