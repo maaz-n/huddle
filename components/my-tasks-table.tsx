@@ -1,13 +1,8 @@
 "use client"
 
-import { updateTaskStatus } from "@/actions/tasks"
 import { MyTaskRow } from "./ui/my-task-row"
-import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { getCurrentUser } from "@/actions/auth"
 import { TasksWithAssignees, UserTypeNew } from "@/types/types"
-
-type nextStatusType = "todo" | "in_review" | "done"
 
 interface MyTasksTableProps {
   tasks: {
@@ -32,20 +27,6 @@ interface MyTasksTableProps {
 export function MyTasksTable({ tasks, currentUserRole, currentUser, workspaceId, onTaskSelect }: MyTasksTableProps) {
   const router = useRouter()
 
-  async function updateStatus(taskId: string, nextStatus: nextStatusType) {
-    try {
-      const user = await getCurrentUser()
-      const response = await updateTaskStatus(taskId, workspaceId, nextStatus)
-      if (response.success) {
-        toast.success(response.message)
-        router.refresh()
-      } else {
-        toast.error(response.message)
-      }
-    } catch (error) {
-      console.error(error)
-    }
-  }
   return (
     <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm mt-10">
       <table className="w-full text-left border-collapse">
@@ -65,7 +46,6 @@ export function MyTasksTable({ tasks, currentUserRole, currentUser, workspaceId,
                 key={task.id}
                 task={task}
                 currentUserRole={currentUserRole}
-                onStatusUpdate={updateStatus}
                 currentUser={currentUser}
                 workspaceId={workspaceId}
                 onClick={() => onTaskSelect(task)}

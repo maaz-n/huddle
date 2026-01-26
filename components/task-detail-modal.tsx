@@ -19,7 +19,6 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog"
-import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TasksWithAssignees, UserTypeNew } from "@/types/types"
@@ -30,20 +29,15 @@ import { useRouter } from "next/navigation"
 import { Toggle } from "./ui/toggle"
 import { Textarea } from "./ui/textarea"
 
+type nextStatusType = "todo" | "in_review" | "done"
+
 interface TaskDetailModalProps {
   task: TasksWithAssignees | null,
   open: boolean,
   onOpenChange: (open: boolean) => void,
-  workspaceId: string
+  workspaceId: string,
   currentUser: UserTypeNew,
-  currentUserRole: string | null
-}
-
-const statusConfig = {
-  "todo": { label: "To Do", icon: Circle, color: "text-slate-500" },
-  "in_progress": { label: "In Progress", icon: Loader2, color: "text-blue-500" },
-  "blocked": { label: "Blocked", icon: AlertCircle, color: "text-destructive" },
-  "done": { label: "Done", icon: CheckCircle2, color: "text-green-500" },
+  currentUserRole: string | null,
 }
 
 type TaskStatusType = "todo" | "in_review" | "done"
@@ -55,28 +49,57 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   const [isRequestingChange, setIsRequestingChange] = useState(false)
   const [revisionNote, setRevisionNote] = useState(task?.description ?? "")
 
+  async function updateStatus(taskId: string, nextStatus: nextStatusType) {
+    try {
+      const response = await updateTaskStatus(taskId, workspaceId, nextStatus)
+      if (response.success) {
+        toast.success(response.message)
+        router.refresh()
+      } else {
+        toast.error(response.message)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   useEffect(() => {
     if (task) setSelectedStatus(task.status)
+    setIsRequestingChange(false)
+    setRevisionNote("")
   }, [task, open])
 
   const router = useRouter();
 
   if (!task) return null
 
-  const hasChanges = selectedStatus !== task.status
-  const canUserUpdate = task.user?.id === currentUser.id || currentUserRole !== "member";
+
+  const currentUserTaskInReview = task.assigneeId === currentUser.id && task.status === "in_review"
+  const taskCompleted = task.status === "done"
+  const isManager = currentUserRole === "admin" || currentUserRole === "owner"
+
+  // const handleUpdateStatus = async () => {
+  //   setIsUpdating(true)
+  //   try {
+  //     const response = await updateTaskStatus(task.id, workspaceId, "done")
+  //     if (response.success) {
+  //       toast.success(response.message);
+  //       router.refresh()
+  //     } else {
+  //       toast.error(response.message)
+  //     }
+
+  //   } finally {
+  //     setIsUpdating(false)
+  //   }
+  // }
 
   const handleUpdateStatus = async () => {
+    if (task.status === "done") return
     setIsUpdating(true)
+    const nextStatus = currentUserRole === "member" ? "in_review" : "done"
     try {
-      const response = await updateTaskStatus(task.id, workspaceId, "done")
-      if (response.success) {
-        toast.success(response.message);
-        router.refresh()
-      } else {
-        toast.error(response.message)
-      }
-
+      await updateStatus(task.id, nextStatus)
     } finally {
       setIsUpdating(false)
     }
@@ -140,56 +163,6 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
           <div className="w-full md:w-[380px] bg-muted/30 border-l border-border/50 p-6 space-y-6">
             <div className="space-y-5">
 
-              {/* <div className="space-y-3">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Status</label>
-                <div className="space-y-2">
-                  <Select 
-                  value={selectedStatus} 
-                  onValueChange={(value) => setSelectedStatus(value as TaskStatusType)}
-                  disabled={!canUserUpdate}
-                   >
-                    <SelectTrigger className="w-full bg-background ring-offset-background focus:ring-1 focus:ring-primary">
-                      {!canUserUpdate ? 
-                      <div className="flex items-center gap-3">
-                        <LockIcon/>
-                        <SelectValue />
-                      </div>
-                      : 
-                      <SelectValue />
-                      }
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(statusConfig).map(([key, config]) => (
-                        <SelectItem key={key} value={key}>
-                          <div className="flex items-center gap-2">
-                            <config.icon className={`h-4 w-4 ${config.color}`} />
-                            <span className="text-sm">{config.label}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  {hasChanges && (
-                    <Button
-                      onClick={handleUpdateStatus}
-                      disabled={isUpdating}
-                      size="sm"
-                      className="w-full h-9 transition-all animate-in fade-in zoom-in-95 duration-200"
-                    >
-                      {isUpdating ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      ) : (
-                        <Save className="h-4 w-4 mr-2" />
-                      )}
-                      Update Status
-                    </Button>
-                  )}
-                </div>
-              </div> */}
-
-              {/* <Separator /> */}
-
               <div className="space-y-3">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Assignee</label>
                 <div className="flex items-center gap-3">
@@ -219,46 +192,52 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                 </div>
               </div>
 
-              {currentUserRole !== "member" && task.status === "in_review" &&
-                <>
-                  <div className="pt-4">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Actions</label>
-                    <div className="flex items-center justify-between gap-2 mt-1">
-                      <Toggle onPressedChange={setIsRequestingChange} className="px-5" variant={"outline"}>Request changes</Toggle>
-                      <Button disabled={isRequestingChange || isUpdating} onClick={handleUpdateStatus}>
-                        {isUpdating ?
-                          <Loader2 className="h-2 w-2 animate-spin" />
-                          :
-                          "Mark as completed"
-                        }
-                      </Button>
-                    </div>
+              {
+                (isManager || task.assigneeId === currentUser.id) &&
+
+                <div className="pt-4">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Actions</label>
+                  <div className="flex items-center flex-col justify-between gap-2 mt-1">
+                    <Button disabled={isRequestingChange || isUpdating || taskCompleted || currentUserTaskInReview} onClick={handleUpdateStatus} className="w-full">
+                      {isUpdating ?
+                        <Loader2 className="h-2 w-2 animate-spin" />
+                        :
+                        task.status === "done" ? "Completed" :
+                          task.status === "in_review" && task.assigneeId === currentUser.id ? "Awaiting approval" :
+                            currentUserRole === "member" && task.assigneeId === currentUser.id ?
+                              "Send for review"
+                              :
+                              "Mark as completed"
+                      }
+                    </Button>
+                    {
+                      currentUserRole !== "member" && task.status === "in_review" &&
+                      <Toggle onPressedChange={setIsRequestingChange} pressed={isRequestingChange} className="px-5 w-full" variant={"outline"}>Request changes</Toggle>
+                    }
                   </div>
-                  {isRequestingChange &&
-                    <form onSubmit={sendForRevision}>
-
-                      <div className="space-y-3">
-                        <Textarea
-                          placeholder="Note..."
-                          required
-                          className="resize-none min-h-[100px]"
-                          onChange={(e) => setRevisionNote(e.target.value)}
-                        />
-                        <Button className="w-full" type="submit" disabled={isUpdating2} >
-                          {isUpdating2 ?
-                            <Loader2 className="h-2 w-2 animate-spin" />
-                            :
-                            "Send for revision"
-                          }
-                        </Button>
-                      </div>
-                    </form>
-
-                  }
-                </>
-
+                </div>
               }
+              {isRequestingChange &&
+                <form onSubmit={sendForRevision}>
 
+                  <div className="space-y-3">
+                    <Textarea
+                      placeholder="Note..."
+                      required
+                      className="resize-none min-h-[100px]"
+                      onChange={(e) => setRevisionNote(e.target.value)}
+                    />
+                    <Button className="w-full" type="submit" disabled={isUpdating2} >
+                      {isUpdating2 ?
+                        <Loader2 className="h-2 w-2 animate-spin" />
+                        :
+                        "Send for revision"
+                      }
+                    </Button>
+
+                  </div>
+                </form>
+              }
             </div>
           </div>
         </div>

@@ -13,8 +13,6 @@ import { Badge } from "@/components/ui/badge"
 import { UserTypeNew } from "@/types/types"
 import { TableCell, TableRow } from "./table"
 
-type nextStatusType = "todo" | "in_review" | "done"
-
 interface MyTaskRowProps {
     task: {
         id: string;
@@ -31,39 +29,21 @@ interface MyTaskRowProps {
     },
     currentUserRole: string | null,
     currentUser: UserTypeNew,
-    onStatusUpdate: (taskId: string, nextStatus: nextStatusType) => Promise<void>,
     workspaceId: string,
     onClick: () => void
 }
 
-export function MyTaskRow({ task, currentUserRole, onStatusUpdate, onClick }: MyTaskRowProps) {
+export function MyTaskRow({ task, onClick }: MyTaskRowProps) {
     const [isUpdating, setIsUpdating] = useState(false)
 
-    const handleComplete = async () => {
-        if (task.status === "done" || task.status === "in_review") return
-        setIsUpdating(true)
-        const nextStatus = currentUserRole === "member" ? "in_review" : "done"
-        try {
-            await onStatusUpdate(task.id, nextStatus)
-        } finally {
-            setIsUpdating(false)
-        }
-    }
-
     return (
-        <TableRow className="group border-b border-border/40 last:border-0 hover:bg-muted/30 transition-all" onClick={onClick}>
+        <TableRow className="group border-b border-border/40 last:border-0 hover:bg-muted/30 transition-all cursor-default" onClick={onClick}>
             <TableCell className="px-6 py-4 max-w-[300px]">
                 <div className="flex items-center gap-3">
-                    <button
-                        onClick={handleComplete}
-                        disabled={isUpdating || task.status === "in_review" || task.status === "done"}
-                        className="shrink-0 text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
-                    >
-                        {isUpdating ? <Loader2 className="h-5 w-5 animate-spin" /> :
-                            task.status === "in_review" ? <Clock className="h-5 w-5 text-amber-500" /> :
-                                task.status === "done" ? <CheckCircle2 className="h-5 w-5 text-green-500" /> :
-                                    <Circle className="h-5 w-5" />}
-                    </button>
+                    {isUpdating ? <Loader2 className="h-5 w-5 animate-spin" /> :
+                        task.status === "in_review" ? <Clock className="h-5 w-5 text-amber-500" /> :
+                            task.status === "done" ? <CheckCircle2 className="h-5 w-5 text-green-500" /> :
+                                <Circle className="h-5 w-5" />}
                     <span className={cn(
                         "text-sm font-semibold truncate",
                         (task.status === "done" || task.status === "in_review") && "text-muted-foreground font-normal line-through opacity-70"
