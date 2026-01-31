@@ -48,10 +48,7 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
       ],
     },
   ];
-
-
-  const isProfileActive = pathname === "/profile"
-
+  
   return (
     <>
       {open && <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setOpen(false)} />}
