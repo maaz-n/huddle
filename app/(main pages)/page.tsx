@@ -50,7 +50,7 @@ export default async function DashboardPage(props: any) {
         <UserGreeting dueTasks={dueTasks} />
         <div>
           <h2 className="text-xl font-semibold mb-4">Tasks by Status</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {normalizedStats.map((task) => (
               <TaskStatusCard
                 key={task.status}
