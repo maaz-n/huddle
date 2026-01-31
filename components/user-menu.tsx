@@ -57,7 +57,7 @@ export function UserMenu({ user }: { user: UserTypeNew }) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="gap-2 text-destructive" onClick={handleLogout}>
+        <DropdownMenuItem className="gap-2" onClick={handleLogout}>
           <LogOut className="h-4 w-4" />
           <span>Logout</span>
         </DropdownMenuItem>
