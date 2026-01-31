@@ -14,10 +14,13 @@ import { UserTypeNew } from "@/types/types"
 import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useWorkspaceHref } from "@/hooks/useWorkspaceHref"
 
 export function UserMenu({ user }: { user: UserTypeNew }) {
 
   if (!user) throw new Error("Could not fetch user");
+
+  const settingsHref = useWorkspaceHref("/settings")
 
   const router = useRouter()
 
@@ -51,7 +54,7 @@ export function UserMenu({ user }: { user: UserTypeNew }) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem className="gap-2">
-          <Link href={"/settings"} className="flex items-center gap-2">
+          <Link href={settingsHref} className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             <span>Settings</span>
           </Link>
