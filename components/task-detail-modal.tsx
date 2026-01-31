@@ -7,8 +7,6 @@ import {
   Clock,
   Tag,
   AlignLeft,
-  CheckCircle2,
-  Circle,
   Loader2,
   AlertCircle,
 } from "lucide-react"
@@ -48,6 +46,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   const [isUpdating2, setIsUpdating2] = useState(false)
   const [isRequestingChange, setIsRequestingChange] = useState(false)
   const [revisionNote, setRevisionNote] = useState(task?.description ?? "")
+  const [taskStatus, setTaskStatus] = useState(task?.status)
 
   async function updateStatus(taskId: string, nextStatus: nextStatusType) {
     try {
@@ -74,30 +73,15 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   if (!task) return null
 
 
-  const currentUserTaskInReview = task.assigneeId === currentUser.id && task.status === "in_review"
+  const currentUserTaskInReview = task.assigneeId === currentUser.id && taskStatus === "in_review"
   const taskCompleted = task.status === "done"
   const isManager = currentUserRole === "admin" || currentUserRole === "owner"
-
-  // const handleUpdateStatus = async () => {
-  //   setIsUpdating(true)
-  //   try {
-  //     const response = await updateTaskStatus(task.id, workspaceId, "done")
-  //     if (response.success) {
-  //       toast.success(response.message);
-  //       router.refresh()
-  //     } else {
-  //       toast.error(response.message)
-  //     }
-
-  //   } finally {
-  //     setIsUpdating(false)
-  //   }
-  // }
 
   const handleUpdateStatus = async () => {
     if (task.status === "done") return
     setIsUpdating(true)
     const nextStatus = currentUserRole === "member" ? "in_review" : "done"
+    setTaskStatus(nextStatus)
     try {
       await updateStatus(task.id, nextStatus)
     } finally {
@@ -202,8 +186,8 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                       {isUpdating ?
                         <Loader2 className="h-2 w-2 animate-spin" />
                         :
-                        task.status === "done" ? "Completed" :
-                          task.status === "in_review" && task.assigneeId === currentUser.id ? "Awaiting approval" :
+                        taskStatus === "done" ? "Completed" :
+                          taskStatus === "in_review" && task.assigneeId === currentUser.id ? "Awaiting approval" :
                             currentUserRole === "member" && task.assigneeId === currentUser.id ?
                               "Send for review"
                               :
@@ -211,7 +195,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                       }
                     </Button>
                     {
-                      currentUserRole !== "member" && task.status === "in_review" &&
+                      currentUserRole !== "member" && taskStatus === "in_review" &&
                       <Toggle onPressedChange={setIsRequestingChange} pressed={isRequestingChange} className="px-5 w-full" variant={"outline"}>Request changes</Toggle>
                     }
                   </div>
