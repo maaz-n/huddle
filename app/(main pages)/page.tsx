@@ -8,6 +8,7 @@ import { getDashboardStats, getRecentActivity } from "@/actions/activity"
 import { getWorkspacesWithRoles } from "@/actions/workspace"
 import { redirect } from "next/navigation"
 import { requireUser } from "@/lib/authguard"
+import AssignedToMe from "@/components/assigned-to-me"
 
 const STATUSES = [
   "todo",
@@ -70,29 +71,7 @@ export default async function DashboardPage(props: any) {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Assigned to Me</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {myTasks.length === 0 ?
-                    <span className="text-muted-foreground text-sm flex justify-center">There are no tasks currently assigned to you</span>
-                    :
-                    myTasks.map((task) => (
-                      <div key={task.id} className="p-3 bg-secondary rounded-lg">
-                        <p className="text-sm font-medium">{task.title}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{task.status === "todo"
-                          ? "To Do"
-                          : task.status === "in_review"
-                            ? "In Review"
-                            : "Done"}</p>
-                      </div>
-                    ))
-                  }
-                </div>
-              </CardContent>
-            </Card>
+            <AssignedToMe myTasks={myTasks}/>
           </div>
           <div className="lg:col-span-2">
             <Card>
