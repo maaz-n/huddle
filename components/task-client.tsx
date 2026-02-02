@@ -56,15 +56,18 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, cu
                     <p className="text-muted-foreground mt-2">Manage all your tasks in one place</p>
                 </div>
                 {currentUserRole !== "member" &&
-                <div className='flex gap-3'>
-
-                    <Button onClick={() => setTaskCreateOpen(true)} className="gap-2 bg-primary hover:bg-primary/90">
+                    <Button onClick={() => setTaskCreateOpen(true)} className="gap-2 bg-primary hover:bg-primary/90 hidden sm:inline-flex">
                         <Plus className="h-4 w-4" />
                         New Task
                     </Button>
-                </div>
                 }
             </div>
+            {currentUserRole !== "member" &&
+                    <Button onClick={() => setTaskCreateOpen(true)} className="gap-2 bg-primary hover:bg-primary/90 sm:hidden">
+                        <Plus className="h-4 w-4" />
+                        New Task
+                    </Button>
+                }
 
             <FilterBar users={users} />
 
