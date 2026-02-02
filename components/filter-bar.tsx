@@ -107,7 +107,7 @@ export function FilterBar({users}: {users: UserTypeNew[]}) {
       </Select>
 
       <Select value={selectedAssignee} onValueChange={handleAssigneeChange}>
-        <SelectTrigger className="w-40" disabled={users.length == 0}>
+        <SelectTrigger className="w-45" disabled={users.length == 0}>
           <SelectValue placeholder="Filter by assignee" />
         </SelectTrigger>
         <SelectContent>
