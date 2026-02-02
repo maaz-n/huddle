@@ -41,7 +41,6 @@ interface TaskDetailModalProps {
 type TaskStatusType = "todo" | "in_review" | "done"
 
 export function TaskDetailModal({ task, open, onOpenChange, workspaceId, currentUser, currentUserRole }: TaskDetailModalProps) {
-  const [selectedStatus, setSelectedStatus] = useState<TaskStatusType>(task?.status ?? "todo")
   const [isUpdating, setIsUpdating] = useState(false)
   const [isUpdating2, setIsUpdating2] = useState(false)
   const [isRequestingChange, setIsRequestingChange] = useState(false)
@@ -63,7 +62,6 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   }
 
   useEffect(() => {
-    if (task) setSelectedStatus(task.status)
     setIsRequestingChange(false)
     setRevisionNote("")
   }, [task, open])
