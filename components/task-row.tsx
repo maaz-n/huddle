@@ -15,20 +15,20 @@ export function TaskRow({ task, onClick }: TaskRowProps) {
 
   return (
     <TableRow className="cursor-pointer hover:bg-secondary transition-colors" onClick={onClick}>
-      <TableCell className="font-medium max-w-xs truncate">{task.title}</TableCell>
-      <TableCell>
+      <TableCell className="font-medium max-w-xs truncate px-6 py-4">{task.title}</TableCell>
+      <TableCell className="px-6 py-4">
         <UserAvatar user={task.user} className="h-6 w-6" />
       </TableCell>
-      <TableCell>
+      <TableCell className="px-6 py-4">
         <TaskBadge type="status" value={task.status} />
       </TableCell>
-      <TableCell>
+      <TableCell className="px-6 py-4">
         <TaskBadge type="priority" value={task.priority} />
       </TableCell>
-      <TableCell className="text-sm text-muted-foreground">
+      <TableCell className="text-sm text-muted-foreground px-6 py-4">
         {task.dueDate?.split("T")[0]}
       </TableCell>
-      <TableCell className="text-sm text-muted-foreground">
+      <TableCell className="text-sm text-muted-foreground px-6 py-4">
         {formatDistanceToNow(task.updatedAt, { addSuffix: true })}
       </TableCell>
     </TableRow>

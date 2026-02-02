@@ -14,16 +14,16 @@ export function TaskTable({ tasksWithAssignees, onTaskSelect }: { tasksWithAssig
   }
 
   return (
-    <div className="border rounded-lg overflow-hidden">
-      <Table>
+    <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm mt-10">
+      <Table className="w-full text-left border-collapse">
         <TableHeader>
-          <TableRow>
-            <TableHead>Title</TableHead>
-            <TableHead>Assignee</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Priority</TableHead>
-            <TableHead>Due Date</TableHead>
-            <TableHead>Updated</TableHead>
+          <TableRow className="border-b border-border/50 bg-muted/10">
+            <TableHead className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Title</TableHead>
+            <TableHead className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Assignee</TableHead>
+            <TableHead className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Status</TableHead>
+            <TableHead className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Priority</TableHead>
+            <TableHead className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Due Date</TableHead>
+            <TableHead className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Updated</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
