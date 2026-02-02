@@ -53,13 +53,6 @@ export default async function SettingsPage(props: any) {
                         </div>
 
                         <div className="flex-1 min-w-0 space-y-6">
-                            <div className="flex justify-end">
-                                <AddMemberSection
-                                    workspaceId={workspaceId}
-                                    currentUserRole={currentUserRole}
-                                />
-                            </div>
-
                             <div className="rounded-2xl border bg-card shadow-sm overflow-hidden border-border/60">
                                 <MembersSection
                                     users={users}

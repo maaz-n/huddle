@@ -71,5 +71,5 @@ export type Workspace = {
 
 export type Actor = {
   name: string,
-  image: string | null
+  image: string | null | undefined
 }
