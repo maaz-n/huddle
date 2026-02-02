@@ -106,6 +106,9 @@ export async function createTask(
 
   try {
 
+    if (!assigneeId) return { success: false, message: "Please select an assignee" }
+    if (!dueDate) return { success: false, message: "Please select a due date" }
+    
     const [insertedTask] = await db.insert(tasks).values({
       workspaceId: workspaceId,
       title: title,
