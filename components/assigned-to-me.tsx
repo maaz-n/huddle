@@ -24,7 +24,7 @@ const AssignedToMe = ({ myTasks }: AssignedToMeProps) => {
                         :
                         <div>
                             {myTasks.map((task) => (
-                                <div key={task.id} className="p-3 bg-secondary rounded-lg my-3">
+                                <div key={task.id} className="p-3 bg-secondary rounded-lg my-3 shadow-sm">
                                     <p className="text-sm font-medium">{task.title}</p>
                                     <p className="text-xs text-muted-foreground mt-1">{task.status === "todo"
                                         ? "To Do"
@@ -33,7 +33,7 @@ const AssignedToMe = ({ myTasks }: AssignedToMeProps) => {
                                             : "Done"}</p>
                                 </div>
                             ))}
-                            <a className="text-muted-foreground text-center block w-full hover:underline mt-6" href={myTasksHref}>Show all</a>
+                            <a className="text-muted-foreground text-center block w-full hover:underline mt-6 text-sm" href={myTasksHref}>Show all</a>
                         </div>
                     }
                 </div>
