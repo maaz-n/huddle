@@ -7,13 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useSearchParams, usePathname, useRouter } from "next/navigation"
 import { UserTypeNew } from "@/types/types"
 
-type TaskStatus = "todo" | "in_progress" | "blocked" | "done"
+type TaskStatus = "todo" | "in_review" | "done"
 type TaskPriority = "low" | "medium" | "high"
 
 const statuses: { value: TaskStatus; label: string }[] = [
   { value: "todo", label: "To Do" },
-  { value: "in_progress", label: "In Progress" },
-  { value: "blocked", label: "Blocked" },
+  { value: "in_review", label: "In Review" },
   { value: "done", label: "Done" },
 ]
 
