@@ -26,6 +26,7 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { Toggle } from "./ui/toggle"
 import { Textarea } from "./ui/textarea"
+import { Alert } from "./ui/alert"
 
 type nextStatusType = "todo" | "in_review" | "done"
 
@@ -105,7 +106,6 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl md:min-w-2xl p-0 overflow-hidden border-none shadow-2xl bg-background">
         <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
-
           <div className="flex-1 p-8 space-y-6 overflow-y-auto">
             <DialogHeader>
               <div className="flex items-center gap-2 mb-2">
@@ -116,6 +116,17 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
               <DialogTitle className="text-2xl font-bold tracking-tight">
                 {task.title}
               </DialogTitle>
+              {task.isOverdue && (
+                <Alert className="mt-3 px-4 py-2 flex items-center gap-2 border-red-200 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
+                  <AlertCircle className="h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
+                  <span className="text-xs font-semibold uppercase tracking-wide">
+                    Overdue
+                  </span>
+                  <span className="text-xs text-red-600/80 dark:text-red-400/80">
+                    Past due date
+                  </span>
+                </Alert>
+              )}
             </DialogHeader>
 
             <div className="space-y-3">
