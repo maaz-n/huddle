@@ -74,7 +74,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
 
 
   const currentUserTaskInReview = task.assigneeId === currentUser.id && taskStatus === "in_review"
-  const taskCompleted = task.status === "done"
+  const taskCompleted = taskStatus === "done"
   const isManager = currentUserRole === "admin" || currentUserRole === "owner"
 
   const handleUpdateStatus = async () => {
