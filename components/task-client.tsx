@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { WorkspaceCreateModal } from './workspace-create-modal'
 import { createWorkspace } from '@/actions/workspace'
+import { isOverdue } from '@/lib/utils'
 
 interface TaskClientProps {
     users: UserTypeNew[]
@@ -28,6 +29,11 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, cu
     const [selectedTask, setSelectedTask] = useState<(typeof tasksWithAssignees)[0] | null>(null);
     const [taskDetailOpen, setTaskDetailOpen] = useState(false);
     const [taskCreateOpen, setTaskCreateOpen] = useState(false);
+
+    const tasksWithDueInfo = tasksWithAssignees.map(task => ({
+        ...task,
+        isOverdue: isOverdue(task)
+    }))
 
     const router = useRouter()
 
@@ -76,7 +82,7 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, cu
                     setSelectedTask(task);
                     setTaskDetailOpen(true)
                 }}
-                tasksWithAssignees={tasksWithAssignees} />
+                tasksWithAssignees={tasksWithDueInfo} />
 
             <TaskDetailModal
                 task={selectedTask}
