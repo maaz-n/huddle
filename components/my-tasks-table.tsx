@@ -5,19 +5,7 @@ import { useRouter } from "next/navigation"
 import { TasksWithAssignees, UserTypeNew } from "@/types/types"
 
 interface MyTasksTableProps {
-  tasks: {
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    workspaceId: string;
-    title: string;
-    description: string | null;
-    status: "todo" | "in_review" | "done";
-    priority: "low" | "medium" | "high";
-    dueDate: string | null;
-    assigneeId: string;
-    createdBy: string;
-  }[],
+  tasks: TasksWithAssignees[],
   currentUserRole: string | null,
   workspaceId: string,
   currentUser: UserTypeNew
@@ -41,7 +29,7 @@ export function MyTasksTable({ tasks, currentUserRole, currentUser, workspaceId,
         <tbody>
           {tasks.length > 0 ?
 
-            tasks.map((task: any) => (
+            tasks.map((task: TasksWithAssignees) => (
               <MyTaskRow
                 key={task.id}
                 task={task}

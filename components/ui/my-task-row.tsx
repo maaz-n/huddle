@@ -1,31 +1,19 @@
 "use client"
 
-import { useState } from "react"
 import {
     CheckCircle2,
     Circle,
     Clock,
-    Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
-import { UserTypeNew } from "@/types/types"
+import { TasksWithAssignees, UserTypeNew } from "@/types/types"
 import { TableCell, TableRow } from "./table"
 
 interface MyTaskRowProps {
-    task: {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        workspaceId: string;
-        title: string;
-        description: string | null;
-        status: "todo" | "in_review" | "done";
-        priority: "low" | "medium" | "high";
-        dueDate: string | null;
-        assigneeId: string;
-        createdBy: string;
+    task: TasksWithAssignees & {
+        isOverdue?: boolean
     },
     currentUserRole: string | null,
     currentUser: UserTypeNew,
@@ -34,13 +22,15 @@ interface MyTaskRowProps {
 }
 
 export function MyTaskRow({ task, onClick }: MyTaskRowProps) {
-    const [isUpdating, setIsUpdating] = useState(false)
 
     return (
-        <TableRow className="group border-b border-border/40 last:border-0 hover:bg-muted/30 transition-all cursor-default" onClick={onClick}>
+        <TableRow className={cn("group border-b border-border/40 last:border-0 hover:bg-muted/30 transition-all cursor-default", task.isOverdue && [
+            "bg-red-50 hover:bg-red-100 border-l-4 border-red-500",
+            "dark:bg-red-950/30 dark:hover:bg-red-950/40 dark:border-red-600",
+        ])} onClick={onClick}>
             <TableCell className="px-6 py-4 max-w-[300px]">
                 <div className="flex items-center gap-3">
-                    {isUpdating ? <Loader2 className="h-5 w-5 animate-spin" /> :
+                    {
                         task.status === "in_review" ? <Clock className="h-5 w-5 text-amber-500" /> :
                             task.status === "done" ? <CheckCircle2 className="h-5 w-5 text-green-500" /> :
                                 <Circle className="h-5 w-5" />}

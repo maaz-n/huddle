@@ -26,7 +26,6 @@ export type TasksWithAssignees = {
   description: string | null,
   status: "todo" | "in_review" | "done",
   priority: "low" | "medium" | "high",
-  isOverdue: boolean,
   assigneeId: string,
   dueDate: string | null,
   createdBy: string,

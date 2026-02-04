@@ -31,7 +31,9 @@ import { Alert } from "./ui/alert"
 type nextStatusType = "todo" | "in_review" | "done"
 
 interface TaskDetailModalProps {
-  task: TasksWithAssignees | null,
+  task: TasksWithAssignees & {
+    isOverdue?: boolean
+  } | null,
   open: boolean,
   onOpenChange: (open: boolean) => void,
   workspaceId: string,

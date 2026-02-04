@@ -4,6 +4,7 @@ import { TasksWithAssignees, UserTypeNew } from "@/types/types";
 import { MyTasksTable } from "./my-tasks-table"
 import { useState } from "react";
 import { TaskDetailModal } from "./task-detail-modal";
+import { isOverdue } from "@/lib/utils";
 
 interface MyTasksTableProps {
     myTasks: TasksWithAssignees[],
@@ -17,9 +18,14 @@ const MyTasksTableClient = ({ myTasks, workspaceId, currentUserRole, currentUser
     const [selectedTask, setSelectedTask] = useState<TasksWithAssignees | null>(null);
     const [taskDetailOpen, setTaskDetailOpen] = useState(false);
 
+    const myTasksWithDue = myTasks.map(task => ({
+        ...task,
+        isOverdue: isOverdue(task)
+    }))
+
     return (
         <>
-            <MyTasksTable tasks={myTasks} workspaceId={workspaceId} currentUserRole={currentUserRole} currentUser={currentUser}
+            <MyTasksTable tasks={myTasksWithDue} workspaceId={workspaceId} currentUserRole={currentUserRole} currentUser={currentUser}
                 onTaskSelect={(task: TasksWithAssignees) => {
                     setSelectedTask(task);
                     setTaskDetailOpen(true)
