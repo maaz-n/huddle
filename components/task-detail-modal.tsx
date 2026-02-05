@@ -84,6 +84,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
     setTaskStatus(nextStatus)
     try {
       await updateStatus(task.id, nextStatus)
+      onOpenChange(false)
     } finally {
       setIsUpdating(false)
     }
@@ -95,6 +96,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
       await updateTaskStatus(task.id, workspaceId, "todo");
       await addRevisionNote(task.id, workspaceId, revisionNote)
       toast.success("Task sent for revision")
+      onOpenChange(false)
       router.refresh()
     } catch (error) {
       console.error(error)
