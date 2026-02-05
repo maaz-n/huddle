@@ -3,8 +3,6 @@
 import { formatDistanceToNow } from "date-fns"
 import { UserAvatar } from "./user-avatar"
 import { Actor } from "@/types/types"
-import { ArrowRight } from "lucide-react"
-import { Badge } from "./ui/badge"
 
 interface LogProps {
   id: string
@@ -57,6 +55,13 @@ function getActivityContent(log: LogProps) {
         </span>
       );
 
+    case "TASK_DELETED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          deleted task: <span className="font-medium text-foreground">{log.entityName}</span>
+        </span>
+      );
+
     default:
       return (
         <span className="text-muted-foreground ml-1">
@@ -67,17 +72,14 @@ function getActivityContent(log: LogProps) {
 }
 
 export function ActivityLogItem({ log }: { log: LogProps }) {
-  // 1. Get the structured details
   const details = getActivityContent(log);
 
   return (
     <div className="flex gap-3 py-2 items-start">
-      {/* Small, subtle avatar */}
       <UserAvatar user={log.actor} className="h-6 w-6 mt-0.5 shrink-0" />
 
       <div className="flex flex-col min-w-0">
         <div className="text-sm leading-snug">
-          {/* User Name */}
           <span className="font-medium text-foreground">
             {log.actor.name}
           </span>
@@ -85,7 +87,6 @@ export function ActivityLogItem({ log }: { log: LogProps }) {
           {getActivityContent(log)}
         </div>
 
-        {/* Relative Timestamp */}
         <p className="text-[11px] text-muted-foreground/70">
           {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
         </p>

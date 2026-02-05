@@ -141,10 +141,10 @@ export async function createTask(
 export async function deleteTask(workspaceId: string, taskId: string) {
   const { user } = await requireWorkspaceAccess(workspaceId, "admin");
   try {
-    await db.delete(tasks).where(and(
+    const deletedTask = await db.delete(tasks).where(and(
                                     eq(tasks.id, taskId),
                                     eq(tasks.workspaceId, workspaceId)
-    ));
+    )).returning();
 
     await db.insert(activityLogs).values({
       workspaceId,
@@ -152,6 +152,9 @@ export async function deleteTask(workspaceId: string, taskId: string) {
       entityType: "task",
       entityId: taskId,
       action: "TASK_DELETED",
+      metadata: {
+        entityName: deletedTask[0].title
+      }
     });
 
     return { success: true, message: "Task deleted!" }
