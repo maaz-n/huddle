@@ -20,13 +20,14 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TasksWithAssignees, UserTypeNew } from "@/types/types"
-import { addRevisionNote, updateTaskStatus } from "@/actions/tasks"
+import { addRevisionNote, deleteTask, updateTaskStatus } from "@/actions/tasks"
 import { UserAvatar } from "./user-avatar"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { Toggle } from "./ui/toggle"
 import { Textarea } from "./ui/textarea"
 import { Alert } from "./ui/alert"
+import { Separator } from "./ui/separator"
 
 type nextStatusType = "todo" | "in_review" | "done"
 
@@ -44,6 +45,7 @@ interface TaskDetailModalProps {
 export function TaskDetailModal({ task, open, onOpenChange, workspaceId, currentUser, currentUserRole }: TaskDetailModalProps) {
   const [isUpdating, setIsUpdating] = useState(false)
   const [isUpdating2, setIsUpdating2] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [isRequestingChange, setIsRequestingChange] = useState(false)
   const [revisionNote, setRevisionNote] = useState(task?.description ?? "")
   const [taskStatus, setTaskStatus] = useState(task?.status)
@@ -103,6 +105,24 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
       toast.error("An error occured")
     } finally {
       setIsUpdating2(false)
+    }
+  }
+
+  const handleDeleteTask = async () => {
+    try {
+      setIsDeleting(true)
+      const response = await deleteTask(workspaceId, task.id);
+      if (response.success) {
+        toast.success(response.message)
+        onOpenChange(false)
+        router.refresh()
+      } else {
+        toast.error(response.message)
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -191,7 +211,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
               {
                 (isManager || task.assigneeId === currentUser.id) &&
 
-                <div className="pt-4">
+                <div className="pt-4 space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Actions</label>
                   <div className="flex items-center flex-col justify-between gap-2 mt-1">
                     <Button disabled={isRequestingChange || isUpdating || taskCompleted || currentUserTaskInReview} onClick={handleUpdateStatus} className="w-full">
@@ -211,29 +231,41 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                       <Toggle onPressedChange={setIsRequestingChange} pressed={isRequestingChange} className="px-5 w-full" variant={"outline"}>Request changes</Toggle>
                     }
                   </div>
+                  {isRequestingChange &&
+                    <form onSubmit={sendForRevision}>
+
+                      <div className="space-y-3">
+                        <Textarea
+                          placeholder="Note..."
+                          required
+                          className="resize-none min-h-[100px]"
+                          onChange={(e) => setRevisionNote(e.target.value)}
+                        />
+                        <Button className="w-full" type="submit" disabled={isUpdating2} >
+                          {isUpdating2 ?
+                            <Loader2 className="h-2 w-2 animate-spin" />
+                            :
+                            "Send for revision"
+                          }
+                        </Button>
+
+                      </div>
+                    </form>}
+                  {currentUserRole !== "member" &&
+                    <>
+                      <Separator className="my-5" />
+                      <Button variant={"destructive"} className="w-full" disabled={isRequestingChange || isDeleting} onClick={handleDeleteTask}>
+                        {isDeleting ?
+                          <Loader2 className="h-2 w-2 animate-spin" />
+                          :
+                          "Delete Task"
+                        }
+                      </Button>
+                    </>
+                  }
                 </div>
               }
-              {isRequestingChange &&
-                <form onSubmit={sendForRevision}>
 
-                  <div className="space-y-3">
-                    <Textarea
-                      placeholder="Note..."
-                      required
-                      className="resize-none min-h-[100px]"
-                      onChange={(e) => setRevisionNote(e.target.value)}
-                    />
-                    <Button className="w-full" type="submit" disabled={isUpdating2} >
-                      {isUpdating2 ?
-                        <Loader2 className="h-2 w-2 animate-spin" />
-                        :
-                        "Send for revision"
-                      }
-                    </Button>
-
-                  </div>
-                </form>
-              }
             </div>
           </div>
         </div>

@@ -70,17 +70,17 @@ export async function getMyTasks(workspaceId: string) {
         eq(tasks.workspaceId, workspaceId),
         eq(tasks.assigneeId, currentUser.id)
       ),
-      
+
       with: {
-          user: {
-            columns: {
-              id: true,
-              name: true,
-              email: true,
-              image: true
-            }
-          },
-        }
+        user: {
+          columns: {
+            id: true,
+            name: true,
+            email: true,
+            image: true
+          }
+        },
+      }
     })
     return workspaceTasks;
 
@@ -108,7 +108,7 @@ export async function createTask(
 
     if (!assigneeId) return { success: false, message: "Please select an assignee" }
     if (!dueDate) return { success: false, message: "Please select a due date" }
-    
+
     const [insertedTask] = await db.insert(tasks).values({
       workspaceId: workspaceId,
       title: title,
@@ -134,6 +134,31 @@ export async function createTask(
   } catch (error) {
     console.error(error)
     return { success: false, message: "Error creating task" }
+
+  }
+}
+
+export async function deleteTask(workspaceId: string, taskId: string) {
+  const { user } = await requireWorkspaceAccess(workspaceId, "admin");
+  try {
+    await db.delete(tasks).where(and(
+                                    eq(tasks.id, taskId),
+                                    eq(tasks.workspaceId, workspaceId)
+    ));
+
+    await db.insert(activityLogs).values({
+      workspaceId,
+      actorId: user.id,
+      entityType: "task",
+      entityId: taskId,
+      action: "TASK_DELETED",
+    });
+
+    return { success: true, message: "Task deleted!" }
+
+  } catch (error) {
+    console.error(error)
+    return { success: false, message: "There was an error deleting the task" }
 
   }
 }
