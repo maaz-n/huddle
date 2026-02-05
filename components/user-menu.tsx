@@ -21,7 +21,8 @@ export function UserMenu({ user }: { user: UserTypeNew }) {
   if (!user) throw new Error("Could not fetch user");
 
   const settingsHref = useWorkspaceHref("/settings")
-
+  const profileHref = useWorkspaceHref("/profile")
+  
   const router = useRouter()
 
   async function handleLogout() {
@@ -48,7 +49,7 @@ export function UserMenu({ user }: { user: UserTypeNew }) {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="gap-2">
-          <Link href={"/profile"} className="flex items-center gap-2">
+          <Link href={profileHref} className="flex items-center gap-2">
             <User className="h-4 w-4" />
             <span>Profile</span>
           </Link>
