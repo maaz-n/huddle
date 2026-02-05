@@ -132,11 +132,6 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
         <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
           <div className="flex-1 p-8 space-y-6 overflow-y-auto">
             <DialogHeader>
-              <div className="flex items-center gap-2 mb-2">
-                <Badge variant="secondary" className="text-[10px] uppercase font-bold px-2 py-0">
-                  ID-{task.workspaceId.slice(0, 4)}
-                </Badge>
-              </div>
               <DialogTitle className="text-2xl font-bold tracking-tight">
                 {task.title}
               </DialogTitle>
