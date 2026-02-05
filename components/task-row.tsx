@@ -5,7 +5,8 @@ import { TableCell, TableRow } from "@/components/ui/table"
 import { TaskBadge } from "./task-badge"
 import { UserAvatar } from "./user-avatar"
 import { TasksWithAssignees } from "@/types/types"
-import { cn } from "@/lib/utils"
+import { cn, formatDueDate } from "@/lib/utils"
+import { Clock } from "lucide-react"
 
 interface TaskRowProps {
   task: TasksWithAssignees & {
@@ -53,7 +54,10 @@ export function TaskRow({ task, onClick }: TaskRowProps) {
             : "text-muted-foreground"
         )}
       >
-        {task.dueDate?.split("T")[0]}
+        <span className="flex items-center text-sm gap-2 text-muted-foreground transition-opacity">
+                    <Clock className="h-4 w-4" />
+                    <span>{formatDueDate(task.dueDate)}</span>
+                </span>
       </TableCell>
 
       <TableCell className="text-sm text-muted-foreground px-6 py-4">

@@ -5,11 +5,10 @@ import {
     Circle,
     Clock,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, formatDueDate } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { TasksWithAssignees, UserTypeNew } from "@/types/types"
 import { TableCell, TableRow } from "./table"
-import { format, isThisYear, isToday, isTomorrow } from "date-fns"
 
 interface MyTaskRowProps {
     task: TasksWithAssignees & {
@@ -19,16 +18,6 @@ interface MyTaskRowProps {
     currentUser: UserTypeNew,
     workspaceId: string,
     onClick: () => void
-}
-
-function formatDueDate(dueDate: string) {
-    const date = new Date(dueDate)
-    if (isToday(date)) return "Today"
-    if (isTomorrow(date)) return "Tomorrow"
-
-    return isThisYear(date)
-        ? format(date, "MMM d")
-        : format(date, "MMM d, yyyy")
 }
 
 export function MyTaskRow({ task, onClick }: MyTaskRowProps) {
