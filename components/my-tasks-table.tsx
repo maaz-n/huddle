@@ -16,14 +16,14 @@ export function MyTasksTable({ tasks, currentUserRole, currentUser, workspaceId,
   const router = useRouter()
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm mt-10">
+    <div className="rounded-2xl border border-border/60 bg-card overflow-x-scroll sm:overflow-hidden shadow-sm mt-10">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-border/50 bg-muted/10">
             <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Task Name</th>
             <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Priority</th>
             <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Status</th>
-            <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 text-center">Due</th>
+            <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Due</th>
           </tr>
         </thead>
         <tbody>

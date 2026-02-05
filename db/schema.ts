@@ -101,7 +101,7 @@ export const tasks = pgTable("tasks", {
     .$type<"low" | "medium" | "high">()
     .default("medium"),
     revisionNote: text("revision_note"),
-  dueDate: text("due_date"),
+  dueDate: text("due_date").notNull(),
   assigneeId: text("assignee_id").notNull().references(() => user.id, { onDelete: 'cascade' }),
   createdBy: text("created_by").notNull().references(() => user.id, { onDelete: 'cascade' }),
   createdAt: timestamp("created_at").notNull().defaultNow(),

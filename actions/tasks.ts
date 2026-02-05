@@ -97,7 +97,7 @@ export async function createTask(
   status: "todo" | "in_review" | "done",
   priority: "low" | "medium" | "high",
   assigneeId: string,
-  dueDate: string | undefined
+  dueDate: string
 ) {
   const { user } = await requireWorkspaceAccess(
     workspaceId,

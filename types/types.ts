@@ -27,7 +27,7 @@ export type TasksWithAssignees = {
   status: "todo" | "in_review" | "done",
   priority: "low" | "medium" | "high",
   assigneeId: string,
-  dueDate: string | null,
+  dueDate: string,
   createdBy: string,
   createdAt: Date,
   updatedAt: Date,
@@ -47,7 +47,7 @@ export type InsertTask = {
   status: "todo" | "in_review" | "done",
   priority: "low" | "medium" | "high",
   assigneeId: string,
-  dueDate: string | undefined
+  dueDate: string
 }
 
 export type WorkspaceWithRole = {
