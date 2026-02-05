@@ -19,6 +19,7 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
   const settingsHref = useWorkspaceHref("/settings")
   const membersHref = useWorkspaceHref("/members")
   const myTasksHref = useWorkspaceHref("/my-tasks")
+  const profileHref = useWorkspaceHref("/profile")
 
   const navSections = [
     {
@@ -44,7 +45,7 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
     {
       title: "Profile",
       items: [
-        { label: "Profile", href: "/profile", basePath: "/profile", icon: UserIcon}
+        { label: "Profile", href: profileHref, basePath: "/profile", icon: UserIcon}
       ],
     },
   ];
