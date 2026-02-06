@@ -62,7 +62,7 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
       >
         <nav className="flex flex-col h-full">
           <div className="flex items-center justify-between h-16 px-6">
-            <h1 className="text-xl font-bold text-primary mx-auto">OPENOPS</h1>
+            <img src={"/huddle.svg"} className="pt-4 mx-auto w-35 invert-85 dark:invert-0"/>
             <Button variant="ghost" size="icon" onClick={() => setOpen(false)} className="lg:hidden">
               <ChevronLeft className="h-5 w-5" />
             </Button>
