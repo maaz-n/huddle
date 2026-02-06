@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import {
   Field,
   FieldDescription,
@@ -11,8 +11,8 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { FormEventHandler, useState } from "react"
-import { login, signup } from "@/actions/auth"
+import { useState } from "react"
+import { signup } from "@/actions/auth"
 import { toast } from "sonner"
 import { Loader2Icon } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -55,13 +55,16 @@ export function SignupForm({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
+        <CardHeader>
+          <img src={"/huddle.svg"} className="pt-7 -mb-10 mx-auto w-40 invert-85 dark:invert-0" />
+        </CardHeader>
         <CardContent className="p-0">
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
-            <FieldGroup>
+            <FieldGroup className="-space-y-2">
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">Welcome aboard!</h1>
                 <p className="text-muted-foreground text-balance">
-                  Let's create your OPENOPS account
+                  Let's create your account
                 </p>
               </div>
               <Field>
@@ -87,15 +90,15 @@ export function SignupForm({
                 />
               </Field>
               <Field>
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                <Input id="password" type="password" placeholder="********" required 
-                onChange={(e) => setPassword(e.target.value)}
-                value={password}
+                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <Input id="password" type="password" placeholder="********" required
+                  onChange={(e) => setPassword(e.target.value)}
+                  value={password}
                 />
               </Field>
               <Field>
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading ? <Loader2Icon className="size-4 animate-spin"/> : "Sign up" }
+                  {isLoading ? <Loader2Icon className="size-4 animate-spin" /> : "Sign up"}
                 </Button>
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
