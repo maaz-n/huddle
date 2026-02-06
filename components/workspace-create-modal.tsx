@@ -41,7 +41,7 @@ export function WorkspaceCreateModal({ open, onOpenChange, onCreateWorkspace }: 
             <DialogTitle className="text-2xl font-bold tracking-tight">
               Create a new workspace
             </DialogTitle>
-            <DialogDescription className="text-muted-foreground text-balance text-center text-base lg:text-sm">
+            <DialogDescription className="text-muted-foreground text-balance text-center text-sm sm:text-base lg:text-sm">
               Workspaces are shared environments where your team can collaborate on projects and tasks.
             </DialogDescription>
           </DialogHeader>
@@ -58,7 +58,7 @@ export function WorkspaceCreateModal({ open, onOpenChange, onCreateWorkspace }: 
                   placeholder="e.g. Acme Marketing or Engineering"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="h-12 text-base px-4 bg-muted/30 border-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                  className="h-12 text-sm sm:text-base  px-4 bg-muted/30 border-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
                   required
                   disabled={isSubmitting}
                   autoComplete="off"
