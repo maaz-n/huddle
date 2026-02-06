@@ -128,7 +128,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl md:min-w-2xl p-0 overflow-hidden border-none shadow-2xl bg-background">
+      <DialogContent className="sm:max-w-2xl p-0 overflow-hidden border-none shadow-2xl bg-background">
         <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
           <div className="flex-1 p-8 space-y-6 overflow-y-auto">
             <DialogHeader>
