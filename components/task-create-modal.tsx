@@ -60,7 +60,7 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden border-none shadow-2xl">
+      <DialogContent className="sm:max-w-2xl p-0 overflow-hidden border-none shadow-2xl">
         <div className="bg-muted/30 p-6 border-b">
           <DialogHeader>
             <DialogTitle className="text-xl font-semibold">Create New Task</DialogTitle>
