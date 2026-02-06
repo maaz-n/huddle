@@ -3,7 +3,6 @@
 import { usePathname, useSearchParams } from "next/navigation"
 
 export function useWorkspaceHref(path: string) {
-  const pathname = usePathname()
   const searchParams = useSearchParams()
 
   const workspace = searchParams.get("workspace")

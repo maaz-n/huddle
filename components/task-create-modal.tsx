@@ -30,7 +30,7 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
   const [description, setDescription] = useState("")
   const [priority, setPriority] = useState<string>("medium")
   const [assigneeId, setAssigneeId] = useState<string>("")
-  const [dueDate, setDueDate] = useState<Date | undefined>(undefined)
+  const [dueDate, setDueDate] = useState<Date>(new Date())
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,14 +44,14 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
         priority: priority as any,
         assigneeId: assigneeId,
         workspaceId,
-        dueDate: dueDate?.toISOString()
+        dueDate: dueDate.toISOString()
       })
 
       setTitle("")
       setDescription("")
       setPriority("medium")
       setAssigneeId("")
-      setDueDate(undefined)
+      setDueDate(new Date())
       onOpenChange(false)
     } finally {
       setIsSubmitting(false)
@@ -139,7 +139,7 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dueDate ? format(dueDate, "PPP") : <span>Set deadline</span>}
+                    {format(dueDate, "PPP")}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -147,7 +147,7 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
                     mode="single"
                     selected={dueDate}
                     onSelect={setDueDate}
-                    initialFocus
+                    required
                   />
                 </PopoverContent>
               </Popover>
