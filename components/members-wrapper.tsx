@@ -22,7 +22,7 @@ const MembersWrapper = ({ workspaceId, currentUserRole, users, currentUser }: Me
 
     return (
         <>
-            <div className='flex justify-between mt-14'>
+            <div className='flex flex-col gap-4 sm:flex-row justify-between mt-14'>
                 <SearchInput  onChange={(e) => setSearch(e.target.value)}/>
                 <AddMemberSection workspaceId={workspaceId} currentUserRole={currentUserRole} />
             </div>

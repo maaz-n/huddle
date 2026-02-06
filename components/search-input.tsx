@@ -11,7 +11,7 @@ export function SearchInput({
   className?: string
 }) {
   return (
-    <div className={`relative w-full max-w-xs group ${className}`}>
+    <div className={`relative w-full sm:max-w-xs group ${className}`}>
       <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
       
       <Input
