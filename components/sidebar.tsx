@@ -56,12 +56,12 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
 
       <aside
         className={cn(
-          "fixed left-0 top-0 h-screen w-64 border-r bg-card transition-transform duration-300 z-50 lg:static lg:translate-x-0 lg:z-0",
+          "fixed left-0 top-0 h-screen w-64 bg-card transition-transform duration-300 z-50 lg:static lg:translate-x-0 lg:z-0",
           !open && "-translate-x-full",
         )}
       >
         <nav className="flex flex-col h-full">
-          <div className="flex items-center justify-between h-16 px-6 border-b">
+          <div className="flex items-center justify-between h-16 px-6">
             <h1 className="text-xl font-bold text-primary mx-auto">OPENOPS</h1>
             <Button variant="ghost" size="icon" onClick={() => setOpen(false)} className="lg:hidden">
               <ChevronLeft className="h-5 w-5" />

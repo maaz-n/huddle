@@ -19,7 +19,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto border-l">
           <div className="container mx-auto h-full">{children}</div>
         </main>
       </div>
