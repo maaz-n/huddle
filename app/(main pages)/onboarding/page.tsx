@@ -1,6 +1,5 @@
 import { WorkspaceForm } from "@/components/workspace-create-form";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LayoutDashboard } from "lucide-react";
 import { getWorkspacesWithRoles } from "@/actions/workspace";
 import { redirect } from "next/navigation";
 
