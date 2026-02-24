@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { AppLayout } from "@/components/app-layout"
 import { TaskStatusCard } from "@/components/task-status-card"
 import { ActivityLogItem } from "@/components/activity-log-item"

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getCurrentUser, getUserWorkspaceRole } from '@/actions/auth';
 import { getMyTasks } from '@/actions/tasks'
 import { getWorkspacesWithRoles } from '@/actions/workspace';

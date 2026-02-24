@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { AppLayout } from "@/components/app-layout"
 import UserProfile from "@/components/user-profile"
 import { getCurrentUser } from "@/actions/auth"

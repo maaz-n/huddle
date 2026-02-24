@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { AppLayout } from "@/components/app-layout"
 import { getUsers, getTasks } from "@/actions/tasks"
 import TaskClient from "@/components/task-client"

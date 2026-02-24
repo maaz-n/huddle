@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { getCurrentUser, getUserWorkspaceRole } from '@/actions/auth';
 import { getWorkspacesWithRoles, getWorkspaceUsers } from '@/actions/workspace';
 import { AppLayout } from '@/components/app-layout'

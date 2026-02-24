@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { WorkspaceForm } from "@/components/workspace-create-form";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getWorkspacesWithRoles } from "@/actions/workspace";
