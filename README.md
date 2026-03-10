@@ -1,5 +1,5 @@
 <h1 align="center">Huddle</h1>
-<img src='https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge'/>
+
 <p align="center">
   <strong>A multi-workspace task management app built with modern web technologies. Its focused, clean, and role-based.</strong>
 </p>
@@ -14,7 +14,7 @@ Huddle was built to explore:
 * Server actions & modern fullstack patterns
 
 ---
-<h2 align="center">Features it has</h2>
+<h2 align="center">Features</h2>
 
 ### 1. Workspaces
 
@@ -71,7 +71,6 @@ Huddle was built to explore:
   * Global user data
   * Workspace-scoped data
 * Server-side permission enforcement
-* Reusable components across pages (Dashboard, Tasks, My Tasks)
 
 ---
 <h2 align="center">Roles & Permissions</h2>
