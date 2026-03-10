@@ -1,7 +1,12 @@
 <h1 align="center">Huddle</h1>
 
 <p align="center">
-  <strong>A multi-workspace task management app built with modern web technologies. Its focused, clean, and role-based.</strong>
+  <strong>A multi-workspace task management app built with modern web technologies. Its focused, clean, and role-based.</strong> <br><br>
+  <a href='https://teamhuddle.vercel.app'>
+  <img src="https://img.shields.io/badge/Check it out-↗-purple"/>
+  </a>
+  
+
 </p>
 
 ![](./public/huddle-bg.png)
