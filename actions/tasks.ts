@@ -360,7 +360,7 @@ export async function getTaskStats(workspaceId: string) {
     .groupBy(tasks.status)
 }
 
-export async function getTaskInWorkspace(taskId: string, workspaceId: string){
+async function getTaskInWorkspace(taskId: string, workspaceId: string){
   try {
     const [task] = await db.select().from(tasks).where(and(eq(tasks.workspaceId, workspaceId), eq(tasks.id, taskId))).limit(1);
     if(!task) return
