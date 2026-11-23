@@ -20,12 +20,12 @@ export async function getTasks(workspaceId: string, filter: GetFilteredTasks) {
               id: true,
               name: true,
               email: true,
-              image: true
-            }
+              image: true,
+            },
           },
         },
-        orderBy: (tasks, { desc }) => desc(tasks.updatedAt)
-      })
+        orderBy: (tasks, { desc }) => desc(tasks.updatedAt),
+      });
     } else {
       return await db.query.tasks.findMany({
         where: (tasks, { eq, and }) => {
@@ -41,7 +41,7 @@ export async function getTasks(workspaceId: string, filter: GetFilteredTasks) {
             conditions.push(eq(tasks.assigneeId, filter.assignee));
           }
 
-          return and(...conditions)
+          return and(...conditions);
         },
 
         with: {
@@ -50,16 +50,16 @@ export async function getTasks(workspaceId: string, filter: GetFilteredTasks) {
               id: true,
               name: true,
               email: true,
-              image: true
-            }
+              image: true,
+            },
           },
         },
-        orderBy: (tasks, { desc }) => desc(tasks.updatedAt)
-      })
+        orderBy: (tasks, { desc }) => desc(tasks.updatedAt),
+      });
     }
   } catch (error) {
     console.error(error);
-    return []
+    return [];
   }
 }
 
@@ -67,10 +67,8 @@ export async function getMyTasks(workspaceId: string) {
   const { user } = await requireWorkspaceAccess(workspaceId, "member");
   try {
     const workspaceTasks = await db.query.tasks.findMany({
-      where: (tasks, { eq, and }) => and(
-        eq(tasks.workspaceId, workspaceId),
-        eq(tasks.assigneeId, user.id)
-      ),
+      where: (tasks, { eq, and }) =>
+        and(eq(tasks.workspaceId, workspaceId), eq(tasks.assigneeId, user.id)),
 
       with: {
         user: {
@@ -78,15 +76,14 @@ export async function getMyTasks(workspaceId: string) {
             id: true,
             name: true,
             email: true,
-            image: true
-          }
+            image: true,
+          },
         },
-      }
-    })
+      },
+    });
     return workspaceTasks;
-
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return [];
   }
 }
@@ -98,28 +95,44 @@ export async function createTask(
   status: "todo" | "in_review" | "done",
   priority: "low" | "medium" | "high",
   assigneeId: string,
-  dueDate: string
+  dueDate: string,
 ) {
-  const { user } = await requireWorkspaceAccess(
-    workspaceId,
-    "member"
-  );
+  const { user } = await requireWorkspaceAccess(workspaceId, "member");
 
   try {
+    if (!assigneeId)
+      return { success: false, message: "Please select an assignee" };
+    if (!dueDate)
+      return { success: false, message: "Please select a due date" };
 
-    if (!assigneeId) return { success: false, message: "Please select an assignee" }
-    if (!dueDate) return { success: false, message: "Please select a due date" }
+    const [validAssignee] = await db
+      .select()
+      .from(workspaceMembers)
+      .where(
+        and(
+          eq(workspaceMembers.userId, assigneeId),
+          eq(workspaceMembers.workspaceId, workspaceId),
+        ),
+      );
+    if (!validAssignee)
+      return {
+        success: false,
+        message: "Assignee does not belong to the workspace",
+      };
 
-    const [insertedTask] = await db.insert(tasks).values({
-      workspaceId: workspaceId,
-      title: title,
-      description: description,
-      status: status,
-      priority: priority,
-      dueDate: dueDate,
-      assigneeId: assigneeId,
-      createdBy: user.id,
-    }).returning();
+    const [insertedTask] = await db
+      .insert(tasks)
+      .values({
+        workspaceId: workspaceId,
+        title: title,
+        description: description,
+        status: status,
+        priority: priority,
+        dueDate: dueDate,
+        assigneeId: assigneeId,
+        createdBy: user.id,
+      })
+      .returning();
 
     await logActivity({
       workspaceId: workspaceId,
@@ -127,25 +140,23 @@ export async function createTask(
       entityType: "task",
       entityId: insertedTask.id,
       action: "TASK_CREATE",
-      metadata: { entityName: insertedTask.title }
+      metadata: { entityName: insertedTask.title },
     });
 
-    return { success: true, message: "Task created!" }
-
+    return { success: true, message: "Task created!" };
   } catch (error) {
-    console.error(error)
-    return { success: false, message: "Error creating task" }
-
+    console.error(error);
+    return { success: false, message: "Error creating task" };
   }
 }
 
 export async function deleteTask(workspaceId: string, taskId: string) {
   const { user } = await requireWorkspaceAccess(workspaceId, "admin");
   try {
-    const deletedTask = await db.delete(tasks).where(and(
-                                    eq(tasks.id, taskId),
-                                    eq(tasks.workspaceId, workspaceId)
-    )).returning();
+    const deletedTask = await db
+      .delete(tasks)
+      .where(and(eq(tasks.id, taskId), eq(tasks.workspaceId, workspaceId)))
+      .returning();
 
     await db.insert(activityLogs).values({
       workspaceId,
@@ -154,40 +165,39 @@ export async function deleteTask(workspaceId: string, taskId: string) {
       entityId: taskId,
       action: "TASK_DELETED",
       metadata: {
-        entityName: deletedTask[0].title
-      }
+        entityName: deletedTask[0].title,
+      },
     });
 
-    return { success: true, message: "Task deleted!" }
-
+    return { success: true, message: "Task deleted!" };
   } catch (error) {
-    console.error(error)
-    return { success: false, message: "There was an error deleting the task" }
-
+    console.error(error);
+    return { success: false, message: "There was an error deleting the task" };
   }
 }
 
 export async function updateTaskStatus(
   taskId: string,
   workspaceId: string,
-  newStatus: "todo" | "in_review" | "done"
+  newStatus: "todo" | "in_review" | "done",
 ) {
   const { user, role } = await requireWorkspaceAccess(workspaceId, "member");
 
-  const task = await getTaskInWorkspace(taskId, workspaceId)
+  const task = await getTaskInWorkspace(taskId, workspaceId);
 
-  if (!task) return { success: false, message: "Task not found" }
+  if (!task) return { success: false, message: "Task not found" };
 
-  const canChange = task.assigneeId === user.id || role !== "member"
+  const canChange = task.assigneeId === user.id || role !== "member";
 
-  if (!canChange) return { success: false, message: "Unauthorized" }
+  if (!canChange) return { success: false, message: "Unauthorized" };
 
   const currentStatus = task.status;
   if (currentStatus == null) {
-    return { success: false, message: "Task has no status" }
+    return { success: false, message: "Task has no status" };
   }
 
-  await db.update(tasks)
+  await db
+    .update(tasks)
     .set({ status: newStatus, updatedAt: new Date() })
     .where(eq(tasks.id, taskId));
 
@@ -200,10 +210,10 @@ export async function updateTaskStatus(
     metadata: {
       oldStatus: task.status,
       newStatus: newStatus,
-    }
+    },
   });
 
-  return { success: true, message: "Task status updated!" }
+  return { success: true, message: "Task status updated!" };
 }
 
 export async function updateTaskTitle(
@@ -214,15 +224,15 @@ export async function updateTaskTitle(
   const { user } = await requireWorkspaceAccess(workspaceId, "member");
   const task = await getTaskInWorkspace(taskId, workspaceId);
 
-  if (!task) throw new Error("No task found!")
+  if (!task) throw new Error("No task found!");
 
-  await db.update(tasks).set(
-    {
+  await db
+    .update(tasks)
+    .set({
       title: newTitle,
       updatedAt: new Date(),
-    }
-  )
-    .where(eq(tasks.id, taskId))
+    })
+    .where(eq(tasks.id, taskId));
 
   await logActivity({
     workspaceId: workspaceId,
@@ -230,8 +240,8 @@ export async function updateTaskTitle(
     entityType: "task",
     entityId: taskId,
     action: "Title updated",
-    metadata: { entityName: task.title }
-  })
+    metadata: { entityName: task.title },
+  });
 }
 
 export async function updateTaskDescription(
@@ -242,14 +252,15 @@ export async function updateTaskDescription(
   const { user } = await requireWorkspaceAccess(workspaceId, "member");
   const task = await getTaskInWorkspace(taskId, workspaceId);
 
-  if (!task) throw new Error("No task found!")
+  if (!task) throw new Error("No task found!");
 
-  await db.update(tasks).set(
-    {
+  await db
+    .update(tasks)
+    .set({
       description: newDescription,
       updatedAt: new Date(),
-    }
-  ).where(eq(tasks.id, taskId))
+    })
+    .where(eq(tasks.id, taskId));
 
   await logActivity({
     workspaceId: workspaceId,
@@ -257,7 +268,7 @@ export async function updateTaskDescription(
     entityType: "task",
     entityId: taskId,
     action: "Description updated",
-    metadata: { entityName: task.title }
+    metadata: { entityName: task.title },
   });
 }
 
@@ -269,14 +280,15 @@ export async function addRevisionNote(
   const { user } = await requireWorkspaceAccess(workspaceId, "admin");
   const task = await getTaskInWorkspace(taskId, workspaceId);
 
-  if (!task) throw new Error("No task found!")
+  if (!task) throw new Error("No task found!");
 
-  await db.update(tasks).set(
-    {
+  await db
+    .update(tasks)
+    .set({
       revisionNote: note,
       updatedAt: new Date(),
-    }
-  ).where(eq(tasks.id, taskId))
+    })
+    .where(eq(tasks.id, taskId));
 
   await logActivity({
     workspaceId: workspaceId,
@@ -284,25 +296,43 @@ export async function addRevisionNote(
     entityType: "task",
     entityId: taskId,
     action: "Revision note added",
-    metadata: { entityName: note }
+    metadata: { entityName: note },
   });
 }
 
 export async function assignTask(
   taskId: string,
   workspaceId: string,
-  assigneeId: string
+  assigneeId: string,
 ) {
   const { user } = await requireWorkspaceAccess(workspaceId, "admin");
 
-  const task = await getTaskInWorkspace(taskId, workspaceId)
+  const task = await getTaskInWorkspace(taskId, workspaceId);
+
+  const [validAssignee] = await db
+    .select()
+    .from(workspaceMembers)
+    .where(
+      and(
+        eq(workspaceMembers.userId, assigneeId),
+        eq(workspaceMembers.workspaceId, workspaceId),
+      ),
+    );
+  if (!validAssignee)
+    return {
+      success: false,
+      message: "Assignee does not belong to the workspace",
+    };
 
   if (!task) throw new Error("Task not found!");
 
-  await db.update(tasks).set({
-    assigneeId: assigneeId,
-    updatedAt: new Date(),
-  }).where(eq(tasks.id, taskId));
+  await db
+    .update(tasks)
+    .set({
+      assigneeId: assigneeId,
+      updatedAt: new Date(),
+    })
+    .where(eq(tasks.id, taskId));
 
   await logActivity({
     workspaceId: workspaceId,
@@ -310,26 +340,25 @@ export async function assignTask(
     entityType: "task",
     entityId: taskId,
     action: `TASK_ASSIGNED`,
-    metadata: { entityName: task.title }
+    metadata: { entityName: task.title },
   });
 }
 
 export async function getUsers(workspaceId: string): Promise<UserTypeNew[]> {
   await requireWorkspaceAccess(workspaceId, "member");
   try {
-
-    const users = await db.select({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      image: user.image,
-      role: workspaceMembers.role
-    })
+    const users = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        image: user.image,
+        role: workspaceMembers.role,
+      })
       .from(user)
       .innerJoin(workspaceMembers, eq(workspaceMembers.userId, user.id))
-      .where(eq(workspaceMembers.workspaceId, workspaceId))
+      .where(eq(workspaceMembers.workspaceId, workspaceId));
     return users;
-
   } catch (error) {
     throw error;
   }
@@ -338,8 +367,8 @@ export async function getUsers(workspaceId: string): Promise<UserTypeNew[]> {
 export async function getUser(id: string) {
   try {
     return await db.query.user.findFirst({
-      where: eq(user.id, id)
-    })
+      where: eq(user.id, id),
+    });
   } catch (error) {
     throw error;
   }
@@ -353,20 +382,23 @@ export async function getTaskStats(workspaceId: string) {
       count: sql<number>`count(*)`,
     })
     .from(tasks)
-    .where(and(
-      eq(tasks.workspaceId, workspaceId),
-      eq(tasks.assigneeId, user.id)
-    ))
-    .groupBy(tasks.status)
+    .where(
+      and(eq(tasks.workspaceId, workspaceId), eq(tasks.assigneeId, user.id)),
+    )
+    .groupBy(tasks.status);
 }
 
-async function getTaskInWorkspace(taskId: string, workspaceId: string){
+async function getTaskInWorkspace(taskId: string, workspaceId: string) {
   try {
-    const [task] = await db.select().from(tasks).where(and(eq(tasks.workspaceId, workspaceId), eq(tasks.id, taskId))).limit(1);
-    if(!task) return
-    return task
+    const [task] = await db
+      .select()
+      .from(tasks)
+      .where(and(eq(tasks.workspaceId, workspaceId), eq(tasks.id, taskId)))
+      .limit(1);
+    if (!task) return;
+    return task;
   } catch (error) {
-    console.error(error)
-    return null
+    console.error(error);
+    return null;
   }
 }
