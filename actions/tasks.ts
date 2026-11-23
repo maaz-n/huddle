@@ -174,9 +174,7 @@ export async function updateTaskStatus(
 ) {
   const { user, role } = await requireWorkspaceAccess(workspaceId, "member");
 
-  const task = await db.query.tasks.findFirst({
-    where: eq(tasks.id, taskId),
-  });
+  const task = await getTaskInWorkspace(taskId, workspaceId)
 
   if (!task) return { success: false, message: "Task not found" }
 
@@ -214,9 +212,7 @@ export async function updateTaskTitle(
   newTitle: string,
 ) {
   const { user } = await requireWorkspaceAccess(workspaceId, "member");
-  const task = await db.query.tasks.findFirst({
-    where: eq(tasks.id, taskId)
-  });
+  const task = await getTaskInWorkspace(taskId, workspaceId);
 
   if (!task) throw new Error("No task found!")
 
@@ -244,9 +240,7 @@ export async function updateTaskDescription(
   newDescription: string,
 ) {
   const { user } = await requireWorkspaceAccess(workspaceId, "member");
-  const task = await db.query.tasks.findFirst({
-    where: eq(tasks.id, taskId)
-  });
+  const task = await getTaskInWorkspace(taskId, workspaceId);
 
   if (!task) throw new Error("No task found!")
 
@@ -272,10 +266,8 @@ export async function addRevisionNote(
   workspaceId: string,
   note: string,
 ) {
-  const { user } = await requireWorkspaceAccess(workspaceId, "member");
-  const task = await db.query.tasks.findFirst({
-    where: eq(tasks.id, taskId)
-  });
+  const { user } = await requireWorkspaceAccess(workspaceId, "admin");
+  const task = await getTaskInWorkspace(taskId, workspaceId);
 
   if (!task) throw new Error("No task found!")
 
@@ -303,9 +295,7 @@ export async function assignTask(
 ) {
   const { user } = await requireWorkspaceAccess(workspaceId, "admin");
 
-  const task = await db.query.tasks.findFirst({
-    where: eq(tasks.id, taskId)
-  })
+  const task = await getTaskInWorkspace(taskId, workspaceId)
 
   if (!task) throw new Error("Task not found!");
 
@@ -368,4 +358,15 @@ export async function getTaskStats(workspaceId: string) {
       eq(tasks.assigneeId, user.id)
     ))
     .groupBy(tasks.status)
+}
+
+export async function getTaskInWorkspace(taskId: string, workspaceId: string){
+  try {
+    const [task] = await db.select().from(tasks).where(and(eq(tasks.workspaceId, workspaceId), eq(tasks.id, taskId))).limit(1);
+    if(!task) return
+    return task
+  } catch (error) {
+    console.error(error)
+    return null
+  }
 }
