@@ -97,7 +97,7 @@ export const updateWorkspaceName = async (
 
 export const removeUser = async (workspaceId: string, userId: string) => {
   try {
-    await requireWorkspaceAccess(workspaceId, "owner");
+    await requireWorkspaceAccess(workspaceId, "admin");
     await db
       .delete(workspaceMembers)
       .where(
