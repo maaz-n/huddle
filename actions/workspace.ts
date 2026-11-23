@@ -80,7 +80,7 @@ export const updateWorkspaceName = async (
   newName: string,
 ) => {
   try {
-    await requireWorkspaceAccess(workspaceId, "admin")
+    await requireWorkspaceAccess(workspaceId, "owner")
     await db
       .update(workspaces)
       .set({
