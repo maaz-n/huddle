@@ -4,6 +4,7 @@ import { db } from "@/db"
 import { user, workspaceMembers, workspaces } from "@/db/schema"
 import { getCurrentUser } from "./auth"
 import { and, eq } from "drizzle-orm"
+import { requireWorkspaceAccess } from "@/lib/workspace-access"
 
 export const createWorkspace = async (name: string) => {
     try {
@@ -31,6 +32,7 @@ export const getWorkspacesWithRoles = async () => {
 }
 
 export const getWorkspace = async (workspaceId: string) => {
+    await requireWorkspaceAccess(workspaceId, "member");
     const response = await db.select({
         id: workspaces.id,
         name: workspaces.name,
@@ -42,6 +44,7 @@ export const getWorkspace = async (workspaceId: string) => {
 }
 
 export const getWorkspaceUsers = async (workspaceId: string) => {
+    await requireWorkspaceAccess(workspaceId, "member");
     return await db.select({
         id: user.id,
         name: user.name,

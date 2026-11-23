@@ -9,6 +9,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { getCurrentUser } from "./auth";
 
 export async function getTasks(workspaceId: string, filter: GetFilteredTasks) {
+  await requireWorkspaceAccess(workspaceId, "member");
   try {
     if (!filter.status && !filter.priority && !filter.assignee) {
       return await db.query.tasks.findMany({
@@ -28,7 +29,7 @@ export async function getTasks(workspaceId: string, filter: GetFilteredTasks) {
     } else {
       return await db.query.tasks.findMany({
         where: (tasks, { eq, and }) => {
-          const conditions = [];
+          const conditions = [eq(tasks.workspaceId, workspaceId)];
 
           if (filter.status) {
             conditions.push(eq(tasks.status, filter.status));
@@ -52,7 +53,8 @@ export async function getTasks(workspaceId: string, filter: GetFilteredTasks) {
               image: true
             }
           },
-        }
+        },
+        orderBy: (tasks, { desc }) => desc(tasks.updatedAt)
       })
     }
   } catch (error) {
@@ -62,13 +64,12 @@ export async function getTasks(workspaceId: string, filter: GetFilteredTasks) {
 }
 
 export async function getMyTasks(workspaceId: string) {
+  const { user } = await requireWorkspaceAccess(workspaceId, "member");
   try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser) return [];
     const workspaceTasks = await db.query.tasks.findMany({
       where: (tasks, { eq, and }) => and(
         eq(tasks.workspaceId, workspaceId),
-        eq(tasks.assigneeId, currentUser.id)
+        eq(tasks.assigneeId, user.id)
       ),
 
       with: {
@@ -324,6 +325,7 @@ export async function assignTask(
 }
 
 export async function getUsers(workspaceId: string): Promise<UserTypeNew[]> {
+  await requireWorkspaceAccess(workspaceId, "member");
   try {
 
     const users = await db.select({
@@ -354,8 +356,7 @@ export async function getUser(id: string) {
 }
 
 export async function getTaskStats(workspaceId: string) {
-  const user = await getCurrentUser();
-  if (!user) return [];
+  const { user } = await requireWorkspaceAccess(workspaceId, "member");
   return await db
     .select({
       status: tasks.status,

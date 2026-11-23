@@ -19,6 +19,14 @@ export default async function TasksPage(props: any) {
     redirect(`/tasks?workspace=${workspaceId}`)
   }
 
+  const currentUserRole = await getUserWorkspaceRole(workspaceId);
+  if (!currentUserRole) {
+    redirect("/");
+  }
+
+  const currentUser = await getCurrentUser();
+  if(!currentUser) redirect("/login");
+
   const filter = {
     status: searchParams.status || "",
     priority: searchParams.priority || "",
@@ -30,10 +38,6 @@ export default async function TasksPage(props: any) {
   const allUsers = await getUsers(workspaceId);
 
   const workspaceUsers = await getWorkspaceUsers(workspaceId);
-
-  const currentUser = await getCurrentUser();
-  if(!currentUser) return null;
-  const currentUserRole = await getUserWorkspaceRole(workspaceId);
 
   return (
     <AppLayout>

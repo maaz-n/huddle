@@ -10,6 +10,7 @@ import { getDashboardStats, getRecentActivity } from "@/actions/activity"
 import { getWorkspacesWithRoles } from "@/actions/workspace"
 import { redirect } from "next/navigation"
 import { requireUser } from "@/lib/authguard"
+import { getUserWorkspaceRole } from "@/actions/auth"
 import AssignedToMe from "@/components/assigned-to-me"
 
 const STATUSES = [
@@ -28,6 +29,11 @@ export default async function DashboardPage(props: any) {
     if (workspaces.length === 0) redirect("/onboarding")
     const newWorkspaceId = workspaces[0].workspaceId;
     redirect(`/?workspace=${newWorkspaceId}`)
+  }
+
+  const currentUserRole = await getUserWorkspaceRole(workspaceId);
+  if (!currentUserRole) {
+    redirect("/");
   }
 
   const tasksStatsFromDb = await getTaskStats(workspaceId);

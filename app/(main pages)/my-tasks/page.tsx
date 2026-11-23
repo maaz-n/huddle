@@ -18,10 +18,16 @@ async function MyTasksPage(props: any) {
         workspaceId = workspaces[0].workspaceId;
         redirect(`/my-tasks?workspace=${workspaceId}`)
     }
-    const currentUser = await getCurrentUser()
-    if(!currentUser) return;
-    const myTasks = await getMyTasks(workspaceId)
-    const currentUserRole = await getUserWorkspaceRole(workspaceId)
+
+    const currentUserRole = await getUserWorkspaceRole(workspaceId);
+    if (!currentUserRole) {
+        redirect("/");
+    }
+
+    const currentUser = await getCurrentUser();
+    if(!currentUser) redirect("/login");
+
+    const myTasks = await getMyTasks(workspaceId);
 
     return (
         <AppLayout>

@@ -18,10 +18,13 @@ async function MembersPage(props: any) {
         redirect(`/members?workspace=${workspaceId}`)
     }
 
-    const currentUser = await getCurrentUser();
-    if (!currentUser) return;
-
     const currentUserRole = await getUserWorkspaceRole(workspaceId);
+    if (!currentUserRole) {
+        redirect("/");
+    }
+
+    const currentUser = await getCurrentUser();
+    if (!currentUser) redirect("/login");
 
     const users = await getWorkspaceUsers(workspaceId);
 

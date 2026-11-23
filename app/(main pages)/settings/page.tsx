@@ -20,10 +20,13 @@ export default async function SettingsPage(props: any) {
         redirect(`/settings?workspace=${workspaceId}`)
     }
 
-    const currentUser = await getCurrentUser();
-    if (!currentUser) return;
-
     const currentUserRole = await getUserWorkspaceRole(workspaceId);
+    if (!currentUserRole) {
+        redirect("/");
+    }
+
+    const currentUser = await getCurrentUser();
+    if (!currentUser) redirect("/login");
 
     const users = await getWorkspaceUsers(workspaceId);
 

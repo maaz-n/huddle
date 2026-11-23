@@ -2,8 +2,10 @@ import { db } from "@/db";
 import { and, eq, gte, lte, ne } from "drizzle-orm";
 import { startOfDay, endOfDay } from "date-fns";
 import { tasks } from "@/db/schema";
+import { requireWorkspaceAccess } from "@/lib/workspace-access";
 
 export async function getRecentActivity(workspaceId: string) {
+    await requireWorkspaceAccess(workspaceId, "member");
     const logs = await db.query.activityLogs.findMany({
         where: (activityLogs, { eq }) => eq(activityLogs.workspaceId, workspaceId),
         orderBy: (activityLogs, { desc }) => desc(activityLogs.createdAt),
@@ -36,6 +38,7 @@ export async function getRecentActivity(workspaceId: string) {
 
 
 export async function getDashboardStats(userId: string, workspaceId: string) {
+  await requireWorkspaceAccess(workspaceId, "member");
   const now = new Date();
   
   const todayStart = startOfDay(now).toISOString();
