@@ -21,7 +21,7 @@ function UserProfile({ user }: { user: UserTypeNew }) {
     async function handleUpdate() {
         try {
             setLoading(true);
-            const response = await updateUser(name, user.email)
+            const response = await updateUser(name, user.id)
             if (response.success) {
                 toast.success(response.message);
                 router.refresh();
