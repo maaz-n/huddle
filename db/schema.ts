@@ -1,6 +1,14 @@
 import { randomUUID } from "crypto";
-import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index, jsonb } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  index,
+  jsonb,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -81,13 +89,22 @@ export const workspaces = pgTable("workspaces", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const workspaceMembers = pgTable("workspace_members", {
-  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
-  workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
-  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-  role: text("role").$type<"admin" | "member" | "owner">().notNull(),
-  joinedAt: timestamp("joined_at").defaultNow(),
-});
+export const workspaceMembers = pgTable(
+  "workspace_members",
+  {
+    id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+    workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    role: text("role").$type<"admin" | "member" | "owner">().notNull(),
+    joinedAt: timestamp("joined_at").defaultNow(),
+  },
+  (table) => [
+    // A workspace can never have more than one owner.
+    uniqueIndex("workspace_single_owner_idx")
+      .on(table.workspaceId)
+      .where(sql`${table.role} = 'owner'`),
+  ],
+);
 
 export const tasks = pgTable("tasks", {
   id: text("id").primaryKey().$defaultFn(() => randomUUID()),
