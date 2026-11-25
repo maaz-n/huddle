@@ -120,7 +120,10 @@ export async function createTask(
     return { success: false, message: validationMessage(parsed.error) };
   }
 
-  const { user } = await requireWorkspaceAccess(parsed.data.workspaceId, "member");
+  const { user } = await requireWorkspaceAccess(
+    parsed.data.workspaceId,
+    "admin",
+  );
 
   try {
     const [validAssignee] = await db
@@ -314,7 +317,7 @@ export async function updateTaskTitle(
 
   const { user } = await requireWorkspaceAccess(
     parsedWorkspaceId.data,
-    "member",
+    "admin",
   );
   const task = await getTaskInWorkspace(
     parsedTaskId.data,
@@ -367,7 +370,7 @@ export async function updateTaskDescription(
 
   const { user } = await requireWorkspaceAccess(
     parsedWorkspaceId.data,
-    "member",
+    "admin",
   );
   const task = await getTaskInWorkspace(
     parsedTaskId.data,
