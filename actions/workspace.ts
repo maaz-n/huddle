@@ -252,6 +252,85 @@ export const updateUserRole = async (
   }
 };
 
+export const transferOwnership = async (
+  workspaceId: string,
+  newOwnerId: string,
+) => {
+  try {
+    const parsedWorkspaceId = idSchema.safeParse(workspaceId);
+    const parsedNewOwnerId = idSchema.safeParse(newOwnerId);
+
+    if (!parsedWorkspaceId.success) {
+      return {
+        success: false,
+        message: validationMessage(parsedWorkspaceId.error),
+      };
+    }
+    if (!parsedNewOwnerId.success) {
+      return {
+        success: false,
+        message: validationMessage(parsedNewOwnerId.error),
+      };
+    }
+
+    const { user: currentUser } = await requireWorkspaceAccess(
+      parsedWorkspaceId.data,
+      "owner",
+    );
+
+    if (currentUser.id === parsedNewOwnerId.data) {
+      return { success: false, message: "You are already the owner" };
+    }
+
+    const target = await db.query.workspaceMembers.findFirst({
+      where: and(
+        eq(workspaceMembers.workspaceId, parsedWorkspaceId.data),
+        eq(workspaceMembers.userId, parsedNewOwnerId.data),
+      ),
+    });
+
+    if (!target) {
+      return { success: false, message: "Member not found" };
+    }
+
+    if (target.role === "owner") {
+      return { success: false, message: "This member is already the owner" };
+    }
+
+    // The single-owner index means the old owner has to step down before the
+    // new owner is promoted. The batch keeps that gap invisible.
+    await db.batch([
+      db
+        .update(workspaceMembers)
+        .set({ role: "admin" })
+        .where(
+          and(
+            eq(workspaceMembers.workspaceId, parsedWorkspaceId.data),
+            eq(workspaceMembers.userId, currentUser.id),
+          ),
+        ),
+      db
+        .update(workspaceMembers)
+        .set({ role: "owner" })
+        .where(
+          and(
+            eq(workspaceMembers.workspaceId, parsedWorkspaceId.data),
+            eq(workspaceMembers.userId, parsedNewOwnerId.data),
+          ),
+        ),
+      db
+        .update(workspaces)
+        .set({ ownerId: parsedNewOwnerId.data })
+        .where(eq(workspaces.id, parsedWorkspaceId.data)),
+    ]);
+
+    return { success: true, message: "Ownership transferred!" };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Could not transfer ownership" };
+  }
+};
+
 export const deleteWorkspace = async (workspaceId: string) => {
   try {
     const parsedWorkspaceId = idSchema.safeParse(workspaceId);

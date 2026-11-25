@@ -7,8 +7,11 @@ import { getCurrentUser, getUserWorkspaceRole } from "@/actions/auth"
 import MembersSection from "@/components/members-section"
 import WorkspaceSettingsSection from "@/components/workspace-settings-section"
 import DeleteWorkspaceButton from "@/components/delete-workspace-button"
+import TransferOwnershipSection from "@/components/transfer-ownership-section"
 
-export default async function SettingsPage(props: any) {
+export default async function SettingsPage(props: {
+    searchParams: Promise<{ workspace?: string }>
+}) {
 
     const searchParams = await props.searchParams;
     let workspaceId = searchParams.workspace;
@@ -69,6 +72,14 @@ export default async function SettingsPage(props: any) {
 
                     </div>
                 </div>
+
+                {currentUserRole === "owner" && (
+                    <TransferOwnershipSection
+                        workspaceId={workspace.id}
+                        users={users}
+                        currentUserId={currentUser.id}
+                    />
+                )}
 
                 {currentUserRole === "owner" &&
 
