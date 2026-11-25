@@ -4,6 +4,13 @@ import { db } from "@/db";
 import { user, workspaceMembers } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
+import {
+  emailSchema,
+  idSchema,
+  memberRoleSchema,
+  nameSchema,
+  validationMessage,
+} from "@/lib/validation";
 import { getCurrentUser } from "./auth";
 
 export async function updateUser(newName: string) {
@@ -13,12 +20,15 @@ export async function updateUser(newName: string) {
       return { success: false, message: "Unauthorized" };
     }
 
-    const name = newName.trim();
-    if (!name) {
-      return { success: false, message: "Name cannot be empty" };
+    const parsedName = nameSchema.safeParse(newName);
+    if (!parsedName.success) {
+      return { success: false, message: validationMessage(parsedName.error) };
     }
 
-    await db.update(user).set({ name }).where(eq(user.id, currentUser.id));
+    await db
+      .update(user)
+      .set({ name: parsedName.data })
+      .where(eq(user.id, currentUser.id));
 
     return { success: true, message: "Name updated!" };
   } catch (error) {
@@ -27,7 +37,7 @@ export async function updateUser(newName: string) {
   }
 }
 
-export async function getUserByEmail(email: string) {
+async function getUserByEmail(email: string) {
   try {
     const userObj = await db
       .select({ id: user.id })
@@ -46,22 +56,37 @@ export async function addMember(
   email: string,
 ) {
   try {
-    const { user: currentUser, role: currentUserRole } =
-      await requireWorkspaceAccess(workspaceId, "admin");
+    const parsedWorkspaceId = idSchema.safeParse(workspaceId);
+    const parsedRole = memberRoleSchema.safeParse(role);
+    const parsedEmail = emailSchema.safeParse(email);
 
-    // Ownership is unique and can only change through an explicit transfer.
-    if (role !== "admin" && role !== "member") {
-      return { success: false, message: "Invalid role" };
+    if (!parsedWorkspaceId.success) {
+      return {
+        success: false,
+        message: validationMessage(parsedWorkspaceId.error),
+      };
+    }
+    if (!parsedRole.success) {
+      return { success: false, message: validationMessage(parsedRole.error) };
+    }
+    if (!parsedEmail.success) {
+      return { success: false, message: validationMessage(parsedEmail.error) };
     }
 
-    if (currentUserRole === "admin" && role === "admin") {
+    const { user: currentUser, role: currentUserRole } =
+      await requireWorkspaceAccess(parsedWorkspaceId.data, "admin");
+
+    if (currentUserRole === "admin" && parsedRole.data === "admin") {
       return { success: false, message: "Admins can only add members" };
     }
 
-    const targetUser = await getUserByEmail(email);
+    const targetUser = await getUserByEmail(parsedEmail.data);
 
     if (!targetUser || !targetUser.id)
-      return { success: false, message: `User of email ${email} not found!` };
+      return {
+        success: false,
+        message: `User of email ${parsedEmail.data} not found!`,
+      };
 
     if (currentUser.id === targetUser.id) {
       return { success: false, message: "You cannot add yourself" };
@@ -73,7 +98,7 @@ export async function addMember(
       .where(
         and(
           eq(workspaceMembers.userId, targetUser.id),
-          eq(workspaceMembers.workspaceId, workspaceId),
+          eq(workspaceMembers.workspaceId, parsedWorkspaceId.data),
         ),
       );
 
@@ -85,8 +110,8 @@ export async function addMember(
 
     await db.insert(workspaceMembers).values({
       userId: targetUser.id,
-      workspaceId: workspaceId,
-      role: role,
+      workspaceId: parsedWorkspaceId.data,
+      role: parsedRole.data,
     });
 
     return { success: true, message: "User added to workspace" };

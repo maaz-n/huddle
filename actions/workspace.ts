@@ -5,14 +5,21 @@ import { user, workspaceMembers, workspaces } from "@/db/schema";
 import { getCurrentUser } from "./auth";
 import { and, eq } from "drizzle-orm";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
+import { idSchema, nameSchema, validationMessage } from "@/lib/validation";
 
 export const createWorkspace = async (name: string) => {
   try {
     const user = await getCurrentUser();
     if (!user) throw "User not logged in!";
+
+    const parsedName = nameSchema.safeParse(name);
+    if (!parsedName.success) {
+      return { success: false, message: validationMessage(parsedName.error) };
+    }
+
     const workspace = await db
       .insert(workspaces)
-      .values({ name: name, ownerId: user.id })
+      .values({ name: parsedName.data, ownerId: user.id })
       .returning();
     await db
       .insert(workspaceMembers)
@@ -80,13 +87,26 @@ export const updateWorkspaceName = async (
   newName: string,
 ) => {
   try {
-    await requireWorkspaceAccess(workspaceId, "owner")
+    const parsedWorkspaceId = idSchema.safeParse(workspaceId);
+    const parsedName = nameSchema.safeParse(newName);
+
+    if (!parsedWorkspaceId.success) {
+      return {
+        success: false,
+        message: validationMessage(parsedWorkspaceId.error),
+      };
+    }
+    if (!parsedName.success) {
+      return { success: false, message: validationMessage(parsedName.error) };
+    }
+
+    await requireWorkspaceAccess(parsedWorkspaceId.data, "owner");
     await db
       .update(workspaces)
       .set({
-        name: newName,
+        name: parsedName.data,
       })
-      .where(eq(workspaces.id, workspaceId));
+      .where(eq(workspaces.id, parsedWorkspaceId.data));
 
     return { success: true, message: "Workspace name updated!" };
   } catch (error) {
@@ -97,19 +117,32 @@ export const updateWorkspaceName = async (
 
 export const removeUser = async (workspaceId: string, userId: string) => {
   try {
+    const parsedWorkspaceId = idSchema.safeParse(workspaceId);
+    const parsedUserId = idSchema.safeParse(userId);
+
+    if (!parsedWorkspaceId.success) {
+      return {
+        success: false,
+        message: validationMessage(parsedWorkspaceId.error),
+      };
+    }
+    if (!parsedUserId.success) {
+      return { success: false, message: validationMessage(parsedUserId.error) };
+    }
+
     const { user: actor, role: actorRole } = await requireWorkspaceAccess(
-      workspaceId,
+      parsedWorkspaceId.data,
       "admin",
     );
 
-    if (actor.id === userId) {
+    if (actor.id === parsedUserId.data) {
       return { success: false, message: "You cannot remove yourself" };
     }
 
     const target = await db.query.workspaceMembers.findFirst({
       where: and(
-        eq(workspaceMembers.workspaceId, workspaceId),
-        eq(workspaceMembers.userId, userId),
+        eq(workspaceMembers.workspaceId, parsedWorkspaceId.data),
+        eq(workspaceMembers.userId, parsedUserId.data),
       ),
     });
 
@@ -134,8 +167,8 @@ export const removeUser = async (workspaceId: string, userId: string) => {
       .delete(workspaceMembers)
       .where(
         and(
-          eq(workspaceMembers.workspaceId, workspaceId),
-          eq(workspaceMembers.userId, userId),
+          eq(workspaceMembers.workspaceId, parsedWorkspaceId.data),
+          eq(workspaceMembers.userId, parsedUserId.data),
         ),
       );
 
@@ -152,8 +185,24 @@ export const updateUserRole = async (
   newRole: "admin" | "member" | "owner",
 ) => {
   try {
+    const parsedWorkspaceId = idSchema.safeParse(workspaceId);
+    const parsedTargetUserId = idSchema.safeParse(targetUserId);
+
+    if (!parsedWorkspaceId.success) {
+      return {
+        success: false,
+        message: validationMessage(parsedWorkspaceId.error),
+      };
+    }
+    if (!parsedTargetUserId.success) {
+      return {
+        success: false,
+        message: validationMessage(parsedTargetUserId.error),
+      };
+    }
+
     const { user: currentUser, role: executingRole } =
-      await requireWorkspaceAccess(workspaceId, "member");
+      await requireWorkspaceAccess(parsedWorkspaceId.data, "member");
 
     if (executingRole !== "owner") {
       return { success: false, message: "Only the owner can change roles" };
@@ -167,14 +216,14 @@ export const updateUserRole = async (
       };
     }
 
-    if (currentUser.id === targetUserId) {
+    if (currentUser.id === parsedTargetUserId.data) {
       return { success: false, message: "You cannot change your own role" };
     }
 
     const targetMember = await db.query.workspaceMembers.findFirst({
       where: and(
-        eq(workspaceMembers.workspaceId, workspaceId),
-        eq(workspaceMembers.userId, targetUserId),
+        eq(workspaceMembers.workspaceId, parsedWorkspaceId.data),
+        eq(workspaceMembers.userId, parsedTargetUserId.data),
       ),
     });
 
@@ -191,8 +240,8 @@ export const updateUserRole = async (
       .set({ role: newRole })
       .where(
         and(
-          eq(workspaceMembers.workspaceId, workspaceId),
-          eq(workspaceMembers.userId, targetUserId),
+          eq(workspaceMembers.workspaceId, parsedWorkspaceId.data),
+          eq(workspaceMembers.userId, parsedTargetUserId.data),
         ),
       );
 
@@ -205,12 +254,20 @@ export const updateUserRole = async (
 
 export const deleteWorkspace = async (workspaceId: string) => {
   try {
+    const parsedWorkspaceId = idSchema.safeParse(workspaceId);
+    if (!parsedWorkspaceId.success) {
+      return {
+        success: false,
+        message: validationMessage(parsedWorkspaceId.error),
+      };
+    }
+
     const currentUser = await getCurrentUser();
     if (!currentUser) return { success: false, message: "Unauthorized" };
 
     const memberRecord = await db.query.workspaceMembers.findFirst({
       where: and(
-        eq(workspaceMembers.workspaceId, workspaceId),
+        eq(workspaceMembers.workspaceId, parsedWorkspaceId.data),
         eq(workspaceMembers.userId, currentUser.id),
       ),
     });
@@ -219,7 +276,9 @@ export const deleteWorkspace = async (workspaceId: string) => {
       return { success: false, message: "Only owner can delete workspace" };
     }
 
-    await db.delete(workspaces).where(eq(workspaces.id, workspaceId));
+    await db
+      .delete(workspaces)
+      .where(eq(workspaces.id, parsedWorkspaceId.data));
 
     return { success: true, message: "Workspace deleted!" };
   } catch (error) {
