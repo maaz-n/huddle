@@ -4,9 +4,9 @@ import { db } from "@/db";
 import { tasks, activityLogs, user, workspaceMembers } from "@/db/schema";
 import { logActivity } from "@/lib/activity";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
+import { canTransition } from "@/lib/task-workflow";
 import { GetFilteredTasks, UserTypeNew } from "@/types/types";
 import { and, eq, sql } from "drizzle-orm";
-import { getCurrentUser } from "./auth";
 
 export async function getTasks(workspaceId: string, filter: GetFilteredTasks) {
   await requireWorkspaceAccess(workspaceId, "member");
@@ -187,19 +187,24 @@ export async function updateTaskStatus(
 
   if (!task) return { success: false, message: "Task not found" };
 
-  const canChange = task.assigneeId === user.id || role !== "member";
+  const allowed = canTransition({
+    role,
+    isAssignee: task.assigneeId === user.id,
+    from: task.status,
+    to: newStatus,
+  });
 
-  if (!canChange) return { success: false, message: "Unauthorized" };
-
-  const currentStatus = task.status;
-  if (currentStatus == null) {
-    return { success: false, message: "Task has no status" };
+  if (!allowed) {
+    return {
+      success: false,
+      message: "That status change is not allowed",
+    };
   }
 
   await db
     .update(tasks)
     .set({ status: newStatus, updatedAt: new Date() })
-    .where(eq(tasks.id, taskId));
+    .where(and(eq(tasks.id, taskId), eq(tasks.workspaceId, workspaceId)));
 
   await db.insert(activityLogs).values({
     workspaceId,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { formatDistanceToNow } from "date-fns"
 import {
   Calendar,
@@ -17,10 +17,10 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TasksWithAssignees, UserTypeNew } from "@/types/types"
 import { addRevisionNote, deleteTask, updateTaskStatus } from "@/actions/tasks"
+import { getNextStatus, TaskStatus, WorkspaceRole } from "@/lib/task-workflow"
 import { UserAvatar } from "./user-avatar"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -28,8 +28,6 @@ import { Toggle } from "./ui/toggle"
 import { Textarea } from "./ui/textarea"
 import { Alert } from "./ui/alert"
 import { Separator } from "./ui/separator"
-
-type nextStatusType = "todo" | "in_review" | "done"
 
 interface TaskDetailModalProps {
   task: TasksWithAssignees & {
@@ -47,10 +45,9 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   const [isUpdating2, setIsUpdating2] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isRequestingChange, setIsRequestingChange] = useState(false)
-  const [revisionNote, setRevisionNote] = useState(task?.description ?? "")
-  const [taskStatus, setTaskStatus] = useState(task?.status)
+  const [revisionNote, setRevisionNote] = useState("")
 
-  async function updateStatus(taskId: string, nextStatus: nextStatusType) {
+  async function updateStatus(taskId: string, nextStatus: TaskStatus) {
     try {
       const response = await updateTaskStatus(taskId, workspaceId, nextStatus)
       if (response.success) {
@@ -64,26 +61,31 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
     }
   }
 
-  useEffect(() => {
-    if (task) setTaskStatus(task.status)
-    setIsRequestingChange(false)
-    setRevisionNote("")
-  }, [task, open])
-
   const router = useRouter();
 
   if (!task) return null
 
+  const role: WorkspaceRole =
+    currentUserRole === "owner" || currentUserRole === "admin"
+      ? currentUserRole
+      : "member"
 
-  const currentUserTaskInReview = task.assigneeId === currentUser.id && taskStatus === "in_review"
-  const taskCompleted = taskStatus === "done"
-  const isManager = currentUserRole === "admin" || currentUserRole === "owner"
+  const currentUserTaskInReview =
+    role === "member" && task.assigneeId === currentUser.id && task.status === "in_review"
+  const isManager = role !== "member"
+  const nextStatus = getNextStatus(role, task.status)
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      setIsRequestingChange(false)
+      setRevisionNote("")
+    }
+    onOpenChange(nextOpen)
+  }
 
   const handleUpdateStatus = async () => {
-    if (task.status === "done") return
+    if (!nextStatus) return
     setIsUpdating(true)
-    const nextStatus = currentUserRole === "member" ? "in_review" : "done"
-    setTaskStatus(nextStatus)
     try {
       await updateStatus(task.id, nextStatus)
       onOpenChange(false)
@@ -127,7 +129,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-2xl p-0 overflow-hidden border-none shadow-2xl bg-background">
         <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
           <div className="flex-1 p-8 space-y-6 overflow-y-auto">
@@ -164,7 +166,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                   <span className="text-xs font-bold uppercase tracking-tight">Changes Requested</span>
                 </div>
                 <p className="text-sm text-red-700 dark:text-red-300 italic">
-                  "{task.revisionNote}"
+                  &ldquo;{task.revisionNote}&rdquo;
                 </p>
               </div>
             )}
@@ -209,20 +211,18 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                 <div className="pt-4 space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Actions</label>
                   <div className="flex items-center flex-col justify-between gap-2 mt-1">
-                    <Button disabled={isRequestingChange || isUpdating || taskCompleted || currentUserTaskInReview} onClick={handleUpdateStatus} className="w-full">
+                    <Button disabled={isRequestingChange || isUpdating || !nextStatus} onClick={handleUpdateStatus} className="w-full">
                       {isUpdating ?
                         <Loader2 className="h-2 w-2 animate-spin" />
                         :
-                        taskStatus === "done" ? "Completed" :
-                          taskStatus === "in_review" && task.assigneeId === currentUser.id ? "Awaiting approval" :
-                            currentUserRole === "member" && task.assigneeId === currentUser.id ?
-                              "Send for review"
-                              :
-                              "Mark as completed"
+                        currentUserTaskInReview ? "Awaiting approval" :
+                          nextStatus === "done" ? "Mark as completed" :
+                            nextStatus === "in_review" ? "Send for review" :
+                              "Completed"
                       }
                     </Button>
                     {
-                      currentUserRole !== "member" && taskStatus === "in_review" &&
+                      currentUserRole !== "member" && task.status === "in_review" &&
                       <Toggle onPressedChange={setIsRequestingChange} pressed={isRequestingChange} className="px-5 w-full" variant={"outline"}>Request changes</Toggle>
                     }
                   </div>
