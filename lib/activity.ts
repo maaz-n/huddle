@@ -12,6 +12,8 @@ export async function logActivity(params: {
     oldStatus?: string;
     newStatus?: string;
     note?: string;
+    assigneeId?: string;
+    assigneeName?: string;
   }
 }) {
   await db.insert(activityLogs).values({

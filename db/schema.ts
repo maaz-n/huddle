@@ -141,7 +141,9 @@ export const activityLogs = pgTable("activity_logs", {
     entityName?: string,
     oldStatus?: string,
     newStatus?: string,
-    note?: string
+    note?: string,
+    assigneeId?: string,
+    assigneeName?: string
   }>(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

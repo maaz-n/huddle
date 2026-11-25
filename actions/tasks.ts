@@ -344,7 +344,7 @@ export async function updateTaskTitle(
     actorId: user.id,
     entityType: "task",
     entityId: parsedTaskId.data,
-    action: "Title updated",
+    action: "TASK_TITLE_UPDATED",
     metadata: { entityName: task.title },
   });
 }
@@ -397,7 +397,7 @@ export async function updateTaskDescription(
     actorId: user.id,
     entityType: "task",
     entityId: parsedTaskId.data,
-    action: "Description updated",
+    action: "TASK_DESCRIPTION_UPDATED",
     metadata: { entityName: task.title },
   });
 }
@@ -492,15 +492,18 @@ export async function assignTask(
     throw new Error(validationMessage(parsedAssigneeId.error));
   }
 
-  const { user } = await requireWorkspaceAccess(
+  const { user: actor } = await requireWorkspaceAccess(
     parsedWorkspaceId.data,
     "admin",
   );
 
-  const task = await getTaskInWorkspace(
-    parsedTaskId.data,
-    parsedWorkspaceId.data,
-  );
+  const [task, assignee] = await Promise.all([
+    getTaskInWorkspace(parsedTaskId.data, parsedWorkspaceId.data),
+    db.query.user.findFirst({
+      where: eq(user.id, parsedAssigneeId.data),
+      columns: { name: true },
+    }),
+  ]);
 
   const [validAssignee] = await db
     .select()
@@ -534,11 +537,15 @@ export async function assignTask(
 
   await logActivity({
     workspaceId: parsedWorkspaceId.data,
-    actorId: user.id,
+    actorId: actor.id,
     entityType: "task",
     entityId: parsedTaskId.data,
     action: `TASK_ASSIGNED`,
-    metadata: { entityName: task.title },
+    metadata: {
+      entityName: task.title,
+      assigneeId: parsedAssigneeId.data,
+      assigneeName: assignee?.name ?? "a teammate",
+    },
   });
 }
 

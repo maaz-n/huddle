@@ -15,6 +15,9 @@ interface LogProps {
     entityName?: string
     oldStatus?: string,
     newStatus?: string,
+    note?: string,
+    assigneeId?: string,
+    assigneeName?: string,
   } | null
 }
 
@@ -51,14 +54,39 @@ function getActivityContent(log: LogProps) {
     case "TASK_ASSIGNED":
       return (
         <span className="text-muted-foreground ml-1">
-          assigned this task to <span className="font-medium text-foreground">{log.actor.name || "someone"}</span>
+          assigned <span className="font-medium text-foreground">{log.metadata?.entityName}</span> to{" "}
+          <span className="font-medium text-foreground">
+            {log.metadata?.assigneeName || "a teammate"}
+          </span>
+        </span>
+      );
+
+    case "TASK_REVISION_REQUESTED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          requested changes on <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
+          {log.metadata?.note ? `: "${log.metadata.note}"` : ""}
+        </span>
+      );
+
+    case "TASK_TITLE_UPDATED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          updated the title of <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
+        </span>
+      );
+
+    case "TASK_DESCRIPTION_UPDATED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          updated the description of <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
         </span>
       );
 
     case "TASK_DELETED":
       return (
         <span className="text-muted-foreground ml-1">
-          deleted task: <span className="font-medium text-foreground">{log.entityName}</span>
+          deleted task: <span className="font-medium text-foreground">{log.metadata?.entityName || log.entityName}</span>
         </span>
       );
 
@@ -72,8 +100,6 @@ function getActivityContent(log: LogProps) {
 }
 
 export function ActivityLogItem({ log }: { log: LogProps }) {
-  const details = getActivityContent(log);
-
   return (
     <div className="flex gap-3 py-2 items-start">
       <UserAvatar user={log.actor} className="h-6 w-6 mt-0.5 shrink-0" />
