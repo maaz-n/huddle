@@ -168,6 +168,32 @@ export const activityLogs = pgTable(
   ],
 );
 
+export const workspaceInvitations = pgTable(
+  "workspace_invitations",
+  {
+    id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    role: text("role").$type<"admin" | "member">().notNull(),
+    token: text("token").notNull().unique(),
+    invitedBy: text("invited_by")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at").notNull(),
+    acceptedAt: timestamp("accepted_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("workspace_invitations_workspaceId_idx").on(table.workspaceId),
+    // One active invitation per email per workspace; expired ones may be resent.
+    uniqueIndex("workspace_invitations_pending_email_idx")
+      .on(table.workspaceId, table.email)
+      .where(sql`${table.acceptedAt} is null`),
+  ],
+);
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),

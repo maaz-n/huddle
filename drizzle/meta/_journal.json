@@ -29,6 +29,13 @@
       "when": 1795631089297,
       "tag": "0003_optimal_phalanx",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795633057332,
+      "tag": "0004_fair_zarda",
+      "breakpoints": true
     }
   ]
 }
