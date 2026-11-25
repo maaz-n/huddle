@@ -28,7 +28,7 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [priority, setPriority] = useState<string>("medium")
+  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
   const [assigneeId, setAssigneeId] = useState<string>("")
   const [dueDate, setDueDate] = useState<Date>(new Date())
 
@@ -41,7 +41,7 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
         title,
         description,
         status: "todo",
-        priority: priority as any,
+        priority,
         assigneeId: assigneeId,
         workspaceId,
         dueDate: dueDate.toISOString()
@@ -98,7 +98,12 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
           <div className="grid grid-cols-2 gap-x-8 gap-y-6 pt-2">
             <div className="space-y-2">
               <Label className="text-[10px] font-bold uppercase text-muted-foreground">Priority</Label>
-              <Select value={priority} onValueChange={setPriority}>
+              <Select
+                value={priority}
+                onValueChange={(value) =>
+                  setPriority(value as "low" | "medium" | "high")
+                }
+              >
                 <SelectTrigger className="bg-background">
                   <SelectValue />
                 </SelectTrigger>
@@ -114,10 +119,9 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
               <Label className="text-[10px] font-bold uppercase text-muted-foreground">Assignee</Label>
               <Select value={assigneeId} onValueChange={setAssigneeId}>
                 <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="Unassigned" />
+                  <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="unassigned">Unassigned</SelectItem>
                   {workspaceUsers.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.name}
@@ -163,7 +167,7 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting || !title}>
+            <Button type="submit" disabled={isSubmitting || !title || !assigneeId}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Task
             </Button>
