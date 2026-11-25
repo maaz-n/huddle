@@ -104,6 +104,8 @@ export const workspaceMembers = pgTable(
       table.workspaceId,
       table.userId,
     ),
+    // Listing the workspaces a user belongs to.
+    index("workspace_members_userId_idx").on(table.userId),
     // A workspace can never have more than one owner.
     uniqueIndex("workspace_single_owner_idx")
       .on(table.workspaceId)
@@ -111,42 +113,60 @@ export const workspaceMembers = pgTable(
   ],
 );
 
-export const tasks = pgTable("tasks", {
-  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
-  workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  description: text("description"),
-  status: text("status").notNull()
-    .$type<"todo" | "in_review" | "done">()
-    .default("todo"),
-  priority: text("priority").notNull()
-    .$type<"low" | "medium" | "high">()
-    .default("medium"),
-    revisionNote: text("revision_note"),
-  dueDate: text("due_date").notNull(),
-  assigneeId: text("assignee_id").notNull().references(() => user.id, { onDelete: 'cascade' }),
-  createdBy: text("created_by").notNull().references(() => user.id, { onDelete: 'cascade' }),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+export const tasks = pgTable(
+  "tasks",
+  {
+    id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+    workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    description: text("description"),
+    status: text("status").notNull()
+      .$type<"todo" | "in_review" | "done">()
+      .default("todo"),
+    priority: text("priority").notNull()
+      .$type<"low" | "medium" | "high">()
+      .default("medium"),
+      revisionNote: text("revision_note"),
+    dueDate: text("due_date").notNull(),
+    assigneeId: text("assignee_id").notNull().references(() => user.id, { onDelete: 'cascade' }),
+    createdBy: text("created_by").notNull().references(() => user.id, { onDelete: 'cascade' }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("tasks_workspaceId_idx").on(table.workspaceId),
+    index("tasks_assigneeId_idx").on(table.assigneeId),
+    index("tasks_status_idx").on(table.status),
+  ],
+);
 
-export const activityLogs = pgTable("activity_logs", {
-  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
-  workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade"}),
-  actorId: text("actor_id").notNull().references(() => user.id, { onDelete: 'cascade' }),
-  entityType: text("entity_type").notNull(),
-  entityId: text("entity_id").notNull(),
-  action: text("action").notNull(),
-  metadata: jsonb("metadata").$type<{
-    entityName?: string,
-    oldStatus?: string,
-    newStatus?: string,
-    note?: string,
-    assigneeId?: string,
-    assigneeName?: string
-  }>(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+export const activityLogs = pgTable(
+  "activity_logs",
+  {
+    id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+    workspaceId: text("workspace_id").notNull().references(() => workspaces.id, { onDelete: "cascade"}),
+    actorId: text("actor_id").notNull().references(() => user.id, { onDelete: 'cascade' }),
+    entityType: text("entity_type").notNull(),
+    entityId: text("entity_id").notNull(),
+    action: text("action").notNull(),
+    metadata: jsonb("metadata").$type<{
+      entityName?: string,
+      oldStatus?: string,
+      newStatus?: string,
+      note?: string,
+      assigneeId?: string,
+      assigneeName?: string
+    }>(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    // The dashboard reads the newest entries for one workspace.
+    index("activity_logs_workspaceId_createdAt_idx").on(
+      table.workspaceId,
+      table.createdAt,
+    ),
+  ],
+);
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
