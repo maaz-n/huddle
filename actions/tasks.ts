@@ -402,7 +402,7 @@ export async function updateTaskDescription(
   });
 }
 
-export async function addRevisionNote(
+export async function requestChanges(
   taskId: string,
   workspaceId: string,
   note: string,
@@ -412,13 +412,16 @@ export async function addRevisionNote(
   const parsedNote = noteSchema.safeParse(note);
 
   if (!parsedTaskId.success) {
-    throw new Error(validationMessage(parsedTaskId.error));
+    return { success: false, message: validationMessage(parsedTaskId.error) };
   }
   if (!parsedWorkspaceId.success) {
-    throw new Error(validationMessage(parsedWorkspaceId.error));
+    return {
+      success: false,
+      message: validationMessage(parsedWorkspaceId.error),
+    };
   }
   if (!parsedNote.success) {
-    throw new Error(validationMessage(parsedNote.error));
+    return { success: false, message: validationMessage(parsedNote.error) };
   }
 
   const { user } = await requireWorkspaceAccess(
@@ -430,11 +433,21 @@ export async function addRevisionNote(
     parsedWorkspaceId.data,
   );
 
-  if (!task) throw new Error("No task found!");
+  if (!task) return { success: false, message: "Task not found" };
 
-  await db
+  if (task.status !== "in_review") {
+    return {
+      success: false,
+      message: "Only tasks in review can be sent back for changes",
+    };
+  }
+
+  // Reset the status and store the note in one write so the task can never
+  // end up back in todo without its feedback.
+  const [updatedTask] = await db
     .update(tasks)
     .set({
+      status: "todo",
       revisionNote: parsedNote.data,
       updatedAt: new Date(),
     })
@@ -443,16 +456,21 @@ export async function addRevisionNote(
         eq(tasks.id, parsedTaskId.data),
         eq(tasks.workspaceId, parsedWorkspaceId.data),
       ),
-    );
+    )
+    .returning();
+
+  if (!updatedTask) return { success: false, message: "Task not found" };
 
   await logActivity({
     workspaceId: parsedWorkspaceId.data,
     actorId: user.id,
     entityType: "task",
     entityId: parsedTaskId.data,
-    action: "Revision note added",
-    metadata: { entityName: note },
+    action: "TASK_REVISION_REQUESTED",
+    metadata: { entityName: task.title, note: parsedNote.data },
   });
+
+  return { success: true, message: "Changes requested" };
 }
 
 export async function assignTask(

@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { TasksWithAssignees, UserTypeNew } from "@/types/types"
-import { addRevisionNote, deleteTask, updateTaskStatus } from "@/actions/tasks"
+import { deleteTask, requestChanges, updateTaskStatus } from "@/actions/tasks"
 import { getNextStatus, TaskStatus, WorkspaceRole } from "@/lib/task-workflow"
 import { UserAvatar } from "./user-avatar"
 import { toast } from "sonner"
@@ -94,14 +94,18 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
     }
   }
 
-  const sendForRevision = async () => {
+  const sendForRevision = async (e?: React.FormEvent) => {
+    e?.preventDefault()
     try {
       setIsUpdating2(true)
-      await updateTaskStatus(task.id, workspaceId, "todo");
-      await addRevisionNote(task.id, workspaceId, revisionNote)
-      toast.success("Task sent for revision")
-      onOpenChange(false)
-      router.refresh()
+      const response = await requestChanges(task.id, workspaceId, revisionNote)
+      if (response.success) {
+        toast.success(response.message)
+        onOpenChange(false)
+        router.refresh()
+      } else {
+        toast.error(response.message)
+      }
     } catch (error) {
       console.error(error)
       toast.error("An error occured")

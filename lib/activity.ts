@@ -8,7 +8,10 @@ export async function logActivity(params: {
   entityId: string;
   action: string;
   metadata: {
-    entityName: string
+    entityName?: string;
+    oldStatus?: string;
+    newStatus?: string;
+    note?: string;
   }
 }) {
   await db.insert(activityLogs).values({
