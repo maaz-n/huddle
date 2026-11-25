@@ -36,7 +36,7 @@ describe('Multi-tenant Isolation & Read Access Control', () => {
       // User A filters tasks in Workspace A by status: "todo"
       const tasks = await getTasks(fixture.workspaceA.id, {
         status: 'todo',
-        priority: '' as any,
+        priority: '',
         assignee: '',
       });
 

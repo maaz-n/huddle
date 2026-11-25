@@ -43,13 +43,15 @@ export function buildSessionPayload(user: NonNullable<MockUser>) {
  * Initializes or re-attaches the auth.api.getSession spy.
  */
 export function initAuthMock() {
-  if (!getSessionSpy || typeof (auth.api.getSession as any).mockImplementation !== 'function') {
+  if (!getSessionSpy) {
     getSessionSpy = vi.spyOn(auth.api, 'getSession');
   }
 
   getSessionSpy.mockImplementation(async () => {
-    if (!currentSessionUser) return null as any;
-    return buildSessionPayload(currentSessionUser) as any;
+    if (!currentSessionUser) return null;
+    return buildSessionPayload(
+      currentSessionUser,
+    ) as unknown as Awaited<ReturnType<typeof auth.api.getSession>>;
   });
 
   return getSessionSpy;

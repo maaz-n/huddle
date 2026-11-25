@@ -14,8 +14,8 @@ export type UserWithRole = {
 }
 
 export type GetFilteredTasks = {
-  status: "todo" | "in_review" | "done",
-  priority: "low" | "medium" | "high",
+  status: "todo" | "in_review" | "done" | "",
+  priority: "low" | "medium" | "high" | "",
   assignee: string
 }
 

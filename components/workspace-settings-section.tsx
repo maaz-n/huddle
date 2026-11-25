@@ -75,7 +75,7 @@ function WorkspaceSettingsSection({ currentUserRole, workspace }: WorkspaceSetti
                                     />
                                     {currentUserRole !== "owner" && (
                                         <p className="text-xs text-muted-foreground mt-1 italic">
-                                            You don't have permission to rename this workspace.
+                                            You don&apos;t have permission to rename this workspace.
                                         </p>
                                     )}
                                 </div>

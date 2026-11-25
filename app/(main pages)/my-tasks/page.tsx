@@ -7,7 +7,9 @@ import { AppLayout } from '@/components/app-layout'
 import MyTasksTableClient from '@/components/my-tasks-table-client';
 import { redirect } from 'next/navigation';
 
-async function MyTasksPage(props: any) {
+async function MyTasksPage(props: {
+    searchParams: Promise<{ workspace?: string }>
+}) {
 
     const searchParams = await props.searchParams;
     let workspaceId = searchParams.workspace;

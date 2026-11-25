@@ -41,7 +41,7 @@ function MembersSection({ users, currentUserRole, workspaceId, currentUser }: { 
     return (
         <div className="divide-y divide-border">
             {sortedUsers.length > 0 ? (
-                sortedUsers.map((user: any) => (
+                sortedUsers.map((user) => (
                     <div key={user.id} className="p-4 hover:bg-muted/30 transition-colors">
                         <MemberRow
                             user={user}

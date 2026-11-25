@@ -6,8 +6,17 @@ import TaskClient from "@/components/task-client"
 import { getWorkspacesWithRoles, getWorkspaceUsers } from "@/actions/workspace";
 import { redirect } from "next/navigation";
 import { getCurrentUser, getUserWorkspaceRole } from "@/actions/auth";
+import { taskPrioritySchema, taskStatusSchema } from "@/lib/validation";
+import { GetFilteredTasks } from "@/types/types";
 
-export default async function TasksPage(props: any) {
+export default async function TasksPage(props: {
+  searchParams: Promise<{
+    workspace?: string
+    status?: string
+    priority?: string
+    assignee?: string
+  }>
+}) {
 
   const searchParams = await props.searchParams;
   let workspaceId = searchParams.workspace;
@@ -27,9 +36,9 @@ export default async function TasksPage(props: any) {
   const currentUser = await getCurrentUser();
   if(!currentUser) redirect("/login");
 
-  const filter = {
-    status: searchParams.status || "",
-    priority: searchParams.priority || "",
+  const filter: GetFilteredTasks = {
+    status: taskStatusSchema.safeParse(searchParams.status).data ?? "",
+    priority: taskPrioritySchema.safeParse(searchParams.priority).data ?? "",
     assignee: searchParams.assignee || "",
   }
 

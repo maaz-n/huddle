@@ -6,7 +6,9 @@ import { AppLayout } from '@/components/app-layout'
 import MembersWrapper from '@/components/members-wrapper';
 import { redirect } from 'next/navigation';
 
-async function MembersPage(props: any) {
+async function MembersPage(props: {
+    searchParams: Promise<{ workspace?: string }>
+}) {
 
     const searchParams = await props.searchParams;
     let workspaceId = searchParams.workspace;

@@ -71,7 +71,7 @@ export function SignupForm({
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">Welcome aboard!</h1>
                 <p className="text-muted-foreground text-balance">
-                  Let's create your account
+                  Let&apos;s create your account
                 </p>
               </div>
               <Field>

@@ -3,7 +3,12 @@
 import { UserTypeNew, WorkspaceWithRole } from "@/types/types"
 import { createContext, useContext } from "react"
 
-const AppDataContext = createContext<any>(null)
+type AppData = {
+  user: UserTypeNew
+  workspaces: WorkspaceWithRole[]
+}
+
+const AppDataContext = createContext<AppData | null>(null)
 
 export const AppDataProvider = ({
   user,
@@ -22,5 +27,9 @@ export const AppDataProvider = ({
 }
 
 export const useAppData = () => {
-  return useContext(AppDataContext)
+  const context = useContext(AppDataContext)
+  if (!context) {
+    throw new Error("useAppData must be used within an AppDataProvider")
+  }
+  return context
 }

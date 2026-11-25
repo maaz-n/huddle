@@ -63,7 +63,7 @@ export function WorkspaceForm() {
           </div>
         </div>
         <span className='text-sm text-muted-foreground text-center'>
-          Get invited to your team's workspace
+          Get invited to your team&apos;s workspace
         </span>
       </CardFooter>
     </>
