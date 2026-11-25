@@ -99,6 +99,11 @@ export const workspaceMembers = pgTable(
     joinedAt: timestamp("joined_at").defaultNow(),
   },
   (table) => [
+    // A user can only have one membership per workspace.
+    uniqueIndex("workspace_member_unique_idx").on(
+      table.workspaceId,
+      table.userId,
+    ),
     // A workspace can never have more than one owner.
     uniqueIndex("workspace_single_owner_idx")
       .on(table.workspaceId)
