@@ -4,10 +4,21 @@ import { db } from "@/db";
 import { user, workspaceMembers } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
+import { getCurrentUser } from "./auth";
 
-export async function updateUser(newName: string, id: string) {
+export async function updateUser(newName: string) {
   try {
-    await db.update(user).set({ name: newName }).where(eq(user.id, id));
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+      return { success: false, message: "Unauthorized" };
+    }
+
+    const name = newName.trim();
+    if (!name) {
+      return { success: false, message: "Name cannot be empty" };
+    }
+
+    await db.update(user).set({ name }).where(eq(user.id, currentUser.id));
 
     return { success: true, message: "Name updated!" };
   } catch (error) {
