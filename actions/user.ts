@@ -3,7 +3,6 @@
 import { db } from "@/db";
 import { user, workspaceMembers } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
-import { getCurrentUser } from "./auth";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
 
 export async function updateUser(newName: string, id: string) {
@@ -35,38 +34,28 @@ export async function addMember(
   role: string,
   email: string,
 ) {
-  const targetUser = await getUserByEmail(email);
-
-  const currentUser = await getCurrentUser();
-  if (!currentUser) return { success: false, message: "Unauthorized!" };
-
-  await requireWorkspaceAccess(workspaceId, "member");
-
-  if (!targetUser || !targetUser.id)
-    return { success: false, message: `User of email ${email} not found!` };
-
-  const currentUserRole = await db
-    .select({ role: workspaceMembers.role })
-    .from(workspaceMembers)
-    .where(
-      and(
-        eq(workspaceMembers.workspaceId, workspaceId),
-        eq(workspaceMembers.userId, currentUser.id),
-      ),
-    );
-
-  if (currentUser.id === targetUser.id) {
-    return { success: false, message: "You cannot add yourself" };
-  }
-
-  if (
-    currentUserRole[0].role === "admin" &&
-    (role === "admin" || role === "owner")
-  ) {
-    return { success: false, message: "Admins can only add members" };
-  }
-
   try {
+    const { user: currentUser, role: currentUserRole } =
+      await requireWorkspaceAccess(workspaceId, "admin");
+
+    // Ownership is unique and can only change through an explicit transfer.
+    if (role !== "admin" && role !== "member") {
+      return { success: false, message: "Invalid role" };
+    }
+
+    if (currentUserRole === "admin" && role === "admin") {
+      return { success: false, message: "Admins can only add members" };
+    }
+
+    const targetUser = await getUserByEmail(email);
+
+    if (!targetUser || !targetUser.id)
+      return { success: false, message: `User of email ${email} not found!` };
+
+    if (currentUser.id === targetUser.id) {
+      return { success: false, message: "You cannot add yourself" };
+    }
+
     const [existingUser] = await db
       .select()
       .from(workspaceMembers)
@@ -86,7 +75,7 @@ export async function addMember(
     await db.insert(workspaceMembers).values({
       userId: targetUser.id,
       workspaceId: workspaceId,
-      role: role as "admin" | "member" | "owner",
+      role: role,
     });
 
     return { success: true, message: "User added to workspace" };

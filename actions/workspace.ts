@@ -97,7 +97,39 @@ export const updateWorkspaceName = async (
 
 export const removeUser = async (workspaceId: string, userId: string) => {
   try {
-    await requireWorkspaceAccess(workspaceId, "admin");
+    const { user: actor, role: actorRole } = await requireWorkspaceAccess(
+      workspaceId,
+      "admin",
+    );
+
+    if (actor.id === userId) {
+      return { success: false, message: "You cannot remove yourself" };
+    }
+
+    const target = await db.query.workspaceMembers.findFirst({
+      where: and(
+        eq(workspaceMembers.workspaceId, workspaceId),
+        eq(workspaceMembers.userId, userId),
+      ),
+    });
+
+    if (!target) {
+      return { success: false, message: "Member not found" };
+    }
+
+    // The workspace has exactly one owner and that membership is protected.
+    if (target.role === "owner") {
+      return {
+        success: false,
+        message: "The workspace owner cannot be removed",
+      };
+    }
+
+    // Admins may only remove regular members.
+    if (actorRole === "admin" && target.role !== "member") {
+      return { success: false, message: "Admins can only remove members" };
+    }
+
     await db
       .delete(workspaceMembers)
       .where(
@@ -120,42 +152,38 @@ export const updateUserRole = async (
   newRole: "admin" | "member" | "owner",
 ) => {
   try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser) return { success: false, message: "Unauthorized" };
+    const { user: currentUser, role: executingRole } =
+      await requireWorkspaceAccess(workspaceId, "member");
 
-    const [executingMember, targetMember] = await Promise.all([
-      db.query.workspaceMembers.findFirst({
-        where: and(
-          eq(workspaceMembers.workspaceId, workspaceId),
-          eq(workspaceMembers.userId, currentUser.id),
-        ),
-      }),
-      db.query.workspaceMembers.findFirst({
-        where: and(
-          eq(workspaceMembers.workspaceId, workspaceId),
-          eq(workspaceMembers.userId, targetUserId),
-        ),
-      }),
-    ]);
+    if (executingRole !== "owner") {
+      return { success: false, message: "Only the owner can change roles" };
+    }
 
-    if (!executingMember || !targetMember) {
-      return { success: false, message: "Member not found" };
+    // Ownership is unique and can only change through an explicit transfer.
+    if (newRole !== "admin" && newRole !== "member") {
+      return {
+        success: false,
+        message: "Ownership must be transferred, not assigned",
+      };
     }
 
     if (currentUser.id === targetUserId) {
       return { success: false, message: "You cannot change your own role" };
     }
 
-    if (executingMember.role === "admin" && targetMember.role === "admin") {
-      return { success: false, message: "Admins cannot manage other Admins" };
+    const targetMember = await db.query.workspaceMembers.findFirst({
+      where: and(
+        eq(workspaceMembers.workspaceId, workspaceId),
+        eq(workspaceMembers.userId, targetUserId),
+      ),
+    });
+
+    if (!targetMember) {
+      return { success: false, message: "Member not found" };
     }
 
-    if (executingMember.role === "admin" && newRole === "owner") {
-      return { success: false, message: "Only Owners can appoint new Owners" };
-    }
-
-    if (executingMember.role === "member") {
-      return { success: false, message: "Permission denied" };
+    if (targetMember.role === "owner") {
+      return { success: false, message: "The owner's role cannot be changed" };
     }
 
     await db
