@@ -4,6 +4,7 @@ import { useState } from 'react';
 import AddMemberModal from './add-member-modal';
 import { Button } from './ui/button';
 import { addMember } from '@/actions/user';
+import { inviteMember } from '@/actions/invitations';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { UserPlus } from 'lucide-react';
@@ -23,10 +24,26 @@ export default function AddMemberSection({ workspaceId, currentUserRole }: AddMe
         if (response.success) {
             toast.success(response.message);
             router.refresh();
-
-        } else {
-            toast.error(response.message)
+            return true;
         }
+
+        toast.error(response.message)
+        return false;
+    };
+
+    const handleInvite = async (email: string, role: string) => {
+        const response = await inviteMember(workspaceId, email, role);
+        if (response.success) {
+            toast.success(response.message);
+            if (response.inviteLink) {
+                toast.info(`Share this link: ${response.inviteLink}`);
+            }
+            router.refresh();
+            return true;
+        }
+
+        toast.error(response.message)
+        return false;
     };
 
     return (
@@ -47,6 +64,7 @@ export default function AddMemberSection({ workspaceId, currentUserRole }: AddMe
                 isOpen={isOpen}
                 onClose={() => setIsOpen(false)}
                 onAddMember={handleAddMember}
+                onInvite={handleInvite}
             />
         </>
     );

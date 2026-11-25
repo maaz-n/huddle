@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { X } from "lucide-react"
 
 import {
   Dialog,
@@ -23,14 +22,22 @@ import {
 interface AddMemberModalProps {
   isOpen: boolean
   onClose: () => void
-  onAddMember: (email: string, role: string) => Promise<void>
+  onAddMember: (email: string, role: string) => Promise<boolean>
+  onInvite: (email: string, role: string) => Promise<boolean>
 }
 
 type Role = "admin" | "member"
+type Mode = "existing" | "invite"
 
-const AddMemberModal = ({ isOpen, onClose, onAddMember }: AddMemberModalProps) => {
+const AddMemberModal = ({
+  isOpen,
+  onClose,
+  onAddMember,
+  onInvite,
+}: AddMemberModalProps) => {
   const [email, setEmail] = useState("")
   const [role, setRole] = useState<Role>("member")
+  const [mode, setMode] = useState<Mode>("existing")
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,11 +45,18 @@ const AddMemberModal = ({ isOpen, onClose, onAddMember }: AddMemberModalProps) =
     if (!email) return
 
     setIsLoading(true)
-    await onAddMember(email, role)
-
-    setIsLoading(false)
-    setEmail("")
-    onClose()
+    try {
+      const success = await (mode === "existing" ? onAddMember : onInvite)(
+        email,
+        role,
+      )
+      if (success) {
+        setEmail("")
+        onClose()
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -51,6 +65,27 @@ const AddMemberModal = ({ isOpen, onClose, onAddMember }: AddMemberModalProps) =
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle>Add New Member</DialogTitle>
         </DialogHeader>
+
+        <div className="flex gap-1 rounded-lg bg-muted p-1">
+          <Button
+            type="button"
+            size="sm"
+            variant={mode === "existing" ? "default" : "ghost"}
+            className="flex-1"
+            onClick={() => setMode("existing")}
+          >
+            Existing user
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={mode === "invite" ? "default" : "ghost"}
+            className="flex-1"
+            onClick={() => setMode("invite")}
+          >
+            Invite by email
+          </Button>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
@@ -64,7 +99,9 @@ const AddMemberModal = ({ isOpen, onClose, onAddMember }: AddMemberModalProps) =
               onChange={(e) => setEmail(e.target.value)}
             />
             <p className="text-xs text-muted-foreground">
-              The email must already be registered on the platform.
+              {mode === "existing"
+                ? "The email must already be registered on the platform."
+                : "We'll email them a link to join this workspace."}
             </p>
           </div>
 
@@ -86,7 +123,13 @@ const AddMemberModal = ({ isOpen, onClose, onAddMember }: AddMemberModalProps) =
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading || !email}>
-              {isLoading ? "Adding..." : "Add Member"}
+              {isLoading
+                ? mode === "existing"
+                  ? "Adding..."
+                  : "Sending..."
+                : mode === "existing"
+                  ? "Add Member"
+                  : "Send Invitation"}
             </Button>
           </div>
         </form>

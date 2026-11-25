@@ -2,8 +2,10 @@ export const dynamic = 'force-dynamic';
 
 import { getCurrentUser, getUserWorkspaceRole } from '@/actions/auth';
 import { getWorkspacesWithRoles, getWorkspaceUsers } from '@/actions/workspace';
+import { listInvitations } from '@/actions/invitations';
 import { AppLayout } from '@/components/app-layout'
 import MembersWrapper from '@/components/members-wrapper';
+import PendingInvitations from '@/components/pending-invitations';
 import { redirect } from 'next/navigation';
 
 async function MembersPage(props: {
@@ -30,6 +32,10 @@ async function MembersPage(props: {
 
     const users = await getWorkspaceUsers(workspaceId);
 
+    const invitations = currentUserRole !== "member"
+        ? await listInvitations(workspaceId)
+        : [];
+
     return (
         <AppLayout>
             <div className="py-8 px-12 max-w-6xl mx-auto">
@@ -38,6 +44,7 @@ async function MembersPage(props: {
                     <p className="text-muted-foreground mt-2">Manage people in this workspace</p>
                 </div>
                 <MembersWrapper workspaceId={workspaceId} users={users} currentUser={currentUser} currentUserRole={currentUserRole}/>
+                <PendingInvitations workspaceId={workspaceId} invitations={invitations} />
             </div>
         </AppLayout>
     )
