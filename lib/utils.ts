@@ -22,6 +22,10 @@ export function isOverdue(task: TasksWithAssignees): boolean {
 }
 
 
+export function safeNextPath(next?: string | null): string {
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+}
+
 export function formatDueDate(dueDate: string) {
     const date = new Date(dueDate)
     if (isToday(date)) return "Today"

@@ -104,6 +104,21 @@ Admin approves → Done
 Admin requests changes → Todo (with revision note)
 ```
 ---
+<h2 align="center">Environment</h2>
+
+Copy `.env.example` to `.env.local` and fill in the values you need:
+
+| Variable | Purpose |
+| -------- | ------- |
+| `DATABASE_URL` | Neon Postgres connection string |
+| `DATABASE_URL_TEST` | Separate Neon branch used by the tests |
+| `BETTER_AUTH_URL` | Public app URL, e.g. `http://localhost:3000` |
+| `BETTER_AUTH_SECRET` | Secret used to sign sessions |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth credentials |
+| `RESEND_API_KEY` | Resend API key for password-reset and invitation emails |
+| `EMAIL_FROM` | Verified Resend sender address (defaults to `onboarding@resend.dev`) |
+
+---
 <h2 align="center">Show Your Support</h2>
 <p align="center">
   Give a ⭐️ if you liked this project!

@@ -59,6 +59,17 @@ export const dueDateSchema = z
   .string({ required_error: "Due date is required" })
   .refine((value) => !Number.isNaN(Date.parse(value)), "Invalid due date");
 
+export const passwordSchema = z
+  .string({ required_error: "Password is required" })
+  .min(8, "Password must be at least 8 characters")
+  .max(128, "Password is too long");
+
+export const tokenSchema = z
+  .string({ required_error: "Token is required" })
+  .trim()
+  .min(1, "Invalid or missing token")
+  .max(200, "Invalid token");
+
 export const createTaskSchema = z.object({
   workspaceId: idSchema,
   title: taskTitleSchema,
