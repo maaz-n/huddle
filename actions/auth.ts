@@ -5,6 +5,12 @@ import { user, workspaceMembers } from "@/db/schema";
 import { auth } from "@/lib/auth"
 import { and, eq } from "drizzle-orm";
 import { headers } from "next/headers";
+import {
+  emailSchema,
+  passwordSchema,
+  tokenSchema,
+  validationMessage,
+} from "@/lib/validation";
 
 export const login = async (email: string, password: string) => {
     try {
@@ -57,7 +63,7 @@ export const getCurrentUser = async () => {
 
     return realUser[0]
 
-    } catch (error) {
+    } catch {
         throw new Error("Could not fetch user!");    
     }
     
@@ -78,6 +84,57 @@ export const getUserWorkspaceRole = async (workspaceId: string) => {
     )
 
   return result[0]?.role ?? null
+}
+
+export const requestPasswordReset = async (email: string) => {
+  try {
+    const parsedEmail = emailSchema.safeParse(email);
+    if (!parsedEmail.success) {
+      return { success: false, message: validationMessage(parsedEmail.error) };
+    }
+
+    const baseUrl = process.env.BETTER_AUTH_URL || "http://localhost:3000";
+    await auth.api.requestPasswordReset({
+      body: {
+        email: parsedEmail.data.toLowerCase(),
+        redirectTo: `${baseUrl}/reset-password`,
+      },
+    });
+
+    return {
+      success: true,
+      message: "If that email is registered, check your inbox for a reset link.",
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Could not request a password reset" };
+  }
+}
+
+export const resetPassword = async (token: string, newPassword: string) => {
+  try {
+    const parsedToken = tokenSchema.safeParse(token);
+    const parsedPassword = passwordSchema.safeParse(newPassword);
+
+    if (!parsedToken.success) {
+      return { success: false, message: validationMessage(parsedToken.error) };
+    }
+    if (!parsedPassword.success) {
+      return { success: false, message: validationMessage(parsedPassword.error) };
+    }
+
+    await auth.api.resetPassword({
+      body: {
+        token: parsedToken.data,
+        newPassword: parsedPassword.data,
+      },
+    });
+
+    return { success: true, message: "Password reset successfully" };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "This reset link is invalid or expired" };
+  }
 }
 
 

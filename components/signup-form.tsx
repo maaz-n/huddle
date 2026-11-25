@@ -17,11 +17,13 @@ import { toast } from "sonner"
 import { Loader2Icon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
+import { safeNextPath } from "@/lib/utils"
 
 export function SignupForm({
   className,
+  next,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & { next?: string }) {
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,7 +40,7 @@ export function SignupForm({
       const response = await signup(name, email, password);
       if (response.success) {
         toast.success(response.message);
-        router.push("/")
+        router.push(safeNextPath(next))
       } else {
         toast.error(response.message);
       }
@@ -63,7 +65,7 @@ export function SignupForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardHeader>
-          <img src={"/huddle.svg"} className="pt-7 -mb-10 mx-auto w-40 invert-85 dark:invert-0" />
+          <img src={"/huddle.svg"} alt="" className="pt-7 -mb-10 mx-auto w-40 invert-85 dark:invert-0" />
         </CardHeader>
         <CardContent className="p-0">
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
