@@ -17,7 +17,7 @@ const MembersWrapper = ({ workspaceId, currentUserRole, users, currentUser }: Me
 
     const [search, setSearch] = useState("");
 
-    const filteredUsers = users.filter((user) => user.name.toLowerCase().includes(search))
+    const filteredUsers = users.filter((user) => user.name.toLowerCase().includes(search.toLowerCase()))
 
 
     return (

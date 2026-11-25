@@ -19,7 +19,9 @@ const STATUSES = [
   "done",
 ] as const
 
-export default async function DashboardPage(props: any) {
+export default async function DashboardPage(props: {
+  searchParams: Promise<{ workspace?: string }>
+}) {
 
   const searchParams = await props.searchParams;
   const workspaceId = searchParams.workspace;
@@ -58,7 +60,7 @@ export default async function DashboardPage(props: any) {
       <div className="py-8 px-6 space-y-8">
         <UserGreeting dueTasks={dueTasks} />
         <div>
-          <h2 className="text-xl font-semibold mb-4">Tasks by Status</h2>
+          <h2 className="text-xl font-semibold mb-4">My Tasks by Status</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {normalizedStats.map((task) => (
               <TaskStatusCard
