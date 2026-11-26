@@ -14,10 +14,14 @@ export type UserWithRole = {
   role: "owner" | "admin" | "member" | null
 }
 
+export type TaskSort = "updated" | "due" | "priority" | "title"
+
 export type GetFilteredTasks = {
   status: "todo" | "in_review" | "done" | "",
   priority: "low" | "medium" | "high" | "",
-  assignee: string
+  assignee: string,
+  search?: string,
+  sort?: TaskSort
 }
 
 export type TasksWithAssignees = {

@@ -16,60 +16,102 @@ import {
   validationMessage,
 } from "@/lib/validation";
 import { GetFilteredTasks, UserTypeNew } from "@/types/types";
-import { and, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, sql } from "drizzle-orm";
 
-export async function getTasks(workspaceId: string, filter: GetFilteredTasks) {
+/**
+ * Wildcards are escaped so a search for "%" matches a literal percent sign
+ * instead of every task. PostgreSQL's default escape character is backslash.
+ */
+function searchPattern(search: string | undefined) {
+  const term = (search ?? "").trim().slice(0, 100).replace(/[\\%_]/g, "\\$&");
+  return `%${term}%`;
+}
+
+function taskConditions(workspaceId: string, filter: GetFilteredTasks) {
+  const conditions = [eq(tasks.workspaceId, workspaceId)];
+
+  if (filter.status) conditions.push(eq(tasks.status, filter.status));
+  if (filter.priority) conditions.push(eq(tasks.priority, filter.priority));
+  if (filter.assignee) conditions.push(eq(tasks.assigneeId, filter.assignee));
+  if (filter.search?.trim()) {
+    conditions.push(ilike(tasks.title, searchPattern(filter.search)));
+  }
+
+  return conditions;
+}
+
+function taskOrderBy(filter: GetFilteredTasks) {
+  switch (filter.sort) {
+    case "title":
+      return [asc(tasks.title)];
+    case "due":
+      return [asc(tasks.dueDate), desc(tasks.updatedAt)];
+    case "priority":
+      return [
+        sql`case when ${tasks.priority} = 'high' then 0 when ${tasks.priority} = 'medium' then 1 else 2 end asc`,
+        desc(tasks.updatedAt),
+      ];
+    default:
+      return [desc(tasks.updatedAt)];
+  }
+}
+
+/**
+ * Tasks visible in the workspace, with optional search, sort and offset
+ * paging. Omitting `pageSize` returns the whole set, which older callers rely
+ * on.
+ */
+export async function getTasks(
+  workspaceId: string,
+  filter: GetFilteredTasks,
+  options?: { page?: number; pageSize?: number },
+) {
   await requireWorkspaceAccess(workspaceId, "member");
   try {
-    if (!filter.status && !filter.priority && !filter.assignee) {
-      return await db.query.tasks.findMany({
-        where: (tasks, { eq }) => eq(tasks.workspaceId, workspaceId),
-        with: {
-          user: {
-            columns: {
-              id: true,
-              name: true,
-              email: true,
-              image: true,
-            },
+    const pageSize = options?.pageSize;
+    const offset =
+      pageSize && options?.page
+        ? (Math.max(options.page, 1) - 1) * pageSize
+        : undefined;
+
+    return await db.query.tasks.findMany({
+      where: and(...taskConditions(workspaceId, filter)),
+      with: {
+        user: {
+          columns: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
           },
         },
-        orderBy: (tasks, { desc }) => desc(tasks.updatedAt),
-      });
-    } else {
-      return await db.query.tasks.findMany({
-        where: (tasks, { eq, and }) => {
-          const conditions = [eq(tasks.workspaceId, workspaceId)];
-
-          if (filter.status) {
-            conditions.push(eq(tasks.status, filter.status));
-          }
-          if (filter.priority) {
-            conditions.push(eq(tasks.priority, filter.priority));
-          }
-          if (filter.assignee) {
-            conditions.push(eq(tasks.assigneeId, filter.assignee));
-          }
-
-          return and(...conditions);
-        },
-
-        with: {
-          user: {
-            columns: {
-              id: true,
-              name: true,
-              email: true,
-              image: true,
-            },
-          },
-        },
-        orderBy: (tasks, { desc }) => desc(tasks.updatedAt),
-      });
-    }
+      },
+      orderBy: taskOrderBy(filter),
+      limit: pageSize,
+      offset,
+    });
   } catch (error) {
     console.error(error);
     return [];
+  }
+}
+
+/** Total number of tasks matching the current filters, for page counts. */
+export async function getTaskCount(
+  workspaceId: string,
+  filter: GetFilteredTasks,
+) {
+  await requireWorkspaceAccess(workspaceId, "member");
+  try {
+    const [result] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(tasks)
+      .where(and(...taskConditions(workspaceId, filter)));
+
+    return result?.count ?? 0;
+  } catch (error) {
+    console.error(error);
+    return 0;
   }
 }
 

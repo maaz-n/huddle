@@ -38,6 +38,19 @@ export const taskPrioritySchema = z
     { message: "Invalid task priority" },
   );
 
+export const taskSortSchema = z
+  .string()
+  .refine(
+    (value): value is "updated" | "due" | "priority" | "title" =>
+      value === "updated" || value === "due" || value === "priority" || value === "title",
+    { message: "Invalid sort order" },
+  );
+
+export const taskSearchSchema = z
+  .string()
+  .trim()
+  .max(100, "Search query is too long");
+
 export const taskTitleSchema = z
   .string({ required_error: "Title is required" })
   .trim()
