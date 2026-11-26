@@ -10,6 +10,10 @@ import { requireWorkspaceAccess } from "@/lib/workspace-access";
 import { commentSchema, idSchema, validationMessage } from "@/lib/validation";
 import type { TaskComment } from "@/types/types";
 
+type AddCommentResult =
+  | { success: true; message: string; comment: TaskComment }
+  | { success: false; message: string };
+
 async function findTaskInWorkspace(taskId: string, workspaceId: string) {
   return db.query.tasks.findFirst({
     where: and(eq(tasks.id, taskId), eq(tasks.workspaceId, workspaceId)),
@@ -83,7 +87,7 @@ export async function addTaskComment(
   taskId: string,
   workspaceId: string,
   body: string,
-) {
+): Promise<AddCommentResult> {
   try {
     const parsedTaskId = idSchema.safeParse(taskId);
     const parsedWorkspaceId = idSchema.safeParse(workspaceId);
