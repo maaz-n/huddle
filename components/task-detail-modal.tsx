@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { formatDistanceToNow } from "date-fns"
 import {
   Calendar,
@@ -9,6 +9,7 @@ import {
   AlignLeft,
   Loader2,
   AlertCircle,
+  History,
   MessageSquare,
   Trash2,
 } from "lucide-react"
@@ -20,7 +21,14 @@ import {
   DialogTitle
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { TasksWithAssignees, TaskComment, UserTypeNew } from "@/types/types"
+import {
+  ActivityItem,
+  TasksWithAssignees,
+  TaskComment,
+  UserTypeNew,
+} from "@/types/types"
+import { getTaskActivity } from "@/actions/activity"
+import { ActivityLogItem } from "./activity-log-item"
 import { deleteTask, requestChanges, updateTaskStatus } from "@/actions/tasks"
 import {
   addTaskComment,
@@ -58,6 +66,8 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   const [commentBody, setCommentBody] = useState("")
   const [isPostingComment, setIsPostingComment] = useState(false)
   const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null)
+  const [activity, setActivity] = useState<ActivityItem[]>([])
+  const [loadedActivityTaskId, setLoadedActivityTaskId] = useState<string | null>(null)
 
   async function updateStatus(taskId: string, nextStatus: TaskStatus) {
     try {
@@ -77,6 +87,15 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
 
   const taskId = task?.id
   const commentsLoading = open && !!taskId && loadedTaskId !== taskId
+  const activityLoading = open && !!taskId && loadedActivityTaskId !== taskId
+
+  const refreshActivity = useCallback(async (id: string) => {
+    try {
+      setActivity(await getTaskActivity(id, workspaceId))
+    } catch {
+      setActivity([])
+    }
+  }, [workspaceId])
 
   useEffect(() => {
     if (!open || !taskId) return
@@ -96,7 +115,21 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
       }
     }
 
+    const loadActivity = async () => {
+      try {
+        const data = await getTaskActivity(taskId, workspaceId)
+        if (cancelled) return
+        setActivity(data)
+      } catch {
+        if (cancelled) return
+        setActivity([])
+      } finally {
+        if (!cancelled) setLoadedActivityTaskId(taskId)
+      }
+    }
+
     loadComments()
+    loadActivity()
 
     return () => {
       cancelled = true
@@ -184,6 +217,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
         setComments((previous) => [...previous, newComment])
         setCommentBody("")
         setLoadedTaskId(task.id)
+        await refreshActivity(task.id)
         toast.success(response.message)
       } else {
         toast.error(response.message)
@@ -204,6 +238,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
         setComments((previous) =>
           previous.filter((comment) => comment.id !== commentId),
         )
+        await refreshActivity(task.id)
         toast.success(response.message)
       } else {
         toast.error(response.message)
@@ -358,6 +393,29 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                   </Button>
                 </div>
               </form>
+            </div>
+
+            <div className="space-y-4 border-t border-border/50 pt-6">
+              <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <History className="h-4 w-4" />
+                Activity
+              </div>
+
+              {activityLoading ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : activity.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No activity recorded yet.
+                </p>
+              ) : (
+                <div className="space-y-2 divide-y">
+                  {activity.map((item) => (
+                    <ActivityLogItem key={item.id} log={item} />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
