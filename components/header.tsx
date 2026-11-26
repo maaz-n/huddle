@@ -6,6 +6,7 @@ import { WorkspaceSwitcher } from "./workspace-switcher"
 import { UserMenu } from "./user-menu"
 import { useAppData } from "./app-data-provider"
 import { ModeToggle } from "./theme-toggle"
+import { NotificationBell } from "./notification-bell"
 import { useState } from "react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -63,6 +64,7 @@ export function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
             </Button>
           </div>
           <div className="hidden sm:flex items-center gap-2">
+            <NotificationBell />
             <ModeToggle />
             <UserMenu user={user} />
           </div>
