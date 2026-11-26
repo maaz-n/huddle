@@ -64,6 +64,7 @@ Huddle was built to explore:
 ### 6. Activity Log
 
 * Every major action is tracked
+* Task comments with author, timestamp, and notifications for the assignee and creator
 * Status changes
 * Assignments
 * Task creation
