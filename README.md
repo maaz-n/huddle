@@ -65,6 +65,7 @@ Huddle was built to explore:
 
 * Every major action is tracked
 * Task comments with author, timestamp, and notifications for the assignee and creator
+* Per-task timeline of status changes, edits, and comments in the detail modal
 * Status changes
 * Assignments
 * Task creation
