@@ -75,6 +75,36 @@ export async function getTaskActivity(
   }
 }
 
+/**
+ * Newest-first workspace-wide activity feed. Supports simple offset paging
+ * for the dedicated activity page's "Load more" button.
+ */
+export async function getWorkspaceActivity(
+  workspaceId: string,
+  limit = 30,
+  offset = 0,
+): Promise<ActivityItem[]> {
+  try {
+    const parsedWorkspaceId = idSchema.safeParse(workspaceId);
+    if (!parsedWorkspaceId.success) return [];
+
+    await requireWorkspaceAccess(parsedWorkspaceId.data, "member");
+
+    const logs = await db.query.activityLogs.findMany({
+      where: (activityLogs, { eq }) =>
+        eq(activityLogs.workspaceId, parsedWorkspaceId.data),
+      orderBy: (activityLogs, { desc }) => desc(activityLogs.createdAt),
+      limit: Math.min(Math.max(limit, 1), 100),
+      offset: Math.max(offset, 0),
+    });
+
+    return await toActivityItems(logs);
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
 export async function getRecentActivity(workspaceId: string) {
   await requireWorkspaceAccess(workspaceId, "member");
   const logs = await db.query.activityLogs.findMany({
