@@ -1,3 +1,5 @@
+"use server";
+
 import { db } from "@/db";
 import { and, eq, gte, lte, ne } from "drizzle-orm";
 import { startOfDay, endOfDay } from "date-fns";
