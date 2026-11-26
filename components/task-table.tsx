@@ -4,11 +4,17 @@ import { TasksWithAssignees } from "@/types/types"
 
 
 
-export function TaskTable({ tasksWithAssignees, onTaskSelect }: { tasksWithAssignees: TasksWithAssignees[], onTaskSelect: (task: TasksWithAssignees) => void }) {
+export function TaskTable({ tasksWithAssignees, onTaskSelect, emptyMessage }: {
+  tasksWithAssignees: TasksWithAssignees[],
+  onTaskSelect: (task: TasksWithAssignees) => void,
+  emptyMessage?: string
+}) {
   if (tasksWithAssignees.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">No tasks found. Create one to get started.</p>
+        <p className="text-muted-foreground">
+          {emptyMessage ?? "No tasks found. Create one to get started."}
+        </p>
       </div>
     )
   }

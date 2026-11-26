@@ -1,13 +1,20 @@
 export const dynamic = 'force-dynamic';
 
 import { AppLayout } from "@/components/app-layout"
-import { getUsers, getTasks } from "@/actions/tasks"
+import { getUsers, getTasks, getTaskCount } from "@/actions/tasks"
 import TaskClient from "@/components/task-client"
 import { getWorkspacesWithRoles, getWorkspaceUsers } from "@/actions/workspace";
 import { redirect } from "next/navigation";
 import { getCurrentUser, getUserWorkspaceRole } from "@/actions/auth";
-import { taskPrioritySchema, taskStatusSchema } from "@/lib/validation";
+import {
+  taskPrioritySchema,
+  taskSearchSchema,
+  taskSortSchema,
+  taskStatusSchema,
+} from "@/lib/validation";
 import { GetFilteredTasks } from "@/types/types";
+
+const PAGE_SIZE = 10;
 
 export default async function TasksPage(props: {
   searchParams: Promise<{
@@ -15,6 +22,9 @@ export default async function TasksPage(props: {
     status?: string
     priority?: string
     assignee?: string
+    search?: string
+    sort?: string
+    page?: string
   }>
 }) {
 
@@ -40,9 +50,21 @@ export default async function TasksPage(props: {
     status: taskStatusSchema.safeParse(searchParams.status).data ?? "",
     priority: taskPrioritySchema.safeParse(searchParams.priority).data ?? "",
     assignee: searchParams.assignee || "",
+    search: taskSearchSchema.safeParse(searchParams.search ?? "").data ?? "",
+    sort: taskSortSchema.safeParse(searchParams.sort).data ?? "updated",
   }
 
-  const tasksWithAssignees = await getTasks(workspaceId, filter);
+  const total = await getTaskCount(workspaceId, filter)
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const page = Math.min(
+    Math.max(Number.parseInt(searchParams.page ?? "1", 10) || 1, 1),
+    totalPages,
+  )
+
+  const tasksWithAssignees = await getTasks(workspaceId, filter, {
+    page,
+    pageSize: PAGE_SIZE,
+  });
 
   const allUsers = await getUsers(workspaceId);
 
@@ -57,6 +79,9 @@ export default async function TasksPage(props: {
       workspaceId={workspaceId}
       currentUser={currentUser}
       currentUserRole={currentUserRole}
+      total={total}
+      page={page}
+      pageSize={PAGE_SIZE}
       />
     </AppLayout>
   )

@@ -4,13 +4,13 @@ import { InsertTask, TasksWithAssignees, UserTypeNew, WorkspaceUser } from '@/ty
 import { FilterBar } from './filter-bar'
 import { TaskTable } from './task-table'
 import { useState } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Button } from './ui/button'
-import { Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { TaskDetailModal } from './task-detail-modal'
 import { TaskCreateModal } from './task-create-modal'
 import { createTask } from '@/actions/tasks'
 import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
 import { WorkspaceCreateModal } from './workspace-create-modal'
 import { createWorkspace } from '@/actions/workspace'
 import { isOverdue } from '@/lib/utils'
@@ -21,10 +21,13 @@ interface TaskClientProps {
     workspaceUsers: WorkspaceUser[],
     workspaceId: string
     currentUser: UserTypeNew,
-    currentUserRole: string | null
+    currentUserRole: string | null,
+    total: number,
+    page: number,
+    pageSize: number
 }
 
-const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, currentUser, currentUserRole }: TaskClientProps) => {
+const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, currentUser, currentUserRole, total, page, pageSize }: TaskClientProps) => {
 
     const [selectedTask, setSelectedTask] = useState<(typeof tasksWithAssignees)[0] | null>(null);
     const [taskDetailOpen, setTaskDetailOpen] = useState(false);
@@ -36,6 +39,16 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, cu
     }))
 
     const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
+    const totalPages = Math.max(1, Math.ceil(total / pageSize))
+
+    const goToPage = (next: number) => {
+        const params = new URLSearchParams(searchParams.toString())
+        if (next <= 1) params.delete("page")
+        else params.set("page", String(next))
+        router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    }
 
     const handleCreateTask = async (data: InsertTask) => {
         try {
@@ -82,7 +95,34 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, cu
                     setSelectedTask(task);
                     setTaskDetailOpen(true)
                 }}
-                tasksWithAssignees={tasksWithDueInfo} />
+                tasksWithAssignees={tasksWithDueInfo}
+                emptyMessage={total > 0 ? "No tasks match these filters." : undefined} />
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                <p className="text-sm text-muted-foreground">
+                    {total} task{total === 1 ? "" : "s"} &middot; Page {page} of {totalPages}
+                </p>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={page <= 1}
+                        onClick={() => goToPage(page - 1)}
+                    >
+                        <ChevronLeft className="mr-1 h-4 w-4" />
+                        Previous
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={page >= totalPages}
+                        onClick={() => goToPage(page + 1)}
+                    >
+                        Next
+                        <ChevronRight className="ml-1 h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
 
             <TaskDetailModal
                 task={selectedTask}
