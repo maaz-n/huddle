@@ -30,6 +30,8 @@ Huddle was built to explore:
 ### 2. Members
 
 * Invite existing users by email
+* Invite new people with expiring email links
+* Review and revoke pending invitations
 * Assign roles
 * Remove members
 * Role-based permissions enforced server-side
@@ -51,7 +53,14 @@ Huddle was built to explore:
 * Quick actions for completing work
 * Streamlined contributor-focused workflow
 
-### 5. Activity Log
+### 5. Notifications
+
+* Persistent in-app notifications with an unread badge
+* Assignments, review submissions, approvals, and change requests
+* Workspace additions and role changes
+* Mark individual or all notifications as read
+
+### 6. Activity Log
 
 * Every major action is tracked
 * Status changes
@@ -59,7 +68,7 @@ Huddle was built to explore:
 * Task creation
 * Visible in Dashboard & Activity views
 
-### 6. Workspace Settings
+### 7. Workspace Settings
 
 * Rename workspace
 * Delete workspace
