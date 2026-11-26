@@ -6,16 +6,19 @@ import { Label } from '@radix-ui/react-label'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
 import { useState } from 'react'
-import { updateUser } from '@/actions/user'
+import { updateEmailNotifications, updateUser } from '@/actions/user'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { UserTypeNew } from '@/types/types'
 import { useRouter } from 'next/navigation'
+import { Switch } from './ui/switch'
 
 function UserProfile({ user }: { user: UserTypeNew }) {
 
     const [loading, setLoading] = useState(false);
     const [name, setName] = useState(user.name);
+    const [emailNotifications, setEmailNotifications] = useState(user.emailNotifications ?? true);
+    const [savingPreference, setSavingPreference] = useState(false);
     const router = useRouter()
 
     async function handleUpdate() {
@@ -33,6 +36,28 @@ function UserProfile({ user }: { user: UserTypeNew }) {
             console.error(error)
         } finally {
             setLoading(false)
+        }
+    }
+
+    async function handleEmailToggle(enabled: boolean) {
+        const previous = emailNotifications;
+        setEmailNotifications(enabled);
+        setSavingPreference(true);
+
+        try {
+            const response = await updateEmailNotifications(enabled);
+            if (response.success) {
+                toast.success(response.message);
+            } else {
+                setEmailNotifications(previous);
+                toast.error(response.message);
+            }
+        } catch (error) {
+            console.error(error);
+            setEmailNotifications(previous);
+            toast.error("Could not update email preferences");
+        } finally {
+            setSavingPreference(false);
         }
     }
 
@@ -88,6 +113,26 @@ function UserProfile({ user }: { user: UserTypeNew }) {
                             <p className="text-[11px] text-muted-foreground mt-2 italic">
                                 Email changes must be handled by your workspace administrator.
                             </p>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col lg:flex-row py-8 gap-12 lg:gap-24">
+                        <div className="flex-none lg:w-[380px] space-y-1">
+                            <Label className="text-base font-semibold">Email Notifications</Label>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                Get an email when you are assigned a task or when changes are requested.
+                            </p>
+                        </div>
+                        <div className="flex flex-1 items-center gap-3">
+                            <Switch
+                                checked={emailNotifications}
+                                onCheckedChange={handleEmailToggle}
+                                disabled={savingPreference}
+                                aria-label="Email notifications"
+                            />
+                            <span className="text-sm text-muted-foreground">
+                                {emailNotifications ? "On" : "Off"}
+                            </span>
                         </div>
                     </div>
 

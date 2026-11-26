@@ -38,6 +38,34 @@ export async function updateUser(newName: string) {
   }
 }
 
+export async function updateEmailNotifications(enabled: boolean) {
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+      return { success: false, message: "Unauthorized" };
+    }
+
+    if (typeof enabled !== "boolean") {
+      return { success: false, message: "Invalid preference" };
+    }
+
+    await db
+      .update(user)
+      .set({ emailNotifications: enabled })
+      .where(eq(user.id, currentUser.id));
+
+    return {
+      success: true,
+      message: enabled
+        ? "Email notifications enabled"
+        : "Email notifications disabled",
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Could not update email preferences" };
+  }
+}
+
 async function getUserByEmail(email: string) {
   try {
     const userObj = await db

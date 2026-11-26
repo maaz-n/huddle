@@ -43,6 +43,13 @@
       "when": 1795713479734,
       "tag": "0005_open_nico_minoru",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795714873398,
+      "tag": "0006_typical_hannibal_king",
+      "breakpoints": true
     }
   ]
 }

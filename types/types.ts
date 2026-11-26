@@ -3,6 +3,7 @@ export type UserTypeNew = {
   name: string;
   email: string;
   image?: string | null | undefined;
+  emailNotifications?: boolean;
 }
 
 export type UserWithRole = {

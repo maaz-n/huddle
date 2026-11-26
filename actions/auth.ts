@@ -57,6 +57,7 @@ export const getCurrentUser = async () => {
         name: user.name,
         email: user.email,
         image: user.image,
+        emailNotifications: user.emailNotifications,
     })
     .from(user)
     .where(eq(user.id, userId));
