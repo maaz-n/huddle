@@ -46,6 +46,7 @@ Huddle was built to explore:
   * `Done`
 * Members submit work for review
 * Admins/Owners approve or request revisions
+* Search by title, sort by updated/due date/priority/title, and page results
 
 ### 4. My Tasks
 
