@@ -73,3 +73,31 @@ export type Actor = {
   name: string,
   image: string | null | undefined
 }
+
+export type NotificationType =
+  | "task_assigned"
+  | "task_submitted"
+  | "task_completed"
+  | "changes_requested"
+  | "workspace_added"
+  | "role_changed"
+  | "invitation_accepted"
+
+export type NotificationMetadata = {
+  taskId?: string
+  taskTitle?: string
+  workspaceName?: string
+  role?: string
+}
+
+export type NotificationItem = {
+  id: string
+  type: NotificationType
+  title: string
+  body: string | null
+  workspaceId: string
+  entityType: "task" | "workspace"
+  entityId: string
+  readAt: string | null
+  createdAt: string
+}

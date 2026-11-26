@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import { relations, sql } from "drizzle-orm";
+import type { NotificationMetadata, NotificationType } from "../types/types";
 import {
   pgTable,
   text,
@@ -191,6 +192,38 @@ export const workspaceInvitations = pgTable(
     uniqueIndex("workspace_invitations_pending_email_idx")
       .on(table.workspaceId, table.email)
       .where(sql`${table.acceptedAt} is null`),
+  ],
+);
+
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    type: text("type").$type<NotificationType>().notNull(),
+    entityType: text("entity_type").$type<"task" | "workspace">().notNull(),
+    entityId: text("entity_id").notNull(),
+    title: text("title").notNull(),
+    body: text("body"),
+    metadata: jsonb("metadata").$type<NotificationMetadata>(),
+    readAt: timestamp("read_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    // The bell reads the newest notifications for one user.
+    index("notifications_userId_createdAt_idx").on(
+      table.userId,
+      table.createdAt,
+    ),
+    // The unread badge only ever counts rows where read_at is null.
+    index("notifications_userId_unread_idx")
+      .on(table.userId)
+      .where(sql`${table.readAt} is null`),
   ],
 );
 

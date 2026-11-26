@@ -36,6 +36,13 @@
       "when": 1795633057332,
       "tag": "0004_fair_zarda",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795713479734,
+      "tag": "0005_open_nico_minoru",
+      "breakpoints": true
     }
   ]
 }
