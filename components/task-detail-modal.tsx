@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { formatDistanceToNow } from "date-fns"
 import {
   Calendar,
@@ -9,6 +9,8 @@ import {
   AlignLeft,
   Loader2,
   AlertCircle,
+  MessageSquare,
+  Trash2,
 } from "lucide-react"
 
 import {
@@ -18,8 +20,13 @@ import {
   DialogTitle
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { TasksWithAssignees, UserTypeNew } from "@/types/types"
+import { TasksWithAssignees, TaskComment, UserTypeNew } from "@/types/types"
 import { deleteTask, requestChanges, updateTaskStatus } from "@/actions/tasks"
+import {
+  addTaskComment,
+  deleteTaskComment,
+  getTaskComments,
+} from "@/actions/comments"
 import { getNextStatus, TaskStatus, WorkspaceRole } from "@/lib/task-workflow"
 import { UserAvatar } from "./user-avatar"
 import { toast } from "sonner"
@@ -46,6 +53,11 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   const [isDeleting, setIsDeleting] = useState(false)
   const [isRequestingChange, setIsRequestingChange] = useState(false)
   const [revisionNote, setRevisionNote] = useState("")
+  const [comments, setComments] = useState<TaskComment[]>([])
+  const [loadedTaskId, setLoadedTaskId] = useState<string | null>(null)
+  const [commentBody, setCommentBody] = useState("")
+  const [isPostingComment, setIsPostingComment] = useState(false)
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null)
 
   async function updateStatus(taskId: string, nextStatus: TaskStatus) {
     try {
@@ -62,6 +74,34 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   }
 
   const router = useRouter();
+
+  const taskId = task?.id
+  const commentsLoading = open && !!taskId && loadedTaskId !== taskId
+
+  useEffect(() => {
+    if (!open || !taskId) return
+
+    let cancelled = false
+
+    const loadComments = async () => {
+      try {
+        const data = await getTaskComments(taskId, workspaceId)
+        if (cancelled) return
+        setComments(data)
+      } catch {
+        if (cancelled) return
+        setComments([])
+      } finally {
+        if (!cancelled) setLoadedTaskId(taskId)
+      }
+    }
+
+    loadComments()
+
+    return () => {
+      cancelled = true
+    }
+  }, [open, taskId, workspaceId])
 
   if (!task) return null
 
@@ -132,6 +172,50 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
     }
   }
 
+  const handleAddComment = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!commentBody.trim()) return
+
+    setIsPostingComment(true)
+    try {
+      const response = await addTaskComment(task.id, workspaceId, commentBody)
+      if (response.success) {
+        const newComment = response.comment
+        setComments((previous) => [...previous, newComment])
+        setCommentBody("")
+        setLoadedTaskId(task.id)
+        toast.success(response.message)
+      } else {
+        toast.error(response.message)
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error("Could not add comment")
+    } finally {
+      setIsPostingComment(false)
+    }
+  }
+
+  const handleDeleteComment = async (commentId: string) => {
+    setDeletingCommentId(commentId)
+    try {
+      const response = await deleteTaskComment(commentId, workspaceId)
+      if (response.success) {
+        setComments((previous) =>
+          previous.filter((comment) => comment.id !== commentId),
+        )
+        toast.success(response.message)
+      } else {
+        toast.error(response.message)
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error("Could not delete comment")
+    } finally {
+      setDeletingCommentId(null)
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-2xl p-0 overflow-hidden border-none shadow-2xl bg-background">
@@ -174,6 +258,107 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                 </p>
               </div>
             )}
+
+            <div className="space-y-4 border-t border-border/50 pt-6">
+              <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <MessageSquare className="h-4 w-4" />
+                Comments
+                {comments.length > 0 && (
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold">
+                    {comments.length}
+                  </span>
+                )}
+              </div>
+
+              {commentsLoading ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : comments.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No comments yet. Start the discussion.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {comments.map((comment) => {
+                    const canDelete =
+                      comment.authorId === currentUser.id || isManager
+
+                    return (
+                      <div key={comment.id} className="flex gap-3">
+                        <UserAvatar
+                          user={{
+                            id: comment.author.id,
+                            name: comment.author.name,
+                            email: "",
+                            image: comment.author.image,
+                          }}
+                          className="h-8 w-8 shrink-0"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex flex-wrap items-baseline gap-2">
+                              <span className="text-sm font-medium">
+                                {comment.author.name}
+                              </span>
+                              <span className="text-[11px] text-muted-foreground">
+                                {formatDistanceToNow(
+                                  new Date(comment.createdAt),
+                                  { addSuffix: true },
+                                )}
+                              </span>
+                            </div>
+                            {canDelete && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
+                                onClick={() =>
+                                  handleDeleteComment(comment.id)
+                                }
+                                disabled={deletingCommentId === comment.id}
+                                aria-label="Delete comment"
+                              >
+                                {deletingCommentId === comment.id ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                )}
+                              </Button>
+                            )}
+                          </div>
+                          <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground/80">
+                            {comment.body}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+
+              <form onSubmit={handleAddComment} className="space-y-2">
+                <Textarea
+                  value={commentBody}
+                  onChange={(e) => setCommentBody(e.target.value)}
+                  placeholder="Write a comment..."
+                  className="min-h-[80px] resize-none"
+                  maxLength={2000}
+                />
+                <div className="flex justify-end">
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={isPostingComment || !commentBody.trim()}
+                  >
+                    {isPostingComment && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Comment
+                  </Button>
+                </div>
+              </form>
+            </div>
           </div>
 
 
