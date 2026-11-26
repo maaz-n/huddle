@@ -43,3 +43,25 @@ export function invitationEmail({
      <p style="margin:0;font-size:13px;color:#71717a;">If the button does not work, copy this link into your browser:<br>${escapeHtml(url)}</p>`,
   );
 }
+
+export function taskNotificationEmail({
+  recipientName,
+  title,
+  taskTitle,
+  workspaceName,
+  url,
+}: {
+  recipientName: string;
+  title: string;
+  taskTitle?: string | null;
+  workspaceName: string;
+  url: string;
+}): string {
+  return wrap(
+    title,
+    `<p style="margin:0 0 16px;line-height:1.5;">Hi ${escapeHtml(recipientName)},</p>
+     <p style="margin:0 0 20px;line-height:1.5;">${escapeHtml(title)} in <strong>${escapeHtml(workspaceName)}</strong>.</p>
+     ${taskTitle ? `<p style="margin:0 0 24px;padding:12px 16px;background:#f4f4f5;border-radius:8px;font-weight:600;">${escapeHtml(taskTitle)}</p>` : ""}
+     <p style="margin:0 0 24px;"><a href="${escapeHtml(url)}" style="background:#18181b;color:#ffffff;padding:10px 18px;border-radius:8px;text-decoration:none;">Open Huddle</a></p>`,
+  );
+}
