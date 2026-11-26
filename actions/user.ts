@@ -1,9 +1,10 @@
 "use server";
 
 import { db } from "@/db";
-import { user, workspaceMembers } from "@/db/schema";
+import { user, workspaceMembers, workspaces } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
+import { notifyUsers } from "@/lib/notifications";
 import {
   emailSchema,
   idSchema,
@@ -112,6 +113,22 @@ export async function addMember(
       userId: targetUser.id,
       workspaceId: parsedWorkspaceId.data,
       role: parsedRole.data,
+    });
+
+    const workspace = await db.query.workspaces.findFirst({
+      where: eq(workspaces.id, parsedWorkspaceId.data),
+      columns: { name: true },
+    });
+
+    await notifyUsers({
+      userIds: [targetUser.id],
+      workspaceId: parsedWorkspaceId.data,
+      type: "workspace_added",
+      entityType: "workspace",
+      entityId: parsedWorkspaceId.data,
+      title: "Added to a workspace",
+      body: workspace?.name ?? "A workspace",
+      metadata: { workspaceName: workspace?.name },
     });
 
     return { success: true, message: "User added to workspace" };

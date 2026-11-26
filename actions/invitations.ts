@@ -12,6 +12,7 @@ import {
 } from "@/db/schema";
 import { sendEmail } from "@/lib/email";
 import { invitationEmail } from "@/lib/email-templates";
+import { notifyUsers } from "@/lib/notifications";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
 import {
   emailSchema,
@@ -267,6 +268,18 @@ export async function acceptInvitation(token: string) {
 
     if (!result[0]) {
       return { success: false, message: "Could not accept the invitation" };
+    }
+
+    if (invitation.invitedBy !== currentUser.id) {
+      await notifyUsers({
+        userIds: [invitation.invitedBy],
+        workspaceId: invitation.workspaceId,
+        type: "invitation_accepted",
+        entityType: "workspace",
+        entityId: invitation.workspaceId,
+        title: "Invitation accepted",
+        body: `${currentUser.name} joined your workspace`,
+      });
     }
 
     return {

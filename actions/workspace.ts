@@ -5,6 +5,7 @@ import { user, workspaceMembers, workspaces } from "@/db/schema";
 import { getCurrentUser } from "./auth";
 import { and, eq } from "drizzle-orm";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
+import { notifyUsers } from "@/lib/notifications";
 import { idSchema, nameSchema, validationMessage } from "@/lib/validation";
 
 export const createWorkspace = async (name: string) => {
@@ -244,6 +245,22 @@ export const updateUserRole = async (
           eq(workspaceMembers.userId, parsedTargetUserId.data),
         ),
       );
+
+    const workspace = await db.query.workspaces.findFirst({
+      where: eq(workspaces.id, parsedWorkspaceId.data),
+      columns: { name: true },
+    });
+
+    await notifyUsers({
+      userIds: [parsedTargetUserId.data],
+      workspaceId: parsedWorkspaceId.data,
+      type: "role_changed",
+      entityType: "workspace",
+      entityId: parsedWorkspaceId.data,
+      title: "Your role was updated",
+      body: `You are now ${newRole} in ${workspace?.name ?? "a workspace"}`,
+      metadata: { role: newRole, workspaceName: workspace?.name },
+    });
 
     return { success: true, message: "Role updated successfully" };
   } catch (error) {

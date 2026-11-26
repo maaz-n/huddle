@@ -3,6 +3,7 @@
 import { db } from "@/db";
 import { tasks, activityLogs, user, workspaceMembers } from "@/db/schema";
 import { logActivity } from "@/lib/activity";
+import { getWorkspaceManagerIds, notifyUsers } from "@/lib/notifications";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
 import { canTransition } from "@/lib/task-workflow";
 import {
@@ -164,6 +165,22 @@ export async function createTask(
       metadata: { entityName: insertedTask.title },
     });
 
+    if (insertedTask.assigneeId !== user.id) {
+      await notifyUsers({
+        userIds: [insertedTask.assigneeId],
+        workspaceId: parsed.data.workspaceId,
+        type: "task_assigned",
+        entityType: "task",
+        entityId: insertedTask.id,
+        title: "New task assigned to you",
+        body: insertedTask.title,
+        metadata: {
+          taskId: insertedTask.id,
+          taskTitle: insertedTask.title,
+        },
+      });
+    }
+
     return { success: true, message: "Task created!" };
   } catch (error) {
     console.error(error);
@@ -292,6 +309,35 @@ export async function updateTaskStatus(
       newStatus: parsedStatus.data,
     },
   });
+
+  if (parsedStatus.data === "in_review") {
+    const managerIds = await getWorkspaceManagerIds(
+      parsedWorkspaceId.data,
+      user.id,
+    );
+
+    await notifyUsers({
+      userIds: managerIds,
+      workspaceId: parsedWorkspaceId.data,
+      type: "task_submitted",
+      entityType: "task",
+      entityId: parsedTaskId.data,
+      title: "Task submitted for review",
+      body: task.title,
+      metadata: { taskId: parsedTaskId.data, taskTitle: task.title },
+    });
+  } else if (parsedStatus.data === "done" && task.assigneeId !== user.id) {
+    await notifyUsers({
+      userIds: [task.assigneeId],
+      workspaceId: parsedWorkspaceId.data,
+      type: "task_completed",
+      entityType: "task",
+      entityId: parsedTaskId.data,
+      title: "Task completed",
+      body: task.title,
+      metadata: { taskId: parsedTaskId.data, taskTitle: task.title },
+    });
+  }
 
   return { success: true, message: "Task status updated!" };
 }
@@ -470,6 +516,19 @@ export async function requestChanges(
     metadata: { entityName: task.title, note: parsedNote.data },
   });
 
+  if (task.assigneeId !== user.id) {
+    await notifyUsers({
+      userIds: [task.assigneeId],
+      workspaceId: parsedWorkspaceId.data,
+      type: "changes_requested",
+      entityType: "task",
+      entityId: parsedTaskId.data,
+      title: "Changes requested",
+      body: task.title,
+      metadata: { taskId: parsedTaskId.data, taskTitle: task.title },
+    });
+  }
+
   return { success: true, message: "Changes requested" };
 }
 
@@ -547,6 +606,19 @@ export async function assignTask(
       assigneeName: assignee?.name ?? "a teammate",
     },
   });
+
+  if (parsedAssigneeId.data !== actor.id) {
+    await notifyUsers({
+      userIds: [parsedAssigneeId.data],
+      workspaceId: parsedWorkspaceId.data,
+      type: "task_assigned",
+      entityType: "task",
+      entityId: parsedTaskId.data,
+      title: "Task assigned to you",
+      body: task.title,
+      metadata: { taskId: parsedTaskId.data, taskTitle: task.title },
+    });
+  }
 }
 
 export async function getUsers(workspaceId: string): Promise<UserTypeNew[]> {
