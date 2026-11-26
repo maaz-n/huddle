@@ -59,6 +59,7 @@ Huddle was built to explore:
 * Assignments, review submissions, approvals, and change requests
 * Workspace additions and role changes
 * Mark individual or all notifications as read
+* Optional email alerts for assignments and change requests
 
 ### 6. Activity Log
 
