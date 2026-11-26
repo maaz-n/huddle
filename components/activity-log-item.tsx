@@ -16,6 +16,7 @@ interface LogProps {
     oldStatus?: string,
     newStatus?: string,
     note?: string,
+    comment?: string,
     assigneeId?: string,
     assigneeName?: string,
   } | null
@@ -80,6 +81,13 @@ function getActivityContent(log: LogProps) {
       return (
         <span className="text-muted-foreground ml-1">
           updated the description of <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
+        </span>
+      );
+
+    case "TASK_COMMENT_ADDED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          commented on <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
         </span>
       );
 
