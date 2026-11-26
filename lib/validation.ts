@@ -70,6 +70,12 @@ export const tokenSchema = z
   .min(1, "Invalid or missing token")
   .max(200, "Invalid token");
 
+export const commentSchema = z
+  .string({ required_error: "Comment is required" })
+  .trim()
+  .min(1, "Comment cannot be empty")
+  .max(2000, "Comment is too long");
+
 export const createTaskSchema = z.object({
   workspaceId: idSchema,
   title: taskTitleSchema,

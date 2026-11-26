@@ -12,6 +12,7 @@ export async function logActivity(params: {
     oldStatus?: string;
     newStatus?: string;
     note?: string;
+    comment?: string;
     assigneeId?: string;
     assigneeName?: string;
   }

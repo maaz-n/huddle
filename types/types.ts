@@ -80,6 +80,7 @@ export type NotificationType =
   | "task_submitted"
   | "task_completed"
   | "changes_requested"
+  | "task_comment"
   | "workspace_added"
   | "role_changed"
   | "invitation_accepted"
@@ -89,6 +90,7 @@ export type NotificationMetadata = {
   taskTitle?: string
   workspaceName?: string
   role?: string
+  comment?: string
 }
 
 export type NotificationItem = {
@@ -101,4 +103,18 @@ export type NotificationItem = {
   entityId: string
   readAt: string | null
   createdAt: string
+}
+
+export type TaskComment = {
+  id: string
+  taskId: string
+  workspaceId: string
+  authorId: string
+  body: string
+  createdAt: string
+  author: {
+    id: string
+    name: string
+    image: string | null
+  }
 }

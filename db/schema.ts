@@ -142,6 +142,32 @@ export const tasks = pgTable(
   ],
 );
 
+export const taskComments = pgTable(
+  "task_comments",
+  {
+    id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+    taskId: text("task_id")
+      .notNull()
+      .references(() => tasks.id, { onDelete: "cascade" }),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    // The task detail modal reads one task's thread oldest first.
+    index("task_comments_taskId_createdAt_idx").on(
+      table.taskId,
+      table.createdAt,
+    ),
+    index("task_comments_workspaceId_idx").on(table.workspaceId),
+  ],
+);
+
 export const activityLogs = pgTable(
   "activity_logs",
   {
@@ -156,6 +182,7 @@ export const activityLogs = pgTable(
       oldStatus?: string,
       newStatus?: string,
       note?: string,
+      comment?: string,
       assigneeId?: string,
       assigneeName?: string
     }>(),

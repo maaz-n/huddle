@@ -50,6 +50,13 @@
       "when": 1795714873398,
       "tag": "0006_typical_hannibal_king",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795715460389,
+      "tag": "0007_secret_wallow",
+      "breakpoints": true
     }
   ]
 }
