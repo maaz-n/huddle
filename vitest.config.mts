@@ -8,6 +8,10 @@ dotenv.config({ path: '.env.test' });
 dotenv.config({ path: '.env.local' });
 dotenv.config({ path: '.env' });
 
+// Tests mock email delivery in tests/setup.ts. Drop the real key so a stray
+// code path can never reach Resend.
+delete process.env.RESEND_API_KEY;
+
 // Point DATABASE_URL to DATABASE_URL_TEST during tests
 if (process.env.DATABASE_URL_TEST) {
   process.env.DATABASE_URL = process.env.DATABASE_URL_TEST;

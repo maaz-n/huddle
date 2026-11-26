@@ -14,15 +14,8 @@ import {
   TestFixture,
 } from "@/tests/helpers";
 
-vi.mock("@/lib/email", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/email")>();
-  return {
-    ...actual,
-    sendEmail: vi.fn(async () => ({ success: true })),
-  };
-});
-
 const sendEmailMock = vi.mocked(sendEmail);
+const originalResendKey = process.env.RESEND_API_KEY;
 
 describe("Email notifications", () => {
   let fixture: TestFixture;
@@ -40,7 +33,11 @@ describe("Email notifications", () => {
   });
 
   afterEach(async () => {
-    delete process.env.RESEND_API_KEY;
+    if (originalResendKey === undefined) {
+      delete process.env.RESEND_API_KEY;
+    } else {
+      process.env.RESEND_API_KEY = originalResendKey;
+    }
     clearSession();
     if (fixture) {
       await cleanupTestFixture(fixture);

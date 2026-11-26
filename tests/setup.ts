@@ -12,5 +12,15 @@ vi.mock('next/headers', () => ({
   })),
 }));
 
+// Tests must never send real email. Suites that care about delivery can
+// import sendEmail from "@/lib/email" and assert on this mock.
+vi.mock('@/lib/email', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/email')>();
+  return {
+    ...actual,
+    sendEmail: vi.fn(async () => ({ success: true })),
+  };
+});
+
 // Initialize auth session lookup mock
 initAuthMock();
