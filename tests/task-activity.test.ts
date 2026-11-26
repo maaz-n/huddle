@@ -42,6 +42,18 @@ describe("Task activity", () => {
       "in_review",
     );
 
+    // Both logs can share the same second-level timestamp; space them out so
+    // the newest-first assertion is deterministic.
+    const [commentLog] = await db
+      .select()
+      .from(activityLogs)
+      .where(eq(activityLogs.entityId, fixture.taskA.id))
+      .orderBy(asc(activityLogs.createdAt));
+    await db
+      .update(activityLogs)
+      .set({ createdAt: new Date(Date.now() - 60_000) })
+      .where(eq(activityLogs.id, commentLog.id));
+
     const activity = await getTaskActivity(
       fixture.taskA.id,
       fixture.workspaceA.id,
