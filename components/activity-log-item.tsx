@@ -2,28 +2,9 @@
 
 import { formatDistanceToNow } from "date-fns"
 import { UserAvatar } from "./user-avatar"
-import { Actor } from "@/types/types"
+import { ActivityItem } from "@/types/types"
 
-interface LogProps {
-  id: string
-  actor: Actor
-  action: string
-  entityType: string
-  entityName: string
-  timestamp: Date,
-  metadata: {
-    entityName?: string
-    oldStatus?: string,
-    newStatus?: string,
-    note?: string,
-    comment?: string,
-    assigneeId?: string,
-    assigneeName?: string,
-  } | null
-}
-
-
-
+type LogProps = ActivityItem
 
 function getActivityContent(log: LogProps) {
   const { oldStatus, newStatus } = log.metadata || {};

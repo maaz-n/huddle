@@ -75,6 +75,24 @@ export type Actor = {
   image: string | null | undefined
 }
 
+export type ActivityItem = {
+  id: string
+  actor: Actor
+  action: string
+  entityType: string
+  entityName: string
+  timestamp: string | Date
+  metadata: {
+    entityName?: string
+    oldStatus?: string
+    newStatus?: string
+    note?: string
+    comment?: string
+    assigneeId?: string
+    assigneeName?: string
+  } | null
+}
+
 export type NotificationType =
   | "task_assigned"
   | "task_submitted"
