@@ -51,6 +51,7 @@ Huddle was built to explore:
 * Colored workspace labels on tasks, managed from the detail modal
 * File attachments on tasks (5 MB per file, 20 per task) with authenticated downloads
 * Subtask checklists with progress tracking
+* Recurring daily/weekly/monthly tasks that schedule the next occurrence on completion
 
 ### 4. My Tasks
 
