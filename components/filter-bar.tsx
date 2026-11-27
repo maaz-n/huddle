@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { taskSortSchema, taskStatusSchema, taskPrioritySchema } from "@/lib/validation"
+import { useLocale } from "@/lib/use-locale"
 import { UserTypeNew } from "@/types/types"
 
 type TaskStatus = "todo" | "in_review" | "done"
@@ -34,6 +35,7 @@ const sorts: { value: TaskSort; label: string }[] = [
 ]
 
 export function FilterBar({ users }: { users: UserTypeNew[] }) {
+  const { t } = useLocale()
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter()
@@ -121,14 +123,14 @@ export function FilterBar({ users }: { users: UserTypeNew[] }) {
           type="search"
           value={searchInput}
           onChange={(event) => setSearchInput(event.target.value)}
-          placeholder="Search by title..."
+          placeholder={t("tasks.search")}
           className="pl-9"
           aria-label="Search tasks by title"
         />
       </div>
 
       <Select value={sort} onValueChange={(value) => setSort(value as TaskSort)}>
-        <SelectTrigger className="w-48" aria-label="Sort tasks">
+        <SelectTrigger className="w-48" aria-label={t("tasks.sort")}>
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent>
@@ -141,7 +143,7 @@ export function FilterBar({ users }: { users: UserTypeNew[] }) {
       </Select>
 
       <Select value={selectedStatus} onValueChange={(value) => setSelectedStatus(value as TaskStatus)}>
-        <SelectTrigger className="w-40" aria-label="Filter by status">
+        <SelectTrigger className="w-40" aria-label={t("tasks.filterStatus")}>
           <SelectValue placeholder="Filter by status" />
         </SelectTrigger>
         <SelectContent>
@@ -154,7 +156,7 @@ export function FilterBar({ users }: { users: UserTypeNew[] }) {
       </Select>
 
       <Select value={selectedPriority} onValueChange={(value) => setSelectedPriority(value as TaskPriority)}>
-        <SelectTrigger className="w-40" aria-label="Filter by priority">
+        <SelectTrigger className="w-40" aria-label={t("tasks.filterPriority")}>
           <SelectValue placeholder="Filter by priority" />
         </SelectTrigger>
         <SelectContent>
@@ -167,7 +169,7 @@ export function FilterBar({ users }: { users: UserTypeNew[] }) {
       </Select>
 
       <Select value={selectedAssignee} onValueChange={setSelectedAssignee}>
-        <SelectTrigger className="w-45" disabled={users.length === 0} aria-label="Filter by assignee">
+        <SelectTrigger className="w-45" disabled={users.length === 0} aria-label={t("tasks.filterAssignee")}>
           <SelectValue placeholder="Filter by assignee" />
         </SelectTrigger>
         <SelectContent>

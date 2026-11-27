@@ -12,6 +12,7 @@ import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { WorkspaceCreateModal } from "./workspace-create-modal"
 import { createWorkspace } from "@/actions/workspace"
+import { useLocale } from "@/lib/use-locale"
 
 interface HeaderProps {
   sidebarOpen: boolean
@@ -21,6 +22,7 @@ interface HeaderProps {
 export function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
 
   const { user, workspaces } = useAppData();
+  const { t } = useLocale();
   const router = useRouter();
   const [workspaceCreateOpen, setWorkspaceCreateOpen] = useState(false);
 
@@ -49,7 +51,7 @@ export function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
             size="icon"
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="lg:hidden"
-            aria-label={sidebarOpen ? "Close navigation" : "Open navigation"}
+            aria-label={sidebarOpen ? t("a11y.closeNavigation") : t("a11y.openNavigation")}
             aria-expanded={sidebarOpen}
           >
             <Menu className="h-5 w-5" />
@@ -59,7 +61,7 @@ export function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
             <Button
               onClick={() => setWorkspaceCreateOpen(true)}
               className="gap-2 bg-primary hover:bg-primary/90"
-              aria-label="Create workspace"
+              aria-label={t("a11y.createWorkspace")}
             >
               <Plus className="h-2 w-2" />
             </Button>
@@ -73,7 +75,7 @@ export function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
             <Button
               onClick={() => setWorkspaceCreateOpen(true)}
               className="gap-2 bg-primary hover:bg-primary/90"
-              aria-label="Create workspace"
+              aria-label={t("a11y.createWorkspace")}
             >
               <Plus/>
             </Button>

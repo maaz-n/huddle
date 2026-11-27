@@ -25,6 +25,7 @@ import { toast } from 'sonner'
 import { WorkspaceCreateModal } from './workspace-create-modal'
 import { createWorkspace } from '@/actions/workspace'
 import { isOverdue } from '@/lib/utils'
+import { useLocale } from '@/lib/use-locale'
 
 interface TaskClientProps {
     users: UserTypeNew[]
@@ -39,6 +40,8 @@ interface TaskClientProps {
 }
 
 const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, currentUser, currentUserRole, total, page, pageSize }: TaskClientProps) => {
+
+    const { t } = useLocale()
 
     const [selectedTask, setSelectedTask] = useState<(typeof tasksWithAssignees)[0] | null>(null);
     const [taskDetailOpen, setTaskDetailOpen] = useState(false);
@@ -142,14 +145,14 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, cu
                 {currentUserRole !== "member" &&
                     <Button onClick={() => setTaskCreateOpen(true)} className="gap-2 bg-primary hover:bg-primary/90 hidden sm:inline-flex">
                         <Plus className="h-4 w-4" />
-                        New Task
+                        {t("tasks.new")}
                     </Button>
                 }
             </div>
             {currentUserRole !== "member" &&
                     <Button onClick={() => setTaskCreateOpen(true)} className="gap-2 bg-primary hover:bg-primary/90 sm:hidden">
                         <Plus className="h-4 w-4" />
-                        New Task
+                        {t("tasks.new")}
                     </Button>
                 }
 
@@ -171,7 +174,7 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, cu
                         ) : (
                             <CheckCheck className="mr-2 h-4 w-4" />
                         )}
-                        Mark done
+                        {t("tasks.done")}
                     </Button>
                     <Button
                         variant="outline"
@@ -180,19 +183,19 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, cu
                         disabled={bulkLoading}
                     >
                         <RotateCcw className="mr-2 h-4 w-4" />
-                        Reopen
+                        {t("tasks.reopen")}
                     </Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button variant="destructive" size="sm" disabled={bulkLoading}>
                                 <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
+                                {t("tasks.delete")}
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>
-                                    Delete {selectedIds.length} task
+                                    {t("tasks.delete")} {selectedIds.length} task
                                     {selectedIds.length === 1 ? "" : "s"}?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
@@ -202,7 +205,7 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, cu
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction onClick={handleBulkDelete}>
-                                    Delete
+                                    {t("tasks.delete")}
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
@@ -213,7 +216,7 @@ const TaskClient = ({ users, tasksWithAssignees, workspaceUsers, workspaceId, cu
                         onClick={() => setSelectedIds([])}
                         disabled={bulkLoading}
                     >
-                        Clear
+                        {t("tasks.clear")}
                     </Button>
                 </div>
             )}

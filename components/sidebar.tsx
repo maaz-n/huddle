@@ -6,6 +6,7 @@ import { ChevronLeft, History, LayoutDashboard, CheckSquare, Briefcase, UserIcon
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useWorkspaceHref } from "@/hooks/useWorkspaceHref"
+import { useLocale } from "@/lib/use-locale"
 
 interface SidebarProps {
   open: boolean
@@ -13,6 +14,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ open, setOpen }: SidebarProps) {
+  const { t } = useLocale()
   const pathname = usePathname();
   const dashboardHref = useWorkspaceHref("/")
   const tasksHref = useWorkspaceHref("/tasks")
@@ -24,30 +26,30 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
 
   const navSections = [
     {
-      title: "Overview",
+      title: t("nav.overview"),
       items: [
-        { label: "Dashboard", href: dashboardHref, basePath: "/", icon: LayoutDashboard },
+        { label: t("nav.dashboard"), href: dashboardHref, basePath: "/", icon: LayoutDashboard },
       ],
     },
     {
-      title: "Work",
+      title: t("nav.work"),
       items: [
-        { label: "Tasks", href: tasksHref, basePath: "/tasks", icon: CheckSquare },
-        { label: "My Tasks", href: myTasksHref, basePath: "/my-tasks", icon: PenIcon },
+        { label: t("nav.tasks"), href: tasksHref, basePath: "/tasks", icon: CheckSquare },
+        { label: t("nav.myTasks"), href: myTasksHref, basePath: "/my-tasks", icon: PenIcon },
       ],
     },
     {
-      title: "Workspace",
+      title: t("nav.workspace"),
       items: [
-        { label: "Activity", href: activityHref, basePath: "/activity", icon: History },
-        { label: "Members", href: membersHref, basePath: "/members", icon: Users2 },
-        { label: "Workspace Settings", href: settingsHref, basePath: "/settings", icon: Briefcase },
+        { label: t("nav.activity"), href: activityHref, basePath: "/activity", icon: History },
+        { label: t("nav.members"), href: membersHref, basePath: "/members", icon: Users2 },
+        { label: t("nav.settings"), href: settingsHref, basePath: "/settings", icon: Briefcase },
       ],
     },
     {
-      title: "Profile",
+      title: t("nav.profile"),
       items: [
-        { label: "Profile", href: profileHref, basePath: "/profile", icon: UserIcon}
+        { label: t("nav.profile"), href: profileHref, basePath: "/profile", icon: UserIcon}
       ],
     },
   ];
@@ -70,7 +72,7 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
               size="icon"
               onClick={() => setOpen(false)}
               className="lg:hidden"
-              aria-label="Close navigation"
+              aria-label={t("a11y.closeNavigation")}
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>

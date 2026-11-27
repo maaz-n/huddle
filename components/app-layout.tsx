@@ -5,6 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { Header } from "./header"
 import { Sidebar } from "./sidebar"
+import { useLocale } from "@/lib/use-locale"
 
 interface AppLayoutProps {
   children: React.ReactNode,
@@ -12,6 +13,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { t } = useLocale();
 
   return (
     <div className="flex h-screen bg-background">
@@ -19,7 +21,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:text-primary-foreground"
       >
-        Skip to main content
+        {t("a11y.skip")}
       </a>
       <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
 
