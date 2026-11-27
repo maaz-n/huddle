@@ -1,5 +1,6 @@
 "use server";
 
+import { randomUUID } from "crypto";
 import { and, asc, eq } from "drizzle-orm";
 
 import { db } from "@/db";
@@ -10,6 +11,7 @@ import {
   MAX_ATTACHMENTS_PER_TASK,
 } from "@/lib/attachments";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
+import { deleteObject, attachmentKey, putObject } from "@/lib/storage";
 import { idSchema, validationMessage } from "@/lib/validation";
 import type { TaskAttachment } from "@/types/types";
 
@@ -75,6 +77,8 @@ export async function uploadTaskAttachment(
   workspaceId: string,
   formData: FormData,
 ) {
+  let uploadedKey: string | null = null;
+
   try {
     const parsedTaskId = idSchema.safeParse(taskId);
     const parsedWorkspaceId = idSchema.safeParse(workspaceId);
@@ -125,16 +129,24 @@ export async function uploadTaskAttachment(
     }
 
     const bytes = Buffer.from(await file.arrayBuffer());
+    const id = randomUUID();
+    const key = attachmentKey(id);
+    const mimeType = sanitizeMimeType(file.type);
+
+    await putObject({ key, body: bytes, contentType: mimeType });
+    uploadedKey = key;
+
     const [attachment] = await db
       .insert(taskAttachments)
       .values({
+        id,
         taskId: task.id,
         workspaceId: parsedWorkspaceId.data,
         uploaderId: actor.id,
         fileName: sanitizeFileName(file.name),
-        mimeType: sanitizeMimeType(file.type),
+        mimeType,
         size: bytes.length,
-        data: bytes.toString("base64"),
+        objectKey: key,
       })
       .returning({
         id: taskAttachments.id,
@@ -169,6 +181,11 @@ export async function uploadTaskAttachment(
     };
   } catch (error) {
     console.error(error);
+    if (uploadedKey) {
+      await deleteObject(uploadedKey).catch((cleanupError) =>
+        console.error("[storage] Could not clean up attachment object:", cleanupError),
+      );
+    }
     return { success: false, message: "Could not upload the attachment" };
   }
 }
@@ -209,6 +226,7 @@ export async function deleteTaskAttachment(
         taskId: true,
         fileName: true,
         uploaderId: true,
+        objectKey: true,
       },
     });
     if (!attachment) {
@@ -225,6 +243,12 @@ export async function deleteTaskAttachment(
     await db
       .delete(taskAttachments)
       .where(eq(taskAttachments.id, attachment.id));
+
+    try {
+      await deleteObject(attachment.objectKey);
+    } catch (error) {
+      console.error("[storage] Could not delete attachment object:", error);
+    }
 
     await logActivity({
       workspaceId: parsedWorkspaceId.data,

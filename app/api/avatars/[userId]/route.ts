@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { userAvatars } from "@/db/schema";
 import { requireUser } from "@/lib/authguard";
 import { idSchema } from "@/lib/validation";
+import { getObjectUrl } from "@/lib/storage";
 
 export async function GET(
   _request: Request,
@@ -24,16 +25,13 @@ export async function GET(
       return new Response("Not found", { status: 404 });
     }
 
-    const bytes = Buffer.from(avatar.data, "base64");
-    return new Response(new Uint8Array(bytes), {
-      headers: {
-        "Content-Type": avatar.mimeType,
-        "Content-Length": String(bytes.length),
-        "Content-Disposition": `inline; filename="avatar"`,
-        "Cache-Control": "private, max-age=3600",
-        "X-Content-Type-Options": "nosniff",
-      },
+    const url = await getObjectUrl(avatar.objectKey, {
+      expiresIn: 3600,
+      contentType: avatar.mimeType,
+      contentDisposition: `inline; filename="avatar"`,
     });
+
+    return Response.redirect(url, 302);
   } catch (error) {
     console.error(error);
     return new Response("Not found", { status: 404 });

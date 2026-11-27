@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { taskAttachments } from "@/db/schema";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
+import { getObjectUrl } from "@/lib/storage";
 import { idSchema } from "@/lib/validation";
 
 export async function GET(
@@ -25,22 +26,19 @@ export async function GET(
     // Only members of the attachment's workspace may download it.
     await requireWorkspaceAccess(attachment.workspaceId, "member");
 
-    const bytes = Buffer.from(attachment.data, "base64");
     const asciiName =
       attachment.fileName
         .replace(/[^\x20-\x7e]/g, "_")
         .replace(/"/g, "'")
         .slice(0, 150) || "attachment";
 
-    return new Response(new Uint8Array(bytes), {
-      headers: {
-        "Content-Type": attachment.mimeType,
-        "Content-Length": String(bytes.length),
-        "Content-Disposition": `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(attachment.fileName)}`,
-        "Cache-Control": "private, no-store",
-        "X-Content-Type-Options": "nosniff",
-      },
+    const url = await getObjectUrl(attachment.objectKey, {
+      expiresIn: 60,
+      contentType: attachment.mimeType,
+      contentDisposition: `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(attachment.fileName)}`,
     });
+
+    return Response.redirect(url, 302);
   } catch (error) {
     console.error(error);
     return new Response("Not found", { status: 404 });

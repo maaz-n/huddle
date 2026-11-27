@@ -99,6 +99,13 @@
       "when": 1795766100000,
       "tag": "0013_grandfather_verified_users",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795780966731,
+      "tag": "0014_burly_nextwave",
+      "breakpoints": true
     }
   ]
 }

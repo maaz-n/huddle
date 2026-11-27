@@ -10,6 +10,7 @@ import {
   MAX_AVATAR_BYTES,
   avatarUrl,
 } from "@/lib/avatar";
+import { avatarKey, deleteObject, putObject } from "@/lib/storage";
 
 export async function uploadAvatar(formData: FormData) {
   try {
@@ -33,13 +34,22 @@ export async function uploadAvatar(formData: FormData) {
     }
 
     const bytes = Buffer.from(await file.arrayBuffer());
+    const key = avatarKey(currentUser.id);
+
+    await putObject({
+      key,
+      body: bytes,
+      contentType: file.type,
+      cacheControl: "private, max-age=3600",
+    });
+
     await db
       .insert(userAvatars)
       .values({
         userId: currentUser.id,
         mimeType: file.type,
         size: bytes.length,
-        data: bytes.toString("base64"),
+        objectKey: key,
         updatedAt: new Date(),
       })
       .onConflictDoUpdate({
@@ -47,7 +57,7 @@ export async function uploadAvatar(formData: FormData) {
         set: {
           mimeType: file.type,
           size: bytes.length,
-          data: bytes.toString("base64"),
+          objectKey: key,
           updatedAt: new Date(),
         },
       });
@@ -77,6 +87,14 @@ export async function removeAvatar() {
       .update(user)
       .set({ image: null })
       .where(eq(user.id, currentUser.id));
+
+    // The DB row is gone first, so a failed object delete only leaves an
+    // unreferenced object rather than a broken avatar.
+    try {
+      await deleteObject(avatarKey(currentUser.id));
+    } catch (error) {
+      console.error("[storage] Could not delete avatar object:", error);
+    }
 
     return { success: true, message: "Profile picture removed" };
   } catch (error) {

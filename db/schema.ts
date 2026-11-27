@@ -92,7 +92,7 @@ export const userAvatars = pgTable("user_avatars", {
     .references(() => user.id, { onDelete: "cascade" }),
   mimeType: text("mime_type").notNull(),
   size: integer("size").notNull(),
-  data: text("data").notNull(),
+  objectKey: text("object_key").notNull(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
@@ -259,10 +259,8 @@ export const taskAttachments = pgTable(
       .references(() => user.id, { onDelete: "cascade" }),
     fileName: text("file_name").notNull(),
     mimeType: text("mime_type").notNull(),
-    // Bytes are stored base64-encoded so the app stays on the Neon HTTP
-    // driver without a separate object-storage provider.
     size: integer("size").notNull(),
-    data: text("data").notNull(),
+    objectKey: text("object_key").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => [
