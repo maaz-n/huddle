@@ -47,6 +47,7 @@ Huddle was built to explore:
 * Members submit work for review
 * Admins/Owners approve or request revisions
 * Search by title, sort by updated/due date/priority/title, and page results
+* Admins/Owners can bulk update status or delete selected tasks
 
 ### 4. My Tasks
 
