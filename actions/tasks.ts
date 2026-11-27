@@ -11,12 +11,13 @@ import {
   idSchema,
   noteSchema,
   taskDescriptionSchema,
+  taskIdListSchema,
   taskStatusSchema,
   taskTitleSchema,
   validationMessage,
 } from "@/lib/validation";
 import { GetFilteredTasks, UserTypeNew } from "@/types/types";
-import { and, asc, desc, eq, ilike, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, sql } from "drizzle-orm";
 
 /**
  * Wildcards are escaped so a search for "%" matches a literal percent sign
@@ -279,6 +280,171 @@ export async function deleteTask(workspaceId: string, taskId: string) {
   } catch (error) {
     console.error(error);
     return { success: false, message: "There was an error deleting the task" };
+  }
+}
+
+export async function bulkUpdateTaskStatus(
+  workspaceId: string,
+  taskIds: string[],
+  newStatus: "todo" | "in_review" | "done",
+) {
+  try {
+    const parsedWorkspaceId = idSchema.safeParse(workspaceId);
+    const parsedStatus = taskStatusSchema.safeParse(newStatus);
+    const parsedIds = taskIdListSchema.safeParse(taskIds);
+
+    if (!parsedWorkspaceId.success) {
+      return {
+        success: false,
+        message: validationMessage(parsedWorkspaceId.error),
+      };
+    }
+    if (!parsedStatus.success) {
+      return { success: false, message: validationMessage(parsedStatus.error) };
+    }
+    if (!parsedIds.success) {
+      return { success: false, message: validationMessage(parsedIds.error) };
+    }
+
+    const { user, role } = await requireWorkspaceAccess(
+      parsedWorkspaceId.data,
+      "admin",
+    );
+
+    const existing = await db.query.tasks.findMany({
+      where: and(
+        eq(tasks.workspaceId, parsedWorkspaceId.data),
+        inArray(tasks.id, parsedIds.data),
+      ),
+      columns: { id: true, title: true, status: true },
+    });
+
+    // Each task still obeys the normal review workflow; tasks that cannot make
+    // the jump are skipped instead of failing the whole batch.
+    const transitionable = existing.filter((task) =>
+      canTransition({
+        role,
+        isAssignee: false,
+        from: task.status,
+        to: parsedStatus.data,
+      }),
+    );
+
+    if (transitionable.length === 0) {
+      return {
+        success: false,
+        message: "No selected tasks can move to that status",
+      };
+    }
+
+    await db
+      .update(tasks)
+      .set({ status: parsedStatus.data, updatedAt: new Date() })
+      .where(
+        and(
+          eq(tasks.workspaceId, parsedWorkspaceId.data),
+          inArray(
+            tasks.id,
+            transitionable.map((task) => task.id),
+          ),
+        ),
+      );
+
+    await Promise.all(
+      transitionable.map((task) =>
+        logActivity({
+          workspaceId: parsedWorkspaceId.data,
+          actorId: user.id,
+          entityType: "task",
+          entityId: task.id,
+          action: "TASK_STATUS_CHANGE",
+          metadata: {
+            entityName: task.title,
+            oldStatus: task.status,
+            newStatus: parsedStatus.data,
+          },
+        }),
+      ),
+    );
+
+    const skipped = existing.length - transitionable.length;
+    return {
+      success: true,
+      message:
+        skipped > 0
+          ? `${transitionable.length} task(s) updated, ${skipped} skipped by the workflow`
+          : `${transitionable.length} task(s) updated`,
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Could not update the selected tasks" };
+  }
+}
+
+export async function bulkDeleteTasks(workspaceId: string, taskIds: string[]) {
+  try {
+    const parsedWorkspaceId = idSchema.safeParse(workspaceId);
+    const parsedIds = taskIdListSchema.safeParse(taskIds);
+
+    if (!parsedWorkspaceId.success) {
+      return {
+        success: false,
+        message: validationMessage(parsedWorkspaceId.error),
+      };
+    }
+    if (!parsedIds.success) {
+      return { success: false, message: validationMessage(parsedIds.error) };
+    }
+
+    const { user } = await requireWorkspaceAccess(
+      parsedWorkspaceId.data,
+      "admin",
+    );
+
+    const existing = await db.query.tasks.findMany({
+      where: and(
+        eq(tasks.workspaceId, parsedWorkspaceId.data),
+        inArray(tasks.id, parsedIds.data),
+      ),
+      columns: { id: true, title: true },
+    });
+
+    if (existing.length === 0) {
+      return { success: false, message: "No matching tasks" };
+    }
+
+    await db
+      .delete(tasks)
+      .where(
+        and(
+          eq(tasks.workspaceId, parsedWorkspaceId.data),
+          inArray(
+            tasks.id,
+            existing.map((task) => task.id),
+          ),
+        ),
+      );
+
+    await Promise.all(
+      existing.map((task) =>
+        logActivity({
+          workspaceId: parsedWorkspaceId.data,
+          actorId: user.id,
+          entityType: "task",
+          entityId: task.id,
+          action: "TASK_DELETED",
+          metadata: { entityName: task.title },
+        }),
+      ),
+    );
+
+    return {
+      success: true,
+      message: `${existing.length} task(s) deleted`,
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Could not delete the selected tasks" };
   }
 }
 

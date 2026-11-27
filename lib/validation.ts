@@ -38,6 +38,11 @@ export const taskPrioritySchema = z
     { message: "Invalid task priority" },
   );
 
+export const taskIdListSchema = z
+  .array(idSchema)
+  .min(1, "Select at least one task")
+  .max(100, "Select at most 100 tasks");
+
 export const taskSortSchema = z
   .string()
   .refine(
