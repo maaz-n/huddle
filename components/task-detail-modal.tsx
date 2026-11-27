@@ -9,9 +9,12 @@ import {
   AlignLeft,
   Loader2,
   AlertCircle,
+  Download,
   History,
   MessageSquare,
+  Paperclip,
   Trash2,
+  Upload,
 } from "lucide-react"
 
 import {
@@ -26,16 +29,23 @@ import {
   LabelColor,
   LabelItem,
   TasksWithAssignees,
+  TaskAttachment,
   TaskComment,
   UserTypeNew,
 } from "@/types/types"
 import { getTaskActivity } from "@/actions/activity"
+import {
+  deleteTaskAttachment,
+  getTaskAttachments,
+  uploadTaskAttachment,
+} from "@/actions/attachments"
 import {
   createLabel,
   getTaskLabels,
   getWorkspaceLabels,
   setTaskLabels,
 } from "@/actions/labels"
+import { MAX_ATTACHMENT_BYTES, formatFileSize } from "@/lib/attachments"
 import { ActivityLogItem } from "./activity-log-item"
 import { LabelChip, labelColorClasses } from "./label-chip"
 import { Input } from "./ui/input"
@@ -84,6 +94,10 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   const [labelInput, setLabelInput] = useState("")
   const [labelColor, setLabelColor] = useState<LabelColor>("slate")
   const [savingLabel, setSavingLabel] = useState(false)
+  const [attachments, setAttachments] = useState<TaskAttachment[]>([])
+  const [loadedAttachmentsTaskId, setLoadedAttachmentsTaskId] = useState<string | null>(null)
+  const [uploadingAttachment, setUploadingAttachment] = useState(false)
+  const [deletingAttachmentId, setDeletingAttachmentId] = useState<string | null>(null)
 
   async function updateStatus(taskId: string, nextStatus: TaskStatus) {
     try {
@@ -105,6 +119,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   const commentsLoading = open && !!taskId && loadedTaskId !== taskId
   const activityLoading = open && !!taskId && loadedActivityTaskId !== taskId
   const labelsLoading = open && !!taskId && loadedLabelsTaskId !== taskId
+  const attachmentsLoading = open && !!taskId && loadedAttachmentsTaskId !== taskId
 
   const refreshActivity = useCallback(async (id: string) => {
     try {
@@ -163,9 +178,23 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
       }
     }
 
+    const loadAttachments = async () => {
+      try {
+        const data = await getTaskAttachments(taskId, workspaceId)
+        if (cancelled) return
+        setAttachments(data)
+      } catch {
+        if (cancelled) return
+        setAttachments([])
+      } finally {
+        if (!cancelled) setLoadedAttachmentsTaskId(taskId)
+      }
+    }
+
     loadComments()
     loadActivity()
     loadLabels()
+    loadAttachments()
 
     return () => {
       cancelled = true
@@ -256,6 +285,66 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
       toast.error("Could not remove the label")
     } finally {
       setSavingLabel(false)
+    }
+  }
+
+  const handleUploadAttachment = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const input = event.currentTarget
+    const file = input.files?.[0]
+    if (!file) return
+
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      toast.error("Attachments must be 5 MB or smaller")
+      input.value = ""
+      return
+    }
+
+    const formData = new FormData()
+    formData.set("file", file)
+
+    setUploadingAttachment(true)
+    try {
+      const response = await uploadTaskAttachment(
+        task.id,
+        workspaceId,
+        formData,
+      )
+      if (response.success && response.attachment) {
+        setAttachments((previous) => [...previous, response.attachment!])
+        toast.success(response.message)
+        await refreshActivity(task.id)
+      } else {
+        toast.error(response.message)
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error("Could not upload the attachment")
+    } finally {
+      setUploadingAttachment(false)
+      input.value = ""
+    }
+  }
+
+  const handleDeleteAttachment = async (attachmentId: string) => {
+    setDeletingAttachmentId(attachmentId)
+    try {
+      const response = await deleteTaskAttachment(attachmentId, workspaceId)
+      if (response.success) {
+        setAttachments((previous) =>
+          previous.filter((attachment) => attachment.id !== attachmentId),
+        )
+        toast.success(response.message)
+        await refreshActivity(task.id)
+      } else {
+        toast.error(response.message)
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error("Could not delete the attachment")
+    } finally {
+      setDeletingAttachmentId(null)
     }
   }
 
@@ -483,6 +572,128 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                 </p>
               </div>
             )}
+
+            <div className="space-y-3 border-t border-border/50 pt-6">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                  <Paperclip className="h-4 w-4" />
+                  Attachments
+                  {attachments.length > 0 && (
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold">
+                      {attachments.length}
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <input
+                    id={`task-attachment-input-${task.id}`}
+                    type="file"
+                    className="hidden"
+                    onChange={handleUploadAttachment}
+                    disabled={uploadingAttachment}
+                  />
+                  <Button variant="outline" size="sm" asChild>
+                    <label
+                      htmlFor={`task-attachment-input-${task.id}`}
+                      className={
+                        uploadingAttachment
+                          ? "pointer-events-none cursor-default gap-2 opacity-50"
+                          : "cursor-pointer gap-2"
+                      }
+                    >
+                      {uploadingAttachment ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4" />
+                      )}
+                      {uploadingAttachment ? "Uploading..." : "Attach file"}
+                    </label>
+                  </Button>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-muted-foreground">
+                Up to 5 MB per file, 20 files per task.
+              </p>
+
+              {attachmentsLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : attachments.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No attachments yet.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {attachments.map((attachment) => {
+                    const canDelete =
+                      isManager || attachment.uploaderId === currentUser.id
+
+                    return (
+                      <div
+                        key={attachment.id}
+                        className="flex items-center gap-3 rounded-lg border border-border/40 bg-muted/20 px-3 py-2"
+                      >
+                        <Paperclip className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <div className="min-w-0 flex-1">
+                          <a
+                            href={`/api/attachments/${attachment.id}`}
+                            download={attachment.fileName}
+                            className="block truncate text-sm font-medium hover:underline"
+                          >
+                            {attachment.fileName}
+                          </a>
+                          <p className="text-[11px] text-muted-foreground">
+                            {formatFileSize(attachment.size)} ·{" "}
+                            {attachment.uploaderName} ·{" "}
+                            {formatDistanceToNow(
+                              new Date(attachment.createdAt),
+                              { addSuffix: true },
+                            )}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 shrink-0"
+                          asChild
+                        >
+                          <a
+                            href={`/api/attachments/${attachment.id}`}
+                            download={attachment.fileName}
+                            aria-label={`Download ${attachment.fileName}`}
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                          </a>
+                        </Button>
+                        {canDelete && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
+                            onClick={() =>
+                              handleDeleteAttachment(attachment.id)
+                            }
+                            disabled={
+                              deletingAttachmentId === attachment.id
+                            }
+                            aria-label={`Delete ${attachment.fileName}`}
+                          >
+                            {deletingAttachmentId === attachment.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-3.5 w-3.5" />
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
 
             <div className="space-y-4 border-t border-border/50 pt-6">
               <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">

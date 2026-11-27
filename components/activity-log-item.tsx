@@ -72,6 +72,20 @@ function getActivityContent(log: LogProps) {
         </span>
       );
 
+    case "TASK_ATTACHMENT_ADDED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          attached <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
+        </span>
+      );
+
+    case "TASK_ATTACHMENT_REMOVED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          removed the attachment <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
+        </span>
+      );
+
     case "TASK_COMMENT_ADDED":
       return (
         <span className="text-muted-foreground ml-1">
