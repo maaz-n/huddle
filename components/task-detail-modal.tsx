@@ -114,18 +114,28 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   const [savingSubtask, setSavingSubtask] = useState(false)
   const [togglingSubtaskId, setTogglingSubtaskId] = useState<string | null>(null)
   const [deletingSubtaskId, setDeletingSubtaskId] = useState<string | null>(null)
+  const [statusOverride, setStatusOverride] = useState<{
+    taskId: string;
+    status: TaskStatus;
+  } | null>(null)
 
   async function updateStatus(taskId: string, nextStatus: TaskStatus) {
+    const previous = statusOverride
+    setStatusOverride({ taskId, status: nextStatus })
+
     try {
       const response = await updateTaskStatus(taskId, workspaceId, nextStatus)
-      if (response.success) {
-        toast.success(response.message)
-        router.refresh()
-      } else {
-        toast.error(response.message)
+      if (!response.success) {
+        throw new Error(response.message)
       }
+      toast.success(response.message)
+      router.refresh()
     } catch (error) {
+      setStatusOverride(previous)
       console.error(error)
+      toast.error(
+        error instanceof Error ? error.message : "Could not update status",
+      )
     }
   }
 
@@ -234,15 +244,20 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
 
   if (!task) return null
 
+  const displayStatus =
+    statusOverride?.taskId === task.id ? statusOverride.status : task.status
+
   const role: WorkspaceRole =
     currentUserRole === "owner" || currentUserRole === "admin"
       ? currentUserRole
       : "member"
 
   const currentUserTaskInReview =
-    role === "member" && task.assigneeId === currentUser.id && task.status === "in_review"
+    role === "member" &&
+    task.assigneeId === currentUser.id &&
+    displayStatus === "in_review"
   const isManager = role !== "member"
-  const nextStatus = getNextStatus(role, task.status)
+  const nextStatus = getNextStatus(role, displayStatus)
 
   const handleAddLabel = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -475,19 +490,22 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
 
   const sendForRevision = async (e?: React.FormEvent) => {
     e?.preventDefault()
+    const previous = statusOverride
+    setStatusOverride({ taskId: task.id, status: "todo" })
+
     try {
       setIsUpdating2(true)
       const response = await requestChanges(task.id, workspaceId, revisionNote)
-      if (response.success) {
-        toast.success(response.message)
-        onOpenChange(false)
-        router.refresh()
-      } else {
-        toast.error(response.message)
+      if (!response.success) {
+        throw new Error(response.message)
       }
+      toast.success(response.message)
+      onOpenChange(false)
+      router.refresh()
     } catch (error) {
+      setStatusOverride(previous)
       console.error(error)
-      toast.error("An error occured")
+      toast.error(error instanceof Error ? error.message : "An error occured")
     } finally {
       setIsUpdating2(false)
     }
@@ -1091,7 +1109,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                       }
                     </Button>
                     {
-                      currentUserRole !== "member" && task.status === "in_review" &&
+                      currentUserRole !== "member" && displayStatus === "in_review" &&
                       <Toggle onPressedChange={setIsRequestingChange} pressed={isRequestingChange} className="px-5 w-full" variant={"outline"}>Request changes</Toggle>
                     }
                   </div>

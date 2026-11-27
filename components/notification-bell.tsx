@@ -97,6 +97,9 @@ export function NotificationBell() {
 
   const handleItemClick = async (item: NotificationItem) => {
     if (!item.readAt) {
+      const previousItems = items
+      const previousUnread = unread
+
       setItems((previous) =>
         previous.map((entry) =>
           entry.id === item.id
@@ -105,10 +108,18 @@ export function NotificationBell() {
         ),
       )
       setUnread((previous) => Math.max(0, previous - 1))
+
       try {
-        await markNotificationRead(item.id)
+        const response = await markNotificationRead(item.id)
+        if (!response.success) {
+          throw new Error(response.message)
+        }
+        await refreshUnread()
       } catch {
-        // The optimistic update is harmless if the write fails.
+        setItems(previousItems)
+        setUnread(previousUnread)
+        await refreshUnread()
+        toast.error("Could not mark that notification as read")
       }
     }
 
@@ -117,20 +128,26 @@ export function NotificationBell() {
   }
 
   const handleMarkAll = async () => {
+    const previousItems = items
+    const previousUnread = unread
+
+    const readAt = new Date().toISOString()
+    setItems((previous) =>
+      previous.map((entry) => ({ ...entry, readAt: entry.readAt ?? readAt })),
+    )
+    setUnread(0)
     setMarkingAll(true)
+
     try {
       const response = await markAllNotificationsRead()
       if (!response.success) {
-        toast.error(response.message)
-        return
+        throw new Error(response.message)
       }
-
-      const readAt = new Date().toISOString()
-      setItems((previous) =>
-        previous.map((entry) => ({ ...entry, readAt: entry.readAt ?? readAt })),
-      )
-      setUnread(0)
+      await refreshUnread()
     } catch {
+      setItems(previousItems)
+      setUnread(previousUnread)
+      await refreshUnread()
       toast.error("Could not mark notifications as read")
     } finally {
       setMarkingAll(false)
