@@ -7,8 +7,9 @@ import { Input } from './ui/input'
 import { Button } from './ui/button'
 import { useState } from 'react'
 import { updateEmailNotifications, updateUser } from '@/actions/user'
+import { removeAvatar, uploadAvatar } from '@/actions/avatar'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { Camera, Loader2, Trash2 } from 'lucide-react'
 import { UserTypeNew } from '@/types/types'
 import { useRouter } from 'next/navigation'
 import { Switch } from './ui/switch'
@@ -19,7 +20,55 @@ function UserProfile({ user }: { user: UserTypeNew }) {
     const [name, setName] = useState(user.name);
     const [emailNotifications, setEmailNotifications] = useState(user.emailNotifications ?? true);
     const [savingPreference, setSavingPreference] = useState(false);
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const [avatarSrc, setAvatarSrc] = useState(user.image);
     const router = useRouter()
+
+    async function handleAvatarUpload(event: React.ChangeEvent<HTMLInputElement>) {
+        const input = event.currentTarget
+        const file = input.files?.[0]
+        if (!file) return
+
+        setUploadingAvatar(true)
+        const formData = new FormData()
+        formData.set('file', file)
+
+        try {
+            const response = await uploadAvatar(formData)
+            if (response.success && response.imageUrl) {
+                setAvatarSrc(`${response.imageUrl}?v=${Date.now()}`)
+                toast.success(response.message)
+                router.refresh()
+            } else {
+                toast.error(response.message)
+            }
+        } catch (error) {
+            console.error(error)
+            toast.error('Could not upload the image')
+        } finally {
+            setUploadingAvatar(false)
+            input.value = ''
+        }
+    }
+
+    async function handleRemoveAvatar() {
+        setUploadingAvatar(true)
+        try {
+            const response = await removeAvatar()
+            if (response.success) {
+                setAvatarSrc(null)
+                toast.success(response.message)
+                router.refresh()
+            } else {
+                toast.error(response.message)
+            }
+        } catch (error) {
+            console.error(error)
+            toast.error('Could not remove the image')
+        } finally {
+            setUploadingAvatar(false)
+        }
+    }
 
     async function handleUpdate() {
         try {
@@ -72,8 +121,54 @@ function UserProfile({ user }: { user: UserTypeNew }) {
                                 Your personal branding across all workspaces.
                             </p>
                         </div>
-                        <UserAvatar user={user} className="h-20 w-20 ring-4 ring-background shadow-md" />
-
+                        <div className="flex flex-1 flex-col items-start gap-3">
+                            <UserAvatar
+                                user={{ ...user, image: avatarSrc }}
+                                className="h-20 w-20 ring-4 ring-background shadow-md"
+                            />
+                            <div className="flex flex-wrap items-center gap-2">
+                                <input
+                                    id="avatar-input"
+                                    type="file"
+                                    accept="image/png,image/jpeg,image/webp,image/gif"
+                                    className="hidden"
+                                    onChange={handleAvatarUpload}
+                                    disabled={uploadingAvatar}
+                                />
+                                <Button variant="outline" size="sm" asChild>
+                                    <label
+                                        htmlFor="avatar-input"
+                                        className={
+                                            uploadingAvatar
+                                                ? 'pointer-events-none cursor-default gap-2 opacity-50'
+                                                : 'cursor-pointer gap-2'
+                                        }
+                                    >
+                                        {uploadingAvatar ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <Camera className="h-4 w-4" />
+                                        )}
+                                        Change photo
+                                    </label>
+                                </Button>
+                                {avatarSrc && (
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={handleRemoveAvatar}
+                                        disabled={uploadingAvatar}
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Remove
+                                    </Button>
+                                )}
+                            </div>
+                            <p className="text-[11px] text-muted-foreground">
+                                PNG, JPEG, WebP, or GIF up to 2 MB.
+                            </p>
+                        </div>
 
                     </div>
 
