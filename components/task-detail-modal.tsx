@@ -11,8 +11,10 @@ import {
   AlertCircle,
   Download,
   History,
+  ListChecks,
   MessageSquare,
   Paperclip,
+  Plus,
   Trash2,
   Upload,
 } from "lucide-react"
@@ -28,12 +30,19 @@ import {
   ActivityItem,
   LabelColor,
   LabelItem,
+  SubtaskItem,
   TasksWithAssignees,
   TaskAttachment,
   TaskComment,
   UserTypeNew,
 } from "@/types/types"
 import { getTaskActivity } from "@/actions/activity"
+import {
+  createSubtask,
+  deleteSubtask,
+  getSubtasks,
+  toggleSubtask,
+} from "@/actions/subtasks"
 import {
   deleteTaskAttachment,
   getTaskAttachments,
@@ -98,6 +107,12 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   const [loadedAttachmentsTaskId, setLoadedAttachmentsTaskId] = useState<string | null>(null)
   const [uploadingAttachment, setUploadingAttachment] = useState(false)
   const [deletingAttachmentId, setDeletingAttachmentId] = useState<string | null>(null)
+  const [subtasks, setSubtasks] = useState<SubtaskItem[]>([])
+  const [loadedSubtasksTaskId, setLoadedSubtasksTaskId] = useState<string | null>(null)
+  const [subtaskInput, setSubtaskInput] = useState("")
+  const [savingSubtask, setSavingSubtask] = useState(false)
+  const [togglingSubtaskId, setTogglingSubtaskId] = useState<string | null>(null)
+  const [deletingSubtaskId, setDeletingSubtaskId] = useState<string | null>(null)
 
   async function updateStatus(taskId: string, nextStatus: TaskStatus) {
     try {
@@ -120,6 +135,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   const activityLoading = open && !!taskId && loadedActivityTaskId !== taskId
   const labelsLoading = open && !!taskId && loadedLabelsTaskId !== taskId
   const attachmentsLoading = open && !!taskId && loadedAttachmentsTaskId !== taskId
+  const subtasksLoading = open && !!taskId && loadedSubtasksTaskId !== taskId
 
   const refreshActivity = useCallback(async (id: string) => {
     try {
@@ -191,10 +207,24 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
       }
     }
 
+    const loadSubtasks = async () => {
+      try {
+        const data = await getSubtasks(taskId, workspaceId)
+        if (cancelled) return
+        setSubtasks(data)
+      } catch {
+        if (cancelled) return
+        setSubtasks([])
+      } finally {
+        if (!cancelled) setLoadedSubtasksTaskId(taskId)
+      }
+    }
+
     loadComments()
     loadActivity()
     loadLabels()
     loadAttachments()
+    loadSubtasks()
 
     return () => {
       cancelled = true
@@ -285,6 +315,81 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
       toast.error("Could not remove the label")
     } finally {
       setSavingLabel(false)
+    }
+  }
+
+  const handleAddSubtask = async (event: React.FormEvent) => {
+    event.preventDefault()
+    const title = subtaskInput.trim()
+    if (!title) return
+
+    setSavingSubtask(true)
+    try {
+      const response = await createSubtask(task.id, workspaceId, title)
+      if (response.success && response.subtask) {
+        setSubtasks((previous) => [...previous, response.subtask as SubtaskItem])
+        setSubtaskInput("")
+        await refreshActivity(task.id)
+      } else {
+        toast.error(response.message)
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error("Could not add the subtask")
+    } finally {
+      setSavingSubtask(false)
+    }
+  }
+
+  const handleToggleSubtask = async (subtask: SubtaskItem) => {
+    const next = !subtask.completed
+    setTogglingSubtaskId(subtask.id)
+    setSubtasks((previous) =>
+      previous.map((item) =>
+        item.id === subtask.id
+          ? {
+              ...item,
+              completed: next,
+              completedAt: next ? new Date() : null,
+            }
+          : item,
+      ),
+    )
+
+    try {
+      const response = await toggleSubtask(subtask.id, workspaceId, next)
+      if (!response.success) {
+        toast.error(response.message)
+        setSubtasks(await getSubtasks(task.id, workspaceId))
+        return
+      }
+      await refreshActivity(task.id)
+    } catch (error) {
+      console.error(error)
+      toast.error("Could not update the subtask")
+      setSubtasks(await getSubtasks(task.id, workspaceId))
+    } finally {
+      setTogglingSubtaskId(null)
+    }
+  }
+
+  const handleDeleteSubtask = async (subtaskId: string) => {
+    setDeletingSubtaskId(subtaskId)
+    try {
+      const response = await deleteSubtask(subtaskId, workspaceId)
+      if (response.success) {
+        setSubtasks((previous) =>
+          previous.filter((subtask) => subtask.id !== subtaskId),
+        )
+        await refreshActivity(task.id)
+      } else {
+        toast.error(response.message)
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error("Could not delete the subtask")
+    } finally {
+      setDeletingSubtaskId(null)
     }
   }
 
@@ -572,6 +677,115 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                 </p>
               </div>
             )}
+
+            <div className="space-y-3 border-t border-border/50 pt-6">
+              <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <ListChecks className="h-4 w-4" />
+                Subtasks
+                {subtasks.length > 0 && (
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold">
+                    {subtasks.filter((subtask) => subtask.completed).length}/
+                    {subtasks.length}
+                  </span>
+                )}
+              </div>
+
+              {subtasks.length > 0 && (
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all"
+                    style={{
+                      width: `${Math.round(
+                        (subtasks.filter((subtask) => subtask.completed).length /
+                          subtasks.length) *
+                          100,
+                      )}%`,
+                    }}
+                  />
+                </div>
+              )}
+
+              {subtasksLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <>
+                  {subtasks.length > 0 ? (
+                    <div className="space-y-1">
+                      {subtasks.map((subtask) => (
+                        <div
+                          key={subtask.id}
+                          className="flex items-center gap-2 rounded-md px-1 py-1 hover:bg-muted/30"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={subtask.completed}
+                            onChange={() => handleToggleSubtask(subtask)}
+                            disabled={togglingSubtaskId === subtask.id}
+                            aria-label={subtask.title}
+                            className="h-4 w-4 shrink-0 cursor-pointer accent-primary"
+                          />
+                          <span
+                            className={
+                              subtask.completed
+                                ? "flex-1 text-sm text-muted-foreground line-through"
+                                : "flex-1 text-sm"
+                            }
+                          >
+                            {subtask.title}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
+                            onClick={() => handleDeleteSubtask(subtask.id)}
+                            disabled={deletingSubtaskId === subtask.id}
+                            aria-label={`Delete subtask ${subtask.title}`}
+                          >
+                            {deletingSubtaskId === subtask.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-3.5 w-3.5" />
+                            )}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No subtasks yet.
+                    </p>
+                  )}
+
+                  <form onSubmit={handleAddSubtask} className="flex gap-2">
+                    <Input
+                      value={subtaskInput}
+                      onChange={(event) => setSubtaskInput(event.target.value)}
+                      placeholder="Add a subtask..."
+                      className="h-8 text-sm"
+                      maxLength={200}
+                      aria-label="New subtask"
+                      disabled={savingSubtask}
+                    />
+                    <Button
+                      type="submit"
+                      variant="outline"
+                      size="sm"
+                      className="h-8"
+                      disabled={savingSubtask || !subtaskInput.trim()}
+                    >
+                      {savingSubtask ? (
+                        <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Plus className="mr-1 h-3.5 w-3.5" />
+                      )}
+                      Add
+                    </Button>
+                  </form>
+                </>
+              )}
+            </div>
 
             <div className="space-y-3 border-t border-border/50 pt-6">
               <div className="flex flex-wrap items-center justify-between gap-2">

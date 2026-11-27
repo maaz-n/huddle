@@ -86,6 +86,34 @@ function getActivityContent(log: LogProps) {
         </span>
       );
 
+    case "SUBTASK_ADDED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          added subtask <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
+        </span>
+      );
+
+    case "SUBTASK_COMPLETED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          completed subtask <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
+        </span>
+      );
+
+    case "SUBTASK_REOPENED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          reopened subtask <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
+        </span>
+      );
+
+    case "SUBTASK_DELETED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          deleted subtask <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
+        </span>
+      );
+
     case "TASK_COMMENT_ADDED":
       return (
         <span className="text-muted-foreground ml-1">
