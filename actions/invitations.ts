@@ -12,6 +12,7 @@ import {
 } from "@/db/schema";
 import { sendEmail } from "@/lib/email";
 import { invitationEmail } from "@/lib/email-templates";
+import { logActivity } from "@/lib/activity";
 import { notifyUsers } from "@/lib/notifications";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
 import {
@@ -118,6 +119,19 @@ export async function inviteMember(
       token,
       invitedBy: actor.id,
       expiresAt: new Date(Date.now() + INVITE_TTL_MS),
+    });
+
+    await logActivity({
+      workspaceId: parsedWorkspaceId.data,
+      actorId: actor.id,
+      entityType: "workspace",
+      entityId: parsedWorkspaceId.data,
+      action: "INVITATION_SENT",
+      metadata: {
+        entityName: inviteEmail,
+        email: inviteEmail,
+        role: parsedRole.data,
+      },
     });
 
     const emailResult = await sendEmail({
@@ -270,6 +284,19 @@ export async function acceptInvitation(token: string) {
       return { success: false, message: "Could not accept the invitation" };
     }
 
+    await logActivity({
+      workspaceId: invitation.workspaceId,
+      actorId: currentUser.id,
+      entityType: "workspace",
+      entityId: invitation.workspaceId,
+      action: "INVITATION_ACCEPTED",
+      metadata: {
+        entityName: currentUser.name,
+        email: invitation.email,
+        role: invitation.role,
+      },
+    });
+
     if (invitation.invitedBy !== currentUser.id) {
       await notifyUsers({
         userIds: [invitation.invitedBy],
@@ -348,7 +375,19 @@ export async function revokeInvitation(
       };
     }
 
-    await requireWorkspaceAccess(parsedWorkspaceId.data, "admin");
+    const { user: actor } = await requireWorkspaceAccess(
+      parsedWorkspaceId.data,
+      "admin",
+    );
+
+    const invitation = await db.query.workspaceInvitations.findFirst({
+      where: and(
+        eq(workspaceInvitations.id, parsedInvitationId.data),
+        eq(workspaceInvitations.workspaceId, parsedWorkspaceId.data),
+        isNull(workspaceInvitations.acceptedAt),
+      ),
+      columns: { email: true, role: true },
+    });
 
     await db
       .delete(workspaceInvitations)
@@ -359,6 +398,21 @@ export async function revokeInvitation(
           isNull(workspaceInvitations.acceptedAt),
         ),
       );
+
+    if (invitation) {
+      await logActivity({
+        workspaceId: parsedWorkspaceId.data,
+        actorId: actor.id,
+        entityType: "workspace",
+        entityId: parsedWorkspaceId.data,
+        action: "INVITATION_REVOKED",
+        metadata: {
+          entityName: invitation.email,
+          email: invitation.email,
+          role: invitation.role,
+        },
+      });
+    }
 
     return { success: true, message: "Invitation revoked" };
   } catch (error) {

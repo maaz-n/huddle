@@ -79,6 +79,72 @@ function getActivityContent(log: LogProps) {
         </span>
       );
 
+    case "WORKSPACE_CREATED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          created the workspace <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
+        </span>
+      );
+
+    case "WORKSPACE_RENAMED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          renamed the workspace to <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
+        </span>
+      );
+
+    case "MEMBER_ADDED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          added <span className="font-medium text-foreground">{log.metadata?.entityName}</span> as{" "}
+          <span className="font-medium text-foreground">{log.metadata?.role}</span>
+        </span>
+      );
+
+    case "MEMBER_REMOVED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          removed <span className="font-medium text-foreground">{log.metadata?.entityName}</span> from the workspace
+        </span>
+      );
+
+    case "MEMBER_ROLE_CHANGED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          changed <span className="font-medium text-foreground">{log.metadata?.entityName}</span>&apos;s role to{" "}
+          <span className="font-medium text-foreground">{log.metadata?.role}</span>
+        </span>
+      );
+
+    case "OWNERSHIP_TRANSFERRED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          transferred ownership to <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
+        </span>
+      );
+
+    case "INVITATION_SENT":
+      return (
+        <span className="text-muted-foreground ml-1">
+          invited <span className="font-medium text-foreground">{log.metadata?.entityName}</span> as{" "}
+          <span className="font-medium text-foreground">{log.metadata?.role}</span>
+        </span>
+      );
+
+    case "INVITATION_ACCEPTED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          accepted the invitation and joined the workspace
+        </span>
+      );
+
+    case "INVITATION_REVOKED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          revoked the invitation for <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
+        </span>
+      );
+
     default:
       return (
         <span className="text-muted-foreground ml-1">
