@@ -16,6 +16,15 @@ function wrap(title: string, content: string): string {
 </html>`;
 }
 
+export function verificationEmail(url: string): string {
+  return wrap(
+    "Verify your email",
+    `<p style="margin:0 0 20px;line-height:1.5;">Verify your email address to finish setting up your Huddle account.</p>
+     <p style="margin:0 0 24px;"><a href="${escapeHtml(url)}" style="background:#18181b;color:#ffffff;padding:10px 18px;border-radius:8px;text-decoration:none;">Verify email</a></p>
+     <p style="margin:0;font-size:13px;color:#71717a;">If the button does not work, copy this link into your browser:<br>${escapeHtml(url)}</p>`,
+  );
+}
+
 export function passwordResetEmail(url: string): string {
   return wrap(
     "Reset your password",

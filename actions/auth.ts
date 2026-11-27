@@ -112,6 +112,27 @@ export const requestPasswordReset = async (email: string) => {
   }
 }
 
+export const resendVerificationEmail = async (email: string) => {
+  try {
+    const parsedEmail = emailSchema.safeParse(email);
+    if (!parsedEmail.success) {
+      return { success: false, message: validationMessage(parsedEmail.error) };
+    }
+
+    await auth.api.sendVerificationEmail({
+      body: { email: parsedEmail.data.toLowerCase() },
+    });
+
+    return {
+      success: true,
+      message: "If that email needs verification, check your inbox.",
+    };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Could not send a verification email" };
+  }
+}
+
 export const resetPassword = async (token: string, newPassword: string) => {
   try {
     const parsedToken = tokenSchema.safeParse(token);
