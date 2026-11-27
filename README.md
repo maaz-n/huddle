@@ -19,6 +19,7 @@ Huddle was built to explore:
 * Server actions & modern fullstack patterns
 * Optimistic status changes, subtask toggles, and notification reads with rollback on failure
 * Keyboard-friendly sidebar, table rows, labelled controls, and a skip link
+* English/Urdu UI language switcher in the user menu
 
 ---
 <h2 align="center">Features</h2>
