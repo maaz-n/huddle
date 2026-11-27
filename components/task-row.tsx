@@ -13,9 +13,11 @@ interface TaskRowProps {
     isOverdue?: boolean
   }
   onClick: () => void
+  selected?: boolean
+  onSelectedChange?: (selected: boolean) => void
 }
 
-export function TaskRow({ task, onClick }: TaskRowProps) {
+export function TaskRow({ task, onClick, selected = false, onSelectedChange }: TaskRowProps) {
   const isOverdue = task.isOverdue
 
   return (
@@ -24,12 +26,28 @@ export function TaskRow({ task, onClick }: TaskRowProps) {
       className={cn(
         "cursor-pointer transition-colors",
         "hover:bg-secondary",
+        selected && "bg-secondary/70",
         isOverdue && [
           "bg-red-50 hover:bg-red-100 border-l-4 border-red-500",
           "dark:bg-red-950/30 dark:hover:bg-red-950/40 dark:border-red-600",
         ]
       )}
     >
+      {onSelectedChange && (
+        <TableCell
+          className="w-10 px-4 py-4"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={(event) => onSelectedChange(event.target.checked)}
+            aria-label={`Select ${task.title}`}
+            className="h-4 w-4 cursor-pointer accent-primary"
+          />
+        </TableCell>
+      )}
+
       <TableCell className="font-medium max-w-xs truncate px-6 py-4">
         {task.title}
       </TableCell>

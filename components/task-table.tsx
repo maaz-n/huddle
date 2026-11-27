@@ -2,13 +2,25 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components
 import { TaskRow } from "./task-row"
 import { TasksWithAssignees } from "@/types/types"
 
-
-
-export function TaskTable({ tasksWithAssignees, onTaskSelect, emptyMessage }: {
+interface TaskTableProps {
   tasksWithAssignees: TasksWithAssignees[],
   onTaskSelect: (task: TasksWithAssignees) => void,
-  emptyMessage?: string
-}) {
+  emptyMessage?: string,
+  selectable?: boolean,
+  selectedIds?: string[],
+  onToggleSelect?: (id: string) => void,
+  onToggleAll?: () => void,
+}
+
+export function TaskTable({
+  tasksWithAssignees,
+  onTaskSelect,
+  emptyMessage,
+  selectable = false,
+  selectedIds = [],
+  onToggleSelect,
+  onToggleAll,
+}: TaskTableProps) {
   if (tasksWithAssignees.length === 0) {
     return (
       <div className="text-center py-12">
@@ -19,11 +31,25 @@ export function TaskTable({ tasksWithAssignees, onTaskSelect, emptyMessage }: {
     )
   }
 
+  const selected = new Set(selectedIds)
+  const allSelected = selectable && tasksWithAssignees.every((task) => selected.has(task.id))
+
   return (
     <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-sm mt-10">
       <Table className="w-full text-left border-collapse">
         <TableHeader>
           <TableRow className="border-b border-border/50 bg-muted/10">
+            {selectable && (
+              <TableHead className="w-10 px-4 py-4">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={onToggleAll}
+                  aria-label="Select all tasks on this page"
+                  className="h-4 w-4 cursor-pointer accent-primary"
+                />
+              </TableHead>
+            )}
             <TableHead className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Title</TableHead>
             <TableHead className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Assignee</TableHead>
             <TableHead className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Status</TableHead>
@@ -34,7 +60,15 @@ export function TaskTable({ tasksWithAssignees, onTaskSelect, emptyMessage }: {
         </TableHeader>
         <TableBody>
           {tasksWithAssignees.map((task) => (
-            <TaskRow key={task.id} task={task} onClick={() => onTaskSelect(task)}/>
+            <TaskRow
+              key={task.id}
+              task={task}
+              onClick={() => onTaskSelect(task)}
+              selected={selected.has(task.id)}
+              onSelectedChange={selectable && onToggleSelect
+                ? () => onToggleSelect(task.id)
+                : undefined}
+            />
           ))}
         </TableBody>
       </Table>
