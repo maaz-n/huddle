@@ -15,6 +15,7 @@ import {
   MessageSquare,
   Paperclip,
   Plus,
+  Repeat2,
   Trash2,
   Upload,
 } from "lucide-react"
@@ -565,6 +566,12 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
               <DialogTitle className="text-2xl font-bold tracking-tight">
                 {task.title}
               </DialogTitle>
+              {task.recurrence && task.recurrence !== "none" && (
+                <span className="mt-2 inline-flex w-fit items-center gap-1 rounded-full border bg-muted/40 px-2 py-0.5 text-[10px] font-medium capitalize text-muted-foreground">
+                  <Repeat2 className="h-3 w-3" />
+                  Repeats {task.recurrence}
+                </span>
+              )}
               {task.isOverdue && (
                 <Alert className="mt-3 px-4 py-2 flex items-center gap-2 border-red-200 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
                   <AlertCircle className="h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />

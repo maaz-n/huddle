@@ -86,6 +86,14 @@ function getActivityContent(log: LogProps) {
         </span>
       );
 
+    case "TASK_RECURRENCE_CREATED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          scheduled the next occurrence of{" "}
+          <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
+        </span>
+      );
+
     case "SUBTASK_ADDED":
       return (
         <span className="text-muted-foreground ml-1">

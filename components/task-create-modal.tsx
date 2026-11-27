@@ -13,8 +13,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
+import { RECURRENCE_OPTIONS } from "@/lib/recurrence"
 
-import { InsertTask, WorkspaceUser } from "@/types/types"
+import { InsertTask, Recurrence, WorkspaceUser } from "@/types/types"
 
 interface TaskCreateModalProps {
   open: boolean
@@ -31,6 +32,7 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium")
   const [assigneeId, setAssigneeId] = useState<string>("")
   const [dueDate, setDueDate] = useState<Date>(new Date())
+  const [recurrence, setRecurrence] = useState<Recurrence>("none")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,7 +46,8 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
         priority,
         assigneeId: assigneeId,
         workspaceId,
-        dueDate: dueDate.toISOString()
+        dueDate: dueDate.toISOString(),
+        recurrence
       })
 
       setTitle("")
@@ -52,6 +55,7 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
       setPriority("medium")
       setAssigneeId("")
       setDueDate(new Date())
+      setRecurrence("none")
       onOpenChange(false)
     } finally {
       setIsSubmitting(false)
@@ -160,6 +164,28 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
                   />
                 </PopoverContent>
               </Popover>
+            </div>
+
+            <div className="space-y-2 flex flex-col">
+              <Label className="text-[10px] font-bold uppercase text-muted-foreground">Repeat</Label>
+              <Select
+                value={recurrence}
+                onValueChange={(value) => setRecurrence(value as Recurrence)}
+              >
+                <SelectTrigger className="bg-background">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {RECURRENCE_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[10px] text-muted-foreground">
+                A new task is scheduled when this one is completed.
+              </p>
             </div>
           </div>
 
