@@ -33,6 +33,7 @@ export type TasksWithAssignees = {
   priority: "low" | "medium" | "high",
   assigneeId: string,
   dueDate: string,
+  recurrence?: Recurrence
   createdBy: string,
   createdAt: Date,
   updatedAt: Date,
@@ -45,6 +46,8 @@ export type TasksWithAssignees = {
   }
 }
 
+export type Recurrence = "none" | "daily" | "weekly" | "monthly"
+
 export type InsertTask = {
   workspaceId: string,
   title: string,
@@ -52,7 +55,8 @@ export type InsertTask = {
   status: "todo" | "in_review" | "done",
   priority: "low" | "medium" | "high",
   assigneeId: string,
-  dueDate: string
+  dueDate: string,
+  recurrence?: Recurrence
 }
 
 export type WorkspaceWithRole = {

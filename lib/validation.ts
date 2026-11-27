@@ -106,6 +106,8 @@ export const commentSchema = z
   .min(1, "Comment cannot be empty")
   .max(2000, "Comment is too long");
 
+export const recurrenceSchema = z.enum(["none", "daily", "weekly", "monthly"]);
+
 export const createTaskSchema = z.object({
   workspaceId: idSchema,
   title: taskTitleSchema,
@@ -114,6 +116,7 @@ export const createTaskSchema = z.object({
   priority: taskPrioritySchema,
   assigneeId: idSchema,
   dueDate: dueDateSchema,
+  recurrence: recurrenceSchema.optional().default("none"),
 });
 
 export function validationMessage(error: z.ZodError): string {

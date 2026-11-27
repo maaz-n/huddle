@@ -1,8 +1,11 @@
 "use server";
 
+import { randomUUID } from "crypto";
+
 import { db } from "@/db";
 import { tasks, activityLogs, user, workspaceMembers } from "@/db/schema";
 import { logActivity } from "@/lib/activity";
+import { getNextDueDate } from "@/lib/recurrence";
 import { getWorkspaceManagerIds, notifyUsers } from "@/lib/notifications";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
 import { canTransition } from "@/lib/task-workflow";
@@ -16,8 +19,8 @@ import {
   taskTitleSchema,
   validationMessage,
 } from "@/lib/validation";
-import { GetFilteredTasks, UserTypeNew } from "@/types/types";
-import { and, asc, desc, eq, ilike, inArray, sql } from "drizzle-orm";
+import { GetFilteredTasks, Recurrence, UserTypeNew } from "@/types/types";
+import { and, asc, desc, eq, gt, ilike, inArray, ne, sql } from "drizzle-orm";
 
 /**
  * Wildcards are escaped so a search for "%" matches a literal percent sign
@@ -141,6 +144,83 @@ export async function getMyTasks(workspaceId: string) {
   }
 }
 
+type RecurringTaskSource = {
+  id: string;
+  workspaceId: string;
+  title: string;
+  dueDate: string;
+  description: string | null;
+  priority: "low" | "medium" | "high";
+  assigneeId: string;
+  createdBy: string;
+  recurrence: Recurrence;
+  seriesId: string | null;
+};
+
+/**
+ * Schedules the next occurrence when a repeating task is completed. Best
+ * effort: a failure here must never turn a successful status change into an
+ * error for the user.
+ */
+async function createNextOccurrence(
+  completed: RecurringTaskSource,
+  actorId: string,
+) {
+  if (completed.recurrence === "none") return;
+
+  try {
+    const seriesId = completed.seriesId ?? completed.id;
+    const nextDueDate = getNextDueDate(
+      completed.dueDate,
+      completed.recurrence,
+    );
+    if (!nextDueDate) return;
+
+    // Guard against double-clicks and re-completions: a pending occurrence
+    // later in the same series means the next one already exists.
+    const pending = await db
+      .select({ id: tasks.id })
+      .from(tasks)
+      .where(
+        and(
+          eq(tasks.workspaceId, completed.workspaceId),
+          eq(tasks.seriesId, seriesId),
+          ne(tasks.status, "done"),
+          gt(tasks.dueDate, completed.dueDate),
+        ),
+      )
+      .limit(1);
+    if (pending.length > 0) return;
+
+    await db.insert(tasks).values({
+      workspaceId: completed.workspaceId,
+      title: completed.title,
+      description: completed.description,
+      status: "todo",
+      priority: completed.priority,
+      dueDate: nextDueDate,
+      assigneeId: completed.assigneeId,
+      createdBy: completed.createdBy,
+      recurrence: completed.recurrence,
+      seriesId,
+    });
+
+    await logActivity({
+      workspaceId: completed.workspaceId,
+      actorId,
+      entityType: "task",
+      entityId: completed.id,
+      action: "TASK_RECURRENCE_CREATED",
+      metadata: {
+        entityName: completed.title,
+        note: nextDueDate,
+      },
+    });
+  } catch (error) {
+    console.error("[recurrence] Could not schedule the next task:", error);
+  }
+}
+
 export async function createTask(
   workspaceId: string,
   title: string,
@@ -149,6 +229,7 @@ export async function createTask(
   priority: "low" | "medium" | "high",
   assigneeId: string,
   dueDate: string,
+  recurrence: Recurrence = "none",
 ) {
   const parsed = createTaskSchema.safeParse({
     workspaceId,
@@ -158,6 +239,7 @@ export async function createTask(
     priority,
     assigneeId,
     dueDate,
+    recurrence,
   });
 
   if (!parsed.success) {
@@ -185,9 +267,15 @@ export async function createTask(
         message: "Assignee does not belong to the workspace",
       };
 
+    // The first occurrence doubles as the series id, so every later task can
+    // point back to one stable value.
+    const seriesId =
+      parsed.data.recurrence === "none" ? null : randomUUID();
+
     const [insertedTask] = await db
       .insert(tasks)
       .values({
+        id: seriesId ?? undefined,
         workspaceId: parsed.data.workspaceId,
         title: parsed.data.title,
         description: parsed.data.description || null,
@@ -196,6 +284,8 @@ export async function createTask(
         dueDate: parsed.data.dueDate,
         assigneeId: parsed.data.assigneeId,
         createdBy: user.id,
+        recurrence: parsed.data.recurrence,
+        seriesId,
       })
       .returning();
 
@@ -316,7 +406,19 @@ export async function bulkUpdateTaskStatus(
         eq(tasks.workspaceId, parsedWorkspaceId.data),
         inArray(tasks.id, parsedIds.data),
       ),
-      columns: { id: true, title: true, status: true },
+      columns: {
+        id: true,
+        workspaceId: true,
+        title: true,
+        status: true,
+        dueDate: true,
+        description: true,
+        priority: true,
+        assigneeId: true,
+        createdBy: true,
+        recurrence: true,
+        seriesId: true,
+      },
     });
 
     // Each task still obeys the normal review workflow; tasks that cannot make
@@ -366,6 +468,12 @@ export async function bulkUpdateTaskStatus(
         }),
       ),
     );
+
+    if (parsedStatus.data === "done") {
+      await Promise.all(
+        transitionable.map((task) => createNextOccurrence(task, user.id)),
+      );
+    }
 
     const skipped = existing.length - transitionable.length;
     return {
@@ -517,6 +625,10 @@ export async function updateTaskStatus(
       newStatus: parsedStatus.data,
     },
   });
+
+  if (parsedStatus.data === "done") {
+    await createNextOccurrence(task, user.id);
+  }
 
   if (parsedStatus.data === "in_review") {
     const managerIds = await getWorkspaceManagerIds(

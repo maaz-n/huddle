@@ -132,6 +132,13 @@ export const tasks = pgTable(
       .default("medium"),
       revisionNote: text("revision_note"),
     dueDate: text("due_date").notNull(),
+    recurrence: text("recurrence")
+      .notNull()
+      .$type<"none" | "daily" | "weekly" | "monthly">()
+      .default("none"),
+    // All occurrences of one repeating task share this id; one-off tasks leave
+    // it null. It is not a foreign key because the first task owns its id.
+    seriesId: text("series_id"),
     assigneeId: text("assignee_id").notNull().references(() => user.id, { onDelete: 'cascade' }),
     createdBy: text("created_by").notNull().references(() => user.id, { onDelete: 'cascade' }),
     createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -141,6 +148,7 @@ export const tasks = pgTable(
     index("tasks_workspaceId_idx").on(table.workspaceId),
     index("tasks_assigneeId_idx").on(table.assigneeId),
     index("tasks_status_idx").on(table.status),
+    index("tasks_seriesId_idx").on(table.seriesId),
   ],
 );
 
