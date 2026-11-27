@@ -150,6 +150,10 @@ Copy `.env.example` to `.env.local` and fill in the values you need:
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth credentials |
 | `RESEND_API_KEY` | Resend API key for password-reset and invitation emails |
 | `EMAIL_FROM` | Verified Resend sender address (defaults to `onboarding@resend.dev`) |
+| `AWS_ENDPOINT_URL_S3` | Neon Object Storage branch endpoint (from Neon → Connect → Storage) |
+| `AWS_REGION` | Neon storage bucket region |
+| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | Neon storage credentials |
+| `UPLOADS_BUCKET` | Bucket name |
 
 ---
 <h2 align="center">Show Your Support</h2>
