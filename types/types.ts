@@ -131,6 +131,16 @@ export type NotificationItem = {
   createdAt: string
 }
 
+export type TaskAttachment = {
+  id: string
+  fileName: string
+  mimeType: string
+  size: number
+  uploaderId: string
+  uploaderName: string
+  createdAt: string | Date
+}
+
 export type LabelItem = {
   id: string
   name: string

@@ -7,6 +7,7 @@ import {
   timestamp,
   boolean,
   index,
+  integer,
   jsonb,
   primaryKey,
   uniqueIndex,
@@ -201,6 +202,36 @@ export const taskLabels = pgTable(
   (table) => [primaryKey({ columns: [table.taskId, table.labelId] })],
 );
 
+export const taskAttachments = pgTable(
+  "task_attachments",
+  {
+    id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+    taskId: text("task_id")
+      .notNull()
+      .references(() => tasks.id, { onDelete: "cascade" }),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    uploaderId: text("uploader_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    fileName: text("file_name").notNull(),
+    mimeType: text("mime_type").notNull(),
+    // Bytes are stored base64-encoded so the app stays on the Neon HTTP
+    // driver without a separate object-storage provider.
+    size: integer("size").notNull(),
+    data: text("data").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("task_attachments_taskId_createdAt_idx").on(
+      table.taskId,
+      table.createdAt,
+    ),
+    index("task_attachments_workspaceId_idx").on(table.workspaceId),
+  ],
+);
+
 export const activityLogs = pgTable(
   "activity_logs",
   {
@@ -317,7 +348,22 @@ export const taskRelations = relations(tasks, ({ one, many }) => ({
     references: [user.id]
   }),
   labels: many(taskLabels),
+  attachments: many(taskAttachments),
 }))
+
+export const taskAttachmentRelations = relations(
+  taskAttachments,
+  ({ one }) => ({
+    task: one(tasks, {
+      fields: [taskAttachments.taskId],
+      references: [tasks.id],
+    }),
+    uploader: one(user, {
+      fields: [taskAttachments.uploaderId],
+      references: [user.id],
+    }),
+  }),
+)
 
 export const labelRelations = relations(labels, ({ one, many }) => ({
   workspace: one(workspaces, {
