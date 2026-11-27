@@ -17,6 +17,7 @@ Huddle was built to explore:
 * Role-based permissions
 * Task workflows with review systems
 * Server actions & modern fullstack patterns
+* Optimistic status changes, subtask toggles, and notification reads with rollback on failure
 
 ---
 <h2 align="center">Features</h2>
