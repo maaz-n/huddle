@@ -38,6 +38,18 @@ export const taskPrioritySchema = z
     { message: "Invalid task priority" },
   );
 
+export const labelColorSchema = z
+  .string()
+  .refine(
+    (value): value is "slate" | "red" | "amber" | "green" | "blue" | "violet" =>
+      ["slate", "red", "amber", "green", "blue", "violet"].includes(value),
+    { message: "Invalid label color" },
+  );
+
+export const taskLabelIdsSchema = z
+  .array(idSchema)
+  .max(20, "A task can have at most 20 labels");
+
 export const taskIdListSchema = z
   .array(idSchema)
   .min(1, "Select at least one task")

@@ -131,6 +131,20 @@ export type NotificationItem = {
   createdAt: string
 }
 
+export type LabelItem = {
+  id: string
+  name: string
+  color: LabelColor
+}
+
+export type LabelColor =
+  | "slate"
+  | "red"
+  | "amber"
+  | "green"
+  | "blue"
+  | "violet"
+
 export type TaskComment = {
   id: string
   taskId: string

@@ -8,6 +8,7 @@ import {
   boolean,
   index,
   jsonb,
+  primaryKey,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
@@ -168,6 +169,38 @@ export const taskComments = pgTable(
   ],
 );
 
+export const labels = pgTable(
+  "labels",
+  {
+    id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    color: text("color").notNull().default("slate"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("labels_workspaceId_name_idx").on(
+      table.workspaceId,
+      table.name,
+    ),
+  ],
+);
+
+export const taskLabels = pgTable(
+  "task_labels",
+  {
+    taskId: text("task_id")
+      .notNull()
+      .references(() => tasks.id, { onDelete: "cascade" }),
+    labelId: text("label_id")
+      .notNull()
+      .references(() => labels.id, { onDelete: "cascade" }),
+  },
+  (table) => [primaryKey({ columns: [table.taskId, table.labelId] })],
+);
+
 export const activityLogs = pgTable(
   "activity_logs",
   {
@@ -278,9 +311,29 @@ export const accountRelations = relations(account, ({ one }) => ({
   }),
 }));
 
-export const taskRelations = relations(tasks, ({ one }) => ({
+export const taskRelations = relations(tasks, ({ one, many }) => ({
   user: one(user, {
     fields: [tasks.assigneeId],
     references: [user.id]
-  })
+  }),
+  labels: many(taskLabels),
+}))
+
+export const labelRelations = relations(labels, ({ one, many }) => ({
+  workspace: one(workspaces, {
+    fields: [labels.workspaceId],
+    references: [workspaces.id],
+  }),
+  taskLabels: many(taskLabels),
+}))
+
+export const taskLabelRelations = relations(taskLabels, ({ one }) => ({
+  task: one(tasks, {
+    fields: [taskLabels.taskId],
+    references: [tasks.id],
+  }),
+  label: one(labels, {
+    fields: [taskLabels.labelId],
+    references: [labels.id],
+  }),
 }))
