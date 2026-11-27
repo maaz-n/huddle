@@ -18,6 +18,7 @@ Huddle was built to explore:
 * Task workflows with review systems
 * Server actions & modern fullstack patterns
 * Optimistic status changes, subtask toggles, and notification reads with rollback on failure
+* Keyboard-friendly sidebar, table rows, labelled controls, and a skip link
 
 ---
 <h2 align="center">Features</h2>
