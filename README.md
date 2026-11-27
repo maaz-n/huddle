@@ -85,6 +85,11 @@ Huddle was built to explore:
 * Delete workspace
 * Manage team structure
 
+### 8. Profile
+
+* Upload or remove a profile picture (PNG, JPEG, WebP, or GIF up to 2 MB)
+* Edit display name and email notification preference
+
 ---
 <h2 align="center">Architecture Highlights</h2>
 
