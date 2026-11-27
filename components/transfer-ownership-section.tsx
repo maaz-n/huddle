@@ -94,7 +94,7 @@ function TransferOwnershipSection({
                     New Owner
                   </Label>
                   <Select value={newOwnerId} onValueChange={setNewOwnerId}>
-                    <SelectTrigger className="max-w-md h-11 bg-muted/20">
+                    <SelectTrigger className="max-w-md h-11 bg-muted/20" aria-label="New owner">
                       <SelectValue placeholder="Select a member" />
                     </SelectTrigger>
                     <SelectContent>

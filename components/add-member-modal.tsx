@@ -108,7 +108,7 @@ const AddMemberModal = ({
           <div className="space-y-1.5">
             <Label>Role</Label>
             <Select value={role} onValueChange={(value) => setRole(value as Role)}>
-              <SelectTrigger>
+              <SelectTrigger aria-label="Invitation role">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

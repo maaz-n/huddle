@@ -23,8 +23,17 @@ export function TaskRow({ task, onClick, selected = false, onSelectedChange }: T
   return (
     <TableRow
       onClick={onClick}
+      tabIndex={0}
+      aria-label={`Open task ${task.title}`}
+      onKeyDown={(event) => {
+        if (event.target !== event.currentTarget) return
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault()
+          onClick()
+        }
+      }}
       className={cn(
-        "cursor-pointer transition-colors",
+        "cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         "hover:bg-secondary",
         selected && "bg-secondary/70",
         isOverdue && [

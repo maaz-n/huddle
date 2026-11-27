@@ -128,7 +128,7 @@ export function FilterBar({ users }: { users: UserTypeNew[] }) {
       </div>
 
       <Select value={sort} onValueChange={(value) => setSort(value as TaskSort)}>
-        <SelectTrigger className="w-48">
+        <SelectTrigger className="w-48" aria-label="Sort tasks">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent>
@@ -141,7 +141,7 @@ export function FilterBar({ users }: { users: UserTypeNew[] }) {
       </Select>
 
       <Select value={selectedStatus} onValueChange={(value) => setSelectedStatus(value as TaskStatus)}>
-        <SelectTrigger className="w-40">
+        <SelectTrigger className="w-40" aria-label="Filter by status">
           <SelectValue placeholder="Filter by status" />
         </SelectTrigger>
         <SelectContent>
@@ -154,7 +154,7 @@ export function FilterBar({ users }: { users: UserTypeNew[] }) {
       </Select>
 
       <Select value={selectedPriority} onValueChange={(value) => setSelectedPriority(value as TaskPriority)}>
-        <SelectTrigger className="w-40">
+        <SelectTrigger className="w-40" aria-label="Filter by priority">
           <SelectValue placeholder="Filter by priority" />
         </SelectTrigger>
         <SelectContent>
@@ -167,7 +167,7 @@ export function FilterBar({ users }: { users: UserTypeNew[] }) {
       </Select>
 
       <Select value={selectedAssignee} onValueChange={setSelectedAssignee}>
-        <SelectTrigger className="w-45" disabled={users.length === 0}>
+        <SelectTrigger className="w-45" disabled={users.length === 0} aria-label="Filter by assignee">
           <SelectValue placeholder="Filter by assignee" />
         </SelectTrigger>
         <SelectContent>

@@ -64,8 +64,14 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
       >
         <nav className="flex flex-col h-full">
           <div className="flex items-center justify-between h-16 px-6">
-            <img src={"/huddle.svg"} className="pt-4 mx-auto w-35 invert-85 dark:invert-0"/>
-            <Button variant="ghost" size="icon" onClick={() => setOpen(false)} className="lg:hidden">
+            <img src={"/huddle.svg"} alt="Huddle" className="pt-4 mx-auto w-35 invert-85 dark:invert-0"/>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setOpen(false)}
+              className="lg:hidden"
+              aria-label="Close navigation"
+            >
               <ChevronLeft className="h-5 w-5" />
             </Button>
           </div>
@@ -83,19 +89,20 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
                       const isActive = pathname === item.basePath
 
                       return (
-                        <Link key={item.href} href={item.href}>
-                          <button
-                            onClick={() => setOpen(false)}
-                            className={cn(
-                              "w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors",
-                              isActive
-                                ? "bg-primary text-primary-foreground"
-                                : "text-foreground hover:bg-secondary"
-                            )}
-                          >
-                            <Icon className="h-5 w-5" />
-                            <span className="font-medium">{item.label}</span>
-                          </button>
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setOpen(false)}
+                          aria-current={isActive ? "page" : undefined}
+                          className={cn(
+                            "w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                            isActive
+                              ? "bg-primary text-primary-foreground"
+                              : "text-foreground hover:bg-secondary"
+                          )}
+                        >
+                          <Icon className="h-5 w-5" aria-hidden="true" />
+                          <span className="font-medium">{item.label}</span>
                         </Link>
                       )
                     })}

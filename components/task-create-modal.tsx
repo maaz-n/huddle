@@ -108,7 +108,7 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
                   setPriority(value as "low" | "medium" | "high")
                 }
               >
-                <SelectTrigger className="bg-background">
+                <SelectTrigger className="bg-background" aria-label="Task priority">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -122,7 +122,7 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
             <div className="space-y-2">
               <Label className="text-[10px] font-bold uppercase text-muted-foreground">Assignee</Label>
               <Select value={assigneeId} onValueChange={setAssigneeId}>
-                <SelectTrigger className="bg-background">
+                <SelectTrigger className="bg-background" aria-label="Task assignee">
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>
                 <SelectContent>
@@ -172,7 +172,7 @@ export function TaskCreateModal({ open, onOpenChange, onCreateTask, workspaceUse
                 value={recurrence}
                 onValueChange={(value) => setRecurrence(value as Recurrence)}
               >
-                <SelectTrigger className="bg-background">
+                <SelectTrigger className="bg-background" aria-label="Repeat schedule">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

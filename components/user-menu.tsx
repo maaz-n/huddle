@@ -38,7 +38,7 @@ export function UserMenu({ user }: { user: UserTypeNew }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" aria-label="Open user menu">
           <UserAvatar user={user} />
         </Button>
       </DropdownMenuTrigger>

@@ -42,6 +42,7 @@ function RemoveWorkspaceUserButton({ user, workspaceId }: RemoveWorkspaceUserBut
             <AlertDialogTrigger asChild>
                 <Button
                     variant={"destructive"}
+                    aria-label={`Remove ${user.name}`}
                 >
                     <Trash className="h-4 w-4 " />
                 </Button>

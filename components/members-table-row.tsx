@@ -91,7 +91,10 @@ export function MembersTableRow({ member, workspaceId, currentUserRole, currentU
                                     onValueChange={(e) => setPendingRole(e as UserRole)}
                                     disabled={!canChangeRole}
                                 >
-                                    <SelectTrigger className="w-[180px] sm:w-[120px]">
+                                    <SelectTrigger
+                                        className="w-[180px] sm:w-[120px]"
+                                        aria-label="Member role"
+                                    >
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>

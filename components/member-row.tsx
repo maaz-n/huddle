@@ -73,7 +73,10 @@ function MemberRow({ user, currentUserRole, workspaceId, onRemove, isLoading, cu
                                 defaultValue={user.role as UserRole}
                                 onValueChange={(e) => setPendingRole(e as UserRole)}
                                 >
-                                    <SelectTrigger className="w-[180px] sm:w-[120px]">
+                                    <SelectTrigger
+                                        className="w-[180px] sm:w-[120px]"
+                                        aria-label={`Role for ${user.name}`}
+                                    >
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>

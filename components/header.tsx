@@ -44,12 +44,23 @@ export function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
     <header className="border-b bg-card">
       <div className="flex items-center justify-between h-16 px-6">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="lg:hidden"
+            aria-label={sidebarOpen ? "Close navigation" : "Open navigation"}
+            aria-expanded={sidebarOpen}
+          >
             <Menu className="h-5 w-5" />
           </Button>
           <div className="hidden lg:flex items-center gap-2">
             <WorkspaceSwitcher workspaces={workspaces} />
-            <Button onClick={() => setWorkspaceCreateOpen(true)} className="gap-2 bg-primary hover:bg-primary/90">
+            <Button
+              onClick={() => setWorkspaceCreateOpen(true)}
+              className="gap-2 bg-primary hover:bg-primary/90"
+              aria-label="Create workspace"
+            >
               <Plus className="h-2 w-2" />
             </Button>
             
@@ -59,7 +70,11 @@ export function Header({ sidebarOpen, setSidebarOpen }: HeaderProps) {
         <div className="flex items-center gap-4">
           <div className="lg:hidden flex items-center gap-2">
             <WorkspaceSwitcher workspaces={workspaces} />
-            <Button onClick={() => setWorkspaceCreateOpen(true)} className="gap-2 bg-primary hover:bg-primary/90">
+            <Button
+              onClick={() => setWorkspaceCreateOpen(true)}
+              className="gap-2 bg-primary hover:bg-primary/90"
+              aria-label="Create workspace"
+            >
               <Plus/>
             </Button>
           </div>

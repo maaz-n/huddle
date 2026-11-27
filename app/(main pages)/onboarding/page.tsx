@@ -15,7 +15,7 @@ export default async function OnboardingPage() {
       <div className="max-w-[450px] w-full space-y-8">
         <div className="flex flex-col items-center text-center space-y-3">
           <div className="">
-            <img src={"/huddle.svg"} className="mx-auto w-35 mb-5 invert-85 dark:invert-0" />
+            <img src={"/huddle.svg"} alt="Huddle" className="mx-auto w-35 mb-5 invert-85 dark:invert-0" />
           </div>
           <div className="space-y-1">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Setup your workspace</h1>

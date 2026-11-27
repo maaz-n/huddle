@@ -23,10 +23,22 @@ interface MyTaskRowProps {
 export function MyTaskRow({ task, onClick }: MyTaskRowProps) {
 
     return (
-        <TableRow className={cn("group border-b border-border/40 last:border-0 hover:bg-muted/30 transition-all cursor-default", task.isOverdue && [
-            "bg-red-50 hover:bg-red-100 border-l-4 border-red-500",
-            "dark:bg-red-950/30 dark:hover:bg-red-950/40 dark:border-red-600",
-        ])} onClick={onClick}>
+        <TableRow
+            className={cn("group border-b border-border/40 last:border-0 hover:bg-muted/30 transition-all cursor-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", task.isOverdue && [
+                "bg-red-50 hover:bg-red-100 border-l-4 border-red-500",
+                "dark:bg-red-950/30 dark:hover:bg-red-950/40 dark:border-red-600",
+            ])}
+            onClick={onClick}
+            tabIndex={0}
+            aria-label={`Open task ${task.title}`}
+            onKeyDown={(event) => {
+                if (event.target !== event.currentTarget) return
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault()
+                    onClick()
+                }
+            }}
+        >
             <TableCell className="px-6 py-4 max-w-[300px]">
                 <div className="flex items-center gap-3">
                     {
