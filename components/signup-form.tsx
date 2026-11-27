@@ -39,8 +39,9 @@ export function SignupForm({
     try {
       const response = await signup(name, email, password);
       if (response.success) {
-        toast.success(response.message);
-        router.push(safeNextPath(next))
+        toast.success("Account created. Check your inbox to verify your email.");
+        const destination = next ? `&next=${encodeURIComponent(safeNextPath(next))}` : ""
+        router.push(`/verify-email?email=${encodeURIComponent(email)}${destination}`)
       } else {
         toast.error(response.message);
       }
