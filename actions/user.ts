@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { user, workspaceMembers, workspaces } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
+import { logActivity } from "@/lib/activity";
 import { notifyUsers } from "@/lib/notifications";
 import {
   emailSchema,
@@ -69,7 +70,7 @@ export async function updateEmailNotifications(enabled: boolean) {
 async function getUserByEmail(email: string) {
   try {
     const userObj = await db
-      .select({ id: user.id })
+      .select({ id: user.id, name: user.name })
       .from(user)
       .where(eq(user.email, email));
 
@@ -146,6 +147,18 @@ export async function addMember(
     const workspace = await db.query.workspaces.findFirst({
       where: eq(workspaces.id, parsedWorkspaceId.data),
       columns: { name: true },
+    });
+
+    await logActivity({
+      workspaceId: parsedWorkspaceId.data,
+      actorId: currentUser.id,
+      entityType: "workspace",
+      entityId: parsedWorkspaceId.data,
+      action: "MEMBER_ADDED",
+      metadata: {
+        entityName: targetUser.name ?? parsedEmail.data,
+        role: parsedRole.data,
+      },
     });
 
     await notifyUsers({

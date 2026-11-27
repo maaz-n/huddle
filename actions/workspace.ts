@@ -5,6 +5,7 @@ import { user, workspaceMembers, workspaces } from "@/db/schema";
 import { getCurrentUser } from "./auth";
 import { and, eq } from "drizzle-orm";
 import { requireWorkspaceAccess } from "@/lib/workspace-access";
+import { logActivity } from "@/lib/activity";
 import { notifyUsers } from "@/lib/notifications";
 import { idSchema, nameSchema, validationMessage } from "@/lib/validation";
 
@@ -25,6 +26,16 @@ export const createWorkspace = async (name: string) => {
     await db
       .insert(workspaceMembers)
       .values({ workspaceId: workspace[0].id, userId: user.id, role: "owner" });
+
+    await logActivity({
+      workspaceId: workspace[0].id,
+      actorId: user.id,
+      entityType: "workspace",
+      entityId: workspace[0].id,
+      action: "WORKSPACE_CREATED",
+      metadata: { entityName: workspace[0].name },
+    });
+
     return {
       success: true,
       message: "Workspace created!",
@@ -101,13 +112,34 @@ export const updateWorkspaceName = async (
       return { success: false, message: validationMessage(parsedName.error) };
     }
 
-    await requireWorkspaceAccess(parsedWorkspaceId.data, "owner");
+    const { user: actor } = await requireWorkspaceAccess(
+      parsedWorkspaceId.data,
+      "owner",
+    );
+
+    const existing = await db.query.workspaces.findFirst({
+      where: eq(workspaces.id, parsedWorkspaceId.data),
+      columns: { name: true },
+    });
+
     await db
       .update(workspaces)
       .set({
         name: parsedName.data,
       })
       .where(eq(workspaces.id, parsedWorkspaceId.data));
+
+    await logActivity({
+      workspaceId: parsedWorkspaceId.data,
+      actorId: actor.id,
+      entityType: "workspace",
+      entityId: parsedWorkspaceId.data,
+      action: "WORKSPACE_RENAMED",
+      metadata: {
+        entityName: parsedName.data,
+        oldName: existing?.name,
+      },
+    });
 
     return { success: true, message: "Workspace name updated!" };
   } catch (error) {
@@ -164,6 +196,11 @@ export const removeUser = async (workspaceId: string, userId: string) => {
       return { success: false, message: "Admins can only remove members" };
     }
 
+    const removedUser = await db.query.user.findFirst({
+      where: eq(user.id, parsedUserId.data),
+      columns: { name: true },
+    });
+
     await db
       .delete(workspaceMembers)
       .where(
@@ -172,6 +209,18 @@ export const removeUser = async (workspaceId: string, userId: string) => {
           eq(workspaceMembers.userId, parsedUserId.data),
         ),
       );
+
+    await logActivity({
+      workspaceId: parsedWorkspaceId.data,
+      actorId: actor.id,
+      entityType: "workspace",
+      entityId: parsedWorkspaceId.data,
+      action: "MEMBER_REMOVED",
+      metadata: {
+        entityName: removedUser?.name ?? "A member",
+        role: target.role,
+      },
+    });
 
     return { success: true, message: "User removed from workspace!" };
   } catch (error) {
@@ -251,6 +300,24 @@ export const updateUserRole = async (
       columns: { name: true },
     });
 
+    const targetUser = await db.query.user.findFirst({
+      where: eq(user.id, parsedTargetUserId.data),
+      columns: { name: true },
+    });
+
+    await logActivity({
+      workspaceId: parsedWorkspaceId.data,
+      actorId: currentUser.id,
+      entityType: "workspace",
+      entityId: parsedWorkspaceId.data,
+      action: "MEMBER_ROLE_CHANGED",
+      metadata: {
+        entityName: targetUser?.name ?? "A member",
+        role: newRole,
+        oldRole: targetMember.role,
+      },
+    });
+
     await notifyUsers({
       userIds: [parsedTargetUserId.data],
       workspaceId: parsedWorkspaceId.data,
@@ -314,6 +381,11 @@ export const transferOwnership = async (
       return { success: false, message: "This member is already the owner" };
     }
 
+    const newOwner = await db.query.user.findFirst({
+      where: eq(user.id, parsedNewOwnerId.data),
+      columns: { name: true },
+    });
+
     // The single-owner index means the old owner has to step down before the
     // new owner is promoted. The batch keeps that gap invisible.
     await db.batch([
@@ -340,6 +412,15 @@ export const transferOwnership = async (
         .set({ ownerId: parsedNewOwnerId.data })
         .where(eq(workspaces.id, parsedWorkspaceId.data)),
     ]);
+
+    await logActivity({
+      workspaceId: parsedWorkspaceId.data,
+      actorId: currentUser.id,
+      entityType: "workspace",
+      entityId: parsedWorkspaceId.data,
+      action: "OWNERSHIP_TRANSFERRED",
+      metadata: { entityName: newOwner?.name ?? "A member", role: "owner" },
+    });
 
     return { success: true, message: "Ownership transferred!" };
   } catch (error) {

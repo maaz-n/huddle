@@ -179,10 +179,14 @@ export const activityLogs = pgTable(
     action: text("action").notNull(),
     metadata: jsonb("metadata").$type<{
       entityName?: string,
+      oldName?: string,
       oldStatus?: string,
       newStatus?: string,
       note?: string,
       comment?: string,
+      role?: string,
+      oldRole?: string,
+      email?: string,
       assigneeId?: string,
       assigneeName?: string
     }>(),

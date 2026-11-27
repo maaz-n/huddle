@@ -88,10 +88,14 @@ export type ActivityItem = {
   timestamp: string | Date
   metadata: {
     entityName?: string
+    oldName?: string
     oldStatus?: string
     newStatus?: string
     note?: string
     comment?: string
+    role?: string
+    oldRole?: string
+    email?: string
     assigneeId?: string
     assigneeName?: string
   } | null
