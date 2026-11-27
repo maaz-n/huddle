@@ -48,6 +48,7 @@ Huddle was built to explore:
 * Admins/Owners approve or request revisions
 * Search by title, sort by updated/due date/priority/title, and page results
 * Admins/Owners can bulk update status or delete selected tasks
+* Colored workspace labels on tasks, managed from the detail modal
 
 ### 4. My Tasks
 
