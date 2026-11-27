@@ -23,12 +23,22 @@ import {
 import { Button } from "@/components/ui/button"
 import {
   ActivityItem,
+  LabelColor,
+  LabelItem,
   TasksWithAssignees,
   TaskComment,
   UserTypeNew,
 } from "@/types/types"
 import { getTaskActivity } from "@/actions/activity"
+import {
+  createLabel,
+  getTaskLabels,
+  getWorkspaceLabels,
+  setTaskLabels,
+} from "@/actions/labels"
 import { ActivityLogItem } from "./activity-log-item"
+import { LabelChip, labelColorClasses } from "./label-chip"
+import { Input } from "./ui/input"
 import { deleteTask, requestChanges, updateTaskStatus } from "@/actions/tasks"
 import {
   addTaskComment,
@@ -68,6 +78,12 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null)
   const [activity, setActivity] = useState<ActivityItem[]>([])
   const [loadedActivityTaskId, setLoadedActivityTaskId] = useState<string | null>(null)
+  const [labels, setLabels] = useState<LabelItem[]>([])
+  const [workspaceLabels, setWorkspaceLabels] = useState<LabelItem[]>([])
+  const [loadedLabelsTaskId, setLoadedLabelsTaskId] = useState<string | null>(null)
+  const [labelInput, setLabelInput] = useState("")
+  const [labelColor, setLabelColor] = useState<LabelColor>("slate")
+  const [savingLabel, setSavingLabel] = useState(false)
 
   async function updateStatus(taskId: string, nextStatus: TaskStatus) {
     try {
@@ -88,6 +104,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
   const taskId = task?.id
   const commentsLoading = open && !!taskId && loadedTaskId !== taskId
   const activityLoading = open && !!taskId && loadedActivityTaskId !== taskId
+  const labelsLoading = open && !!taskId && loadedLabelsTaskId !== taskId
 
   const refreshActivity = useCallback(async (id: string) => {
     try {
@@ -128,8 +145,27 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
       }
     }
 
+    const loadLabels = async () => {
+      try {
+        const [taskLabelData, workspaceLabelData] = await Promise.all([
+          getTaskLabels(taskId, workspaceId),
+          getWorkspaceLabels(workspaceId),
+        ])
+        if (cancelled) return
+        setLabels(taskLabelData)
+        setWorkspaceLabels(workspaceLabelData)
+      } catch {
+        if (cancelled) return
+        setLabels([])
+        setWorkspaceLabels([])
+      } finally {
+        if (!cancelled) setLoadedLabelsTaskId(taskId)
+      }
+    }
+
     loadComments()
     loadActivity()
+    loadLabels()
 
     return () => {
       cancelled = true
@@ -147,6 +183,81 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
     role === "member" && task.assigneeId === currentUser.id && task.status === "in_review"
   const isManager = role !== "member"
   const nextStatus = getNextStatus(role, task.status)
+
+  const handleAddLabel = async (event: React.FormEvent) => {
+    event.preventDefault()
+    const name = labelInput.trim()
+    if (!name) return
+
+    setSavingLabel(true)
+    try {
+      const existing = workspaceLabels.find(
+        (label) => label.name.toLowerCase() === name.toLowerCase(),
+      )
+
+      let label = existing
+      if (!label) {
+        const created = await createLabel(workspaceId, name, labelColor)
+        if (!created.success || !created.label) {
+          toast.error(created.message)
+          return
+        }
+        label = created.label
+        setWorkspaceLabels((previous) =>
+          [...previous, created.label!].sort((a, b) =>
+            a.name.localeCompare(b.name),
+          ),
+        )
+      }
+
+      if (labels.some((item) => item.id === label!.id)) {
+        setLabelInput("")
+        return
+      }
+
+      const next = [...labels, label]
+      const response = await setTaskLabels(
+        task.id,
+        workspaceId,
+        next.map((item) => item.id),
+      )
+      if (response.success) {
+        setLabels(next)
+        setLabelInput("")
+        await refreshActivity(task.id)
+      } else {
+        toast.error(response.message)
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error("Could not add the label")
+    } finally {
+      setSavingLabel(false)
+    }
+  }
+
+  const handleRemoveLabel = async (labelId: string) => {
+    const next = labels.filter((label) => label.id !== labelId)
+    setSavingLabel(true)
+    try {
+      const response = await setTaskLabels(
+        task.id,
+        workspaceId,
+        next.map((label) => label.id),
+      )
+      if (response.success) {
+        setLabels(next)
+        await refreshActivity(task.id)
+      } else {
+        toast.error(response.message)
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error("Could not remove the label")
+    } finally {
+      setSavingLabel(false)
+    }
+  }
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
@@ -272,6 +383,85 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                 </Alert>
               )}
             </DialogHeader>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <Tag className="h-4 w-4" />
+                Labels
+              </div>
+
+              {labelsLoading ? (
+                <div className="flex items-center py-1">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center gap-2">
+                  {labels.map((label) => (
+                    <LabelChip
+                      key={label.id}
+                      label={label}
+                      onRemove={
+                        isManager
+                          ? () => handleRemoveLabel(label.id)
+                          : undefined
+                      }
+                    />
+                  ))}
+
+                  {labels.length === 0 && !isManager && (
+                    <span className="text-xs text-muted-foreground">
+                      No labels yet
+                    </span>
+                  )}
+
+                  {isManager && (
+                    <form
+                      onSubmit={handleAddLabel}
+                      className="flex flex-wrap items-center gap-1"
+                    >
+                      <Input
+                        value={labelInput}
+                        onChange={(event) => setLabelInput(event.target.value)}
+                        placeholder="Add label..."
+                        className="h-7 w-32 text-xs"
+                        maxLength={100}
+                        disabled={savingLabel}
+                        aria-label="New label name"
+                      />
+                      <select
+                        value={labelColor}
+                        onChange={(event) =>
+                          setLabelColor(event.target.value as LabelColor)
+                        }
+                        aria-label="Label color"
+                        className="h-7 rounded-md border border-input bg-background px-1 text-xs capitalize"
+                        disabled={savingLabel}
+                      >
+                        {(Object.keys(labelColorClasses) as LabelColor[]).map(
+                          (color) => (
+                            <option key={color} value={color}>
+                              {color}
+                            </option>
+                          ),
+                        )}
+                      </select>
+                      <Button
+                        type="submit"
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs"
+                        disabled={savingLabel || !labelInput.trim()}
+                      >
+                        {savingLabel && (
+                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                        )}
+                        Add
+                      </Button>
+                    </form>
+                  )}
+                </div>
+              )}
+            </div>
 
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">

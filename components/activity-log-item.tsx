@@ -65,6 +65,13 @@ function getActivityContent(log: LogProps) {
         </span>
       );
 
+    case "TASK_LABELS_UPDATED":
+      return (
+        <span className="text-muted-foreground ml-1">
+          updated the labels on <span className="font-medium text-foreground">{log.metadata?.entityName}</span>
+        </span>
+      );
+
     case "TASK_COMMENT_ADDED":
       return (
         <span className="text-muted-foreground ml-1">
