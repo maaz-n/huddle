@@ -131,6 +131,16 @@ export type NotificationItem = {
   createdAt: string
 }
 
+export type SubtaskItem = {
+  id: string
+  taskId: string
+  title: string
+  completed: boolean
+  authorId: string
+  createdAt: string | Date
+  completedAt: string | Date | null
+}
+
 export type TaskAttachment = {
   id: string
   fileName: string

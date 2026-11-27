@@ -202,6 +202,30 @@ export const taskLabels = pgTable(
   (table) => [primaryKey({ columns: [table.taskId, table.labelId] })],
 );
 
+export const subtasks = pgTable(
+  "subtasks",
+  {
+    id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+    taskId: text("task_id")
+      .notNull()
+      .references(() => tasks.id, { onDelete: "cascade" }),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    completed: boolean("completed").notNull().default(false),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    completedAt: timestamp("completed_at"),
+  },
+  (table) => [
+    index("subtasks_taskId_createdAt_idx").on(table.taskId, table.createdAt),
+    index("subtasks_workspaceId_idx").on(table.workspaceId),
+  ],
+);
+
 export const taskAttachments = pgTable(
   "task_attachments",
   {
@@ -349,6 +373,18 @@ export const taskRelations = relations(tasks, ({ one, many }) => ({
   }),
   labels: many(taskLabels),
   attachments: many(taskAttachments),
+  subtasks: many(subtasks),
+}))
+
+export const subtaskRelations = relations(subtasks, ({ one }) => ({
+  task: one(tasks, {
+    fields: [subtasks.taskId],
+    references: [tasks.id],
+  }),
+  author: one(user, {
+    fields: [subtasks.authorId],
+    references: [user.id],
+  }),
 }))
 
 export const taskAttachmentRelations = relations(
