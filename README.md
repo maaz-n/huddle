@@ -90,6 +90,11 @@ Huddle was built to explore:
 * Upload or remove a profile picture (PNG, JPEG, WebP, or GIF up to 2 MB)
 * Edit display name and email notification preference
 
+### 9. Authentication
+
+* Email verification required for new accounts, with a resendable link
+* Password reset and Google sign-in
+
 ---
 <h2 align="center">Architecture Highlights</h2>
 
