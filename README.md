@@ -50,6 +50,7 @@ Huddle was built to explore:
 * Admins/Owners can bulk update status or delete selected tasks
 * Colored workspace labels on tasks, managed from the detail modal
 * File attachments on tasks (5 MB per file, 20 per task) with authenticated downloads
+* Subtask checklists with progress tracking
 
 ### 4. My Tasks
 
