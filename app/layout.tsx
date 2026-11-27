@@ -3,6 +3,7 @@ import { Geist_Mono, Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { LocaleProvider } from "@/lib/use-locale";
 
 const outfitSans = Outfit({
   variable: "--font-geist-sans",
@@ -30,8 +31,10 @@ export default function RootLayout({
         className={`${outfitSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
-          <Toaster richColors />
+          <LocaleProvider>
+            {children}
+            <Toaster richColors />
+          </LocaleProvider>
         </ThemeProvider>
       </body>
     </html>
