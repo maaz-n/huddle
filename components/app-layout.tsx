@@ -55,7 +55,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           {user?.isDemo && (
             <div className="mx-auto mt-6 flex max-w-6xl flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm">
               <p className="font-medium text-primary">
-                Demo mode — explore freely. Your changes are temporary.
+                Demo mode - explore freely. Your changes are temporary.
               </p>
               <Button
                 size="sm"

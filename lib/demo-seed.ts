@@ -236,7 +236,7 @@ export async function seedDemoData(options?: { reset?: boolean }) {
       taskId: launch.id,
       workspaceId,
       authorId: sam.userId,
-      body: "Design assets are ready — I dropped them in the shared folder.",
+      body: "Design assets are ready. I dropped them in the shared folder.",
     },
     {
       taskId: launch.id,

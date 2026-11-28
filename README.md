@@ -97,7 +97,7 @@ Huddle was built to explore:
 
 * Email verification required for new accounts, with a resendable link
 * Password reset and Google sign-in
-* **Try a test demo** — one-click access to a populated workspace with sample tasks, comments, labels, subtasks, and activity
+* **Try a test demo** - one-click access to a populated workspace with sample tasks, comments, labels, subtasks, and activity
 
 ### 10. Demo Mode
 

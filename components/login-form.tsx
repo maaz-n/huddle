@@ -114,7 +114,7 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" placeholder="********" required 
+                <Input id="password" type="password" placeholder="********" required
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
                 />
@@ -154,7 +154,7 @@ export function LoginForm({
                   Try a test demo
                 </Button>
                 <FieldDescription className="text-center text-[11px]">
-                  Explore a populated workspace — no sign-up needed.
+                  Explore a populated workspace, no sign-up needed.
                 </FieldDescription>
               </Field>
 

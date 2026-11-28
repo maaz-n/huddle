@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Huddle - Task Management for Pros",
-  description: "An internal task management tool that helps teams organize work, assign tasks, and stay aligned—without the clutter.",
+  description: "An internal task management tool that helps teams organize work, assign tasks, and stay aligned, without the clutter.",
 };
 
 export default function RootLayout({

@@ -111,7 +111,7 @@ async function sendNotificationEmails(
         .map((person) =>
           sendEmail({
             to: person.email,
-            subject: `${input.title} — ${workspaceName}`,
+            subject: `${input.title} - ${workspaceName}`,
             html: taskNotificationEmail({
               recipientName: person.name,
               title: input.title,

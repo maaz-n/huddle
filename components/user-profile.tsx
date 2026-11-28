@@ -115,7 +115,7 @@ function UserProfile({ user }: { user: UserTypeNew }) {
             <CardContent className='my-0'>
                 {user.isDemo && (
                     <div className="mt-4 rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-                        Demo account — profile settings are read-only. Use “Reset demo” in the banner above to restore sample data.
+                        Demo account. Profile settings are read-only. Use “Reset demo” in the banner above to restore sample data.
                     </div>
                 )}
                 <form onSubmit={handleUpdate} className="divide-y divide-border">
