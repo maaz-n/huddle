@@ -13,8 +13,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { login } from "@/actions/auth"
+import { demoLogin } from "@/actions/demo"
 import { toast } from "sonner"
-import { Loader2Icon } from "lucide-react"
+import { Loader2Icon, PlayCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
 import { safeNextPath } from "@/lib/utils"
@@ -26,6 +27,7 @@ export function LoginForm({
 }: React.ComponentProps<"div"> & { next?: string }) {
 
   const [isLoading, setIsLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -51,6 +53,23 @@ export function LoginForm({
       setPassword("");
     }
 
+  }
+
+  const handleDemo = async () => {
+    setDemoLoading(true)
+    try {
+      const response = await demoLogin()
+      if (response.success && response.workspaceId) {
+        toast.success(response.message)
+        router.push(`/?workspace=${response.workspaceId}`)
+      } else {
+        toast.error(response.message)
+      }
+    } catch {
+      toast.error("Could not start the demo")
+    } finally {
+      setDemoLoading(false)
+    }
   }
 
   const loginWithGoogle = async () => {
@@ -119,6 +138,26 @@ export function LoginForm({
                   <span>Login with Google</span>
                 </Button>
               </Field>
+              <Field>
+                <Button
+                  variant="secondary"
+                  type="button"
+                  onClick={handleDemo}
+                  disabled={demoLoading || isLoading}
+                  className="gap-2"
+                >
+                  {demoLoading ? (
+                    <Loader2Icon className="size-4 animate-spin" />
+                  ) : (
+                    <PlayCircle className="size-4" />
+                  )}
+                  Try a test demo
+                </Button>
+                <FieldDescription className="text-center text-[11px]">
+                  Explore a populated workspace — no sign-up needed.
+                </FieldDescription>
+              </Field>
+
               <FieldDescription className="text-center">
                 Don&apos;t have an account? <a href="/signup">Sign up</a>
               </FieldDescription>

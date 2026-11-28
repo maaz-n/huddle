@@ -113,6 +113,11 @@ function UserProfile({ user }: { user: UserTypeNew }) {
     return (
         <Card className="border-none shadow-none bg-transparent">
             <CardContent className='my-0'>
+                {user.isDemo && (
+                    <div className="mt-4 rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+                        Demo account — profile settings are read-only. Use “Reset demo” in the banner above to restore sample data.
+                    </div>
+                )}
                 <form onSubmit={handleUpdate} className="divide-y divide-border">
                     <div className="flex flex-col lg:flex-row py-8 gap-12 lg:gap-24">
                         <div className="flex-none lg:w-[380px] space-y-1">
@@ -133,13 +138,13 @@ function UserProfile({ user }: { user: UserTypeNew }) {
                                     accept="image/png,image/jpeg,image/webp,image/gif"
                                     className="hidden"
                                     onChange={handleAvatarUpload}
-                                    disabled={uploadingAvatar}
+                                    disabled={uploadingAvatar || user.isDemo}
                                 />
                                 <Button variant="outline" size="sm" asChild>
                                     <label
                                         htmlFor="avatar-input"
                                         className={
-                                            uploadingAvatar
+                                            uploadingAvatar || user.isDemo
                                                 ? 'pointer-events-none cursor-default gap-2 opacity-50'
                                                 : 'cursor-pointer gap-2'
                                         }
@@ -158,7 +163,7 @@ function UserProfile({ user }: { user: UserTypeNew }) {
                                         variant="ghost"
                                         size="sm"
                                         onClick={handleRemoveAvatar}
-                                        disabled={uploadingAvatar}
+                                        disabled={uploadingAvatar || user.isDemo}
                                     >
                                         <Trash2 className="mr-2 h-4 w-4" />
                                         Remove
@@ -186,6 +191,7 @@ function UserProfile({ user }: { user: UserTypeNew }) {
                                 onChange={(e) => setName(e.target.value)}
                                 className="max-w-md h-11 bg-muted/20"
                                 placeholder="Your full name"
+                                disabled={user.isDemo}
                             />
                         </div>
                     </div>
@@ -222,7 +228,7 @@ function UserProfile({ user }: { user: UserTypeNew }) {
                             <Switch
                                 checked={emailNotifications}
                                 onCheckedChange={handleEmailToggle}
-                                disabled={savingPreference}
+                                disabled={savingPreference || user.isDemo}
                                 aria-label="Email notifications"
                             />
                             <span className="text-sm text-muted-foreground">
@@ -235,7 +241,7 @@ function UserProfile({ user }: { user: UserTypeNew }) {
                         <Button
                             type="submit"
                             className="px-10 h-11 shadow-lg shadow-primary/20 transition-all hover:-translate-y-px"
-                            disabled={loading || name === user.name}
+                            disabled={loading || name === user.name || user.isDemo}
                         >
                             {loading ? (
                                 <>
