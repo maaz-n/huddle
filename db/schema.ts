@@ -19,6 +19,7 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   emailNotifications: boolean("email_notifications").default(true).notNull(),
+  isDemo: boolean("is_demo").notNull().default(false),
   image: text("image"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
@@ -100,6 +101,7 @@ export const workspaces = pgTable("workspaces", {
   id: text("id").primaryKey().$defaultFn(() => randomUUID()),
   name: text("name").notNull(),
   ownerId: text("owner_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  isDemo: boolean("is_demo").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

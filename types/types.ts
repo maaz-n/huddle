@@ -4,6 +4,7 @@ export type UserTypeNew = {
   email: string;
   image?: string | null | undefined;
   emailNotifications?: boolean;
+  isDemo?: boolean;
 }
 
 export type UserWithRole = {
@@ -76,6 +77,7 @@ export type Workspace = {
   id: string;
   name: string,
   ownerId: string,
+  isDemo?: boolean,
 }
 
 export type Actor = {
