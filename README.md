@@ -97,6 +97,14 @@ Huddle was built to explore:
 
 * Email verification required for new accounts, with a resendable link
 * Password reset and Google sign-in
+* **Try a test demo** — one-click access to a populated workspace with sample tasks, comments, labels, subtasks, and activity
+
+### 10. Demo Mode
+
+* Seeded demo account and workspace, created with `npm run db:seed:demo`
+* Login button signs in as the demo user without needing email verification
+* Demo-only guard blocks workspace deletion, ownership changes, member management, and profile edits
+* **Reset demo** button restores the sample data at any time
 
 ---
 <h2 align="center">Architecture Highlights</h2>
@@ -154,6 +162,15 @@ Copy `.env.example` to `.env.local` and fill in the values you need:
 | `AWS_REGION` | Neon storage bucket region |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | Neon storage credentials |
 | `UPLOADS_BUCKET` | Bucket name |
+
+---
+<h2 align="center">Demo Setup</h2>
+
+```bash
+npm run db:seed:demo
+```
+
+Then open `/login` and click **Try a test demo**. The seed is idempotent, so re-running it restores the original sample data.
 
 ---
 <h2 align="center">Show Your Support</h2>
