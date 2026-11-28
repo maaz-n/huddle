@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { formatDistanceToNow } from "date-fns"
 import {
@@ -577,9 +578,9 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-2xl p-0 overflow-hidden border-none shadow-2xl bg-background">
-        <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
-          <div className="flex-1 p-8 space-y-6 overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl p-0 overflow-hidden border-none shadow-2xl bg-background">
+        <div className="grid h-full max-h-[90vh] md:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="min-w-0 space-y-8 overflow-y-auto py-6 pl-6 pr-12 md:p-8">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold tracking-tight">
                 {task.title}
@@ -636,13 +637,13 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                   {isManager && (
                     <form
                       onSubmit={handleAddLabel}
-                      className="flex flex-wrap items-center gap-1"
+                      className="flex w-full min-w-0 items-center gap-2"
                     >
                       <Input
                         value={labelInput}
                         onChange={(event) => setLabelInput(event.target.value)}
                         placeholder="Add label..."
-                        className="h-7 w-32 text-xs"
+                        className="h-8 min-w-0 flex-1 text-xs"
                         maxLength={100}
                         disabled={savingLabel}
                         aria-label="New label name"
@@ -653,7 +654,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                           setLabelColor(event.target.value as LabelColor)
                         }
                         aria-label="Label color"
-                        className="h-7 rounded-md border border-input bg-background px-1 text-xs capitalize"
+                        className="h-8 w-24 shrink-0 rounded-md border border-input bg-background px-2 text-xs capitalize"
                         disabled={savingLabel}
                       >
                         {(Object.keys(labelColorClasses) as LabelColor[]).map(
@@ -668,7 +669,7 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
                         type="submit"
                         variant="ghost"
                         size="sm"
-                        className="h-7 px-2 text-xs"
+                        className="h-8 shrink-0 px-2 text-xs"
                         disabled={savingLabel || !labelInput.trim()}
                       >
                         {savingLabel && (
@@ -1036,9 +1037,17 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
             </div>
 
             <div className="space-y-4 border-t border-border/50 pt-6">
-              <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                <History className="h-4 w-4" />
-                Activity
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                  <History className="h-4 w-4" />
+                  Activity
+                </div>
+                <Link
+                  href={`/activity?workspace=${workspaceId}`}
+                  className="shrink-0 text-xs font-medium text-primary hover:underline"
+                >
+                  View all
+                </Link>
               </div>
 
               {activityLoading ? (
@@ -1060,95 +1069,94 @@ export function TaskDetailModal({ task, open, onOpenChange, workspaceId, current
           </div>
 
 
-          <div className="w-full md:w-[380px] bg-muted/30 border-l border-border/50 p-6 space-y-6">
-            <div className="space-y-5">
-
-              <div className="space-y-3">
+          <div className="flex h-full w-full flex-col gap-6 border-t border-border/50 bg-muted/30 p-6 md:w-[320px] md:border-l md:border-t-0 md:overflow-y-auto md:pr-12">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2 rounded-xl border border-border/50 bg-background/60 p-3">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Assignee</label>
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground italic">
-                    <UserAvatar user={task.user} />
-                  </div>
-                  <span className="text-sm font-medium">{task.user?.name}</span>
+                <div className="flex min-w-0 items-center gap-2">
+                  <UserAvatar user={task.user} className="h-8 w-8 shrink-0" />
+                  <span className="truncate text-sm font-medium">{task.user?.name}</span>
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2 rounded-xl border border-border/50 bg-background/60 p-3">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Priority</label>
                 <div className="flex items-center gap-2">
-                  <Tag className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-sm capitalize font-medium">{task.priority}</span>
+                  <Tag className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  <span className="truncate text-sm capitalize font-medium">{task.priority}</span>
                 </div>
               </div>
+            </div>
 
-              <div className="pt-4 space-y-3">
-                <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                  <Calendar className="h-3.5 w-3.5" />
-                  <span>Added {formatDistanceToNow(task.createdAt, { addSuffix: true })}</span>
-                </div>
-                <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                  <Clock className="h-3.5 w-3.5" />
-                  <span>Modified {formatDistanceToNow(task.updatedAt, { addSuffix: true })}</span>
-                </div>
+            <div className="space-y-2 rounded-xl border border-border/50 bg-background/60 p-3 text-[11px] text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-3.5 w-3.5 shrink-0" />
+                <span>Added {formatDistanceToNow(task.createdAt, { addSuffix: true })}</span>
               </div>
+              <div className="flex items-center gap-2">
+                <Clock className="h-3.5 w-3.5 shrink-0" />
+                <span>Modified {formatDistanceToNow(task.updatedAt, { addSuffix: true })}</span>
+              </div>
+            </div>
 
-              {
-                (isManager || task.assigneeId === currentUser.id) &&
-
-                <div className="pt-4 space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Actions</label>
-                  <div className="flex items-center flex-col justify-between gap-2 mt-1">
-                    <Button disabled={isRequestingChange || isUpdating || !nextStatus} onClick={handleUpdateStatus} className="w-full">
-                      {isUpdating ?
-                        <Loader2 className="h-2 w-2 animate-spin" />
-                        :
-                        currentUserTaskInReview ? "Awaiting approval" :
-                          nextStatus === "done" ? "Mark as completed" :
-                            nextStatus === "in_review" ? "Send for review" :
-                              "Completed"
-                      }
-                    </Button>
-                    {
-                      currentUserRole !== "member" && displayStatus === "in_review" &&
-                      <Toggle onPressedChange={setIsRequestingChange} pressed={isRequestingChange} className="px-5 w-full" variant={"outline"}>Request changes</Toggle>
+            {(isManager || task.assigneeId === currentUser.id) && (
+              <div className="mt-auto space-y-3 pt-2 md:pt-6">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Actions</label>
+                <div className="flex flex-col gap-2">
+                  <Button disabled={isRequestingChange || isUpdating || !nextStatus} onClick={handleUpdateStatus} className="w-full">
+                    {isUpdating ?
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      :
+                      currentUserTaskInReview ? "Awaiting approval" :
+                        nextStatus === "done" ? "Mark as completed" :
+                          nextStatus === "in_review" ? "Send for review" :
+                            "Completed"
                     }
-                  </div>
-                  {isRequestingChange &&
-                    <form onSubmit={sendForRevision}>
-
-                      <div className="space-y-3">
-                        <Textarea
-                          placeholder="Note..."
-                          required
-                          className="resize-none min-h-[100px]"
-                          onChange={(e) => setRevisionNote(e.target.value)}
-                        />
-                        <Button className="w-full" type="submit" disabled={isUpdating2} >
-                          {isUpdating2 ?
-                            <Loader2 className="h-2 w-2 animate-spin" />
-                            :
-                            "Send for revision"
-                          }
-                        </Button>
-
-                      </div>
-                    </form>}
-                  {currentUserRole !== "member" &&
-                    <>
-                      <Separator className="my-5" />
-                      <Button variant={"destructive"} className="w-full" disabled={isRequestingChange || isDeleting} onClick={handleDeleteTask}>
-                        {isDeleting ?
-                          <Loader2 className="h-2 w-2 animate-spin" />
-                          :
-                          "Delete Task"
-                        }
-                      </Button>
-                    </>
+                  </Button>
+                  {
+                    currentUserRole !== "member" && displayStatus === "in_review" &&
+                    <Toggle onPressedChange={setIsRequestingChange} pressed={isRequestingChange} className="w-full" variant={"outline"}>Request changes</Toggle>
                   }
                 </div>
-              }
-
-            </div>
+                {isRequestingChange &&
+                  <form onSubmit={sendForRevision}>
+                    <div className="space-y-3">
+                      <Textarea
+                        placeholder="Note..."
+                        required
+                        className="min-h-[100px] resize-none"
+                        onChange={(e) => setRevisionNote(e.target.value)}
+                      />
+                      <Button className="w-full" type="submit" disabled={isUpdating2}>
+                        {isUpdating2 ?
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          :
+                          "Send for revision"
+                        }
+                      </Button>
+                    </div>
+                  </form>
+                }
+                {currentUserRole !== "member" &&
+                  <>
+                    <Separator className="my-4" />
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-center text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      disabled={isRequestingChange || isDeleting}
+                      onClick={handleDeleteTask}
+                    >
+                      {isDeleting ?
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        :
+                        <Trash2 className="mr-2 h-4 w-4" />
+                      }
+                      Delete Task
+                    </Button>
+                  </>
+                }
+              </div>
+            )}
           </div>
         </div>
       </DialogContent>
