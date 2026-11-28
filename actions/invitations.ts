@@ -23,6 +23,7 @@ import {
   validationMessage,
 } from "@/lib/validation";
 import { getCurrentUser } from "./auth";
+import { DEMO_MESSAGE } from "@/lib/demo";
 
 const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -65,10 +66,13 @@ export async function inviteMember(
 
     const workspace = await db.query.workspaces.findFirst({
       where: eq(workspaces.id, parsedWorkspaceId.data),
-      columns: { name: true },
+      columns: { name: true, isDemo: true },
     });
     if (!workspace) {
       return { success: false, message: "Workspace not found" };
+    }
+    if (workspace.isDemo) {
+      return { success: false, message: DEMO_MESSAGE };
     }
 
     const inviter = await db.query.user.findFirst({

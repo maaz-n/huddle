@@ -14,12 +14,16 @@ import {
   validationMessage,
 } from "@/lib/validation";
 import { getCurrentUser } from "./auth";
+import { DEMO_MESSAGE } from "@/lib/demo";
 
 export async function updateUser(newName: string) {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return { success: false, message: "Unauthorized" };
+    }
+    if (currentUser.isDemo) {
+      return { success: false, message: DEMO_MESSAGE };
     }
 
     const parsedName = nameSchema.safeParse(newName);
@@ -44,6 +48,9 @@ export async function updateEmailNotifications(enabled: boolean) {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return { success: false, message: "Unauthorized" };
+    }
+    if (currentUser.isDemo) {
+      return { success: false, message: DEMO_MESSAGE };
     }
 
     if (typeof enabled !== "boolean") {
@@ -105,6 +112,14 @@ export async function addMember(
 
     const { user: currentUser, role: currentUserRole } =
       await requireWorkspaceAccess(parsedWorkspaceId.data, "admin");
+
+    const demoWorkspace = await db.query.workspaces.findFirst({
+      where: eq(workspaces.id, parsedWorkspaceId.data),
+      columns: { isDemo: true },
+    });
+    if (demoWorkspace?.isDemo) {
+      return { success: false, message: DEMO_MESSAGE };
+    }
 
     if (currentUserRole === "admin" && parsedRole.data === "admin") {
       return { success: false, message: "Admins can only add members" };

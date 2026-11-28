@@ -9,6 +9,16 @@ import { logActivity } from "@/lib/activity";
 import { notifyUsers } from "@/lib/notifications";
 import { idSchema, nameSchema, validationMessage } from "@/lib/validation";
 
+import { DEMO_MESSAGE } from "@/lib/demo";
+
+async function isDemoWorkspace(workspaceId: string) {
+  const workspace = await db.query.workspaces.findFirst({
+    where: eq(workspaces.id, workspaceId),
+    columns: { isDemo: true },
+  });
+  return workspace?.isDemo ?? false;
+}
+
 export const createWorkspace = async (name: string) => {
   try {
     const user = await getCurrentUser();
@@ -117,9 +127,13 @@ export const updateWorkspaceName = async (
       "owner",
     );
 
+    if (await isDemoWorkspace(parsedWorkspaceId.data)) {
+      return { success: false, message: DEMO_MESSAGE };
+    }
+
     const existing = await db.query.workspaces.findFirst({
       where: eq(workspaces.id, parsedWorkspaceId.data),
-      columns: { name: true },
+      columns: { name: true, isDemo: true },
     });
 
     await db
@@ -170,6 +184,10 @@ export const removeUser = async (workspaceId: string, userId: string) => {
 
     if (actor.id === parsedUserId.data) {
       return { success: false, message: "You cannot remove yourself" };
+    }
+
+    if (await isDemoWorkspace(parsedWorkspaceId.data)) {
+      return { success: false, message: DEMO_MESSAGE };
     }
 
     const target = await db.query.workspaceMembers.findFirst({
@@ -256,6 +274,10 @@ export const updateUserRole = async (
 
     if (executingRole !== "owner") {
       return { success: false, message: "Only the owner can change roles" };
+    }
+
+    if (await isDemoWorkspace(parsedWorkspaceId.data)) {
+      return { success: false, message: DEMO_MESSAGE };
     }
 
     // Ownership is unique and can only change through an explicit transfer.
@@ -366,6 +388,10 @@ export const transferOwnership = async (
       return { success: false, message: "You are already the owner" };
     }
 
+    if (await isDemoWorkspace(parsedWorkspaceId.data)) {
+      return { success: false, message: DEMO_MESSAGE };
+    }
+
     const target = await db.query.workspaceMembers.findFirst({
       where: and(
         eq(workspaceMembers.workspaceId, parsedWorkspaceId.data),
@@ -451,6 +477,10 @@ export const deleteWorkspace = async (workspaceId: string) => {
 
     if (!memberRecord || memberRecord.role !== "owner") {
       return { success: false, message: "Only owner can delete workspace" };
+    }
+
+    if (await isDemoWorkspace(parsedWorkspaceId.data)) {
+      return { success: false, message: DEMO_MESSAGE };
     }
 
     await db

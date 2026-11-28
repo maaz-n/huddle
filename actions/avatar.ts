@@ -11,12 +11,16 @@ import {
   avatarUrl,
 } from "@/lib/avatar";
 import { avatarKey, deleteObject, putObject } from "@/lib/storage";
+import { DEMO_MESSAGE } from "@/lib/demo";
 
 export async function uploadAvatar(formData: FormData) {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return { success: false, message: "Unauthorized" };
+    }
+    if (currentUser.isDemo) {
+      return { success: false, message: DEMO_MESSAGE };
     }
 
     const file = formData.get("file");
@@ -80,6 +84,9 @@ export async function removeAvatar() {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return { success: false, message: "Unauthorized" };
+    }
+    if (currentUser.isDemo) {
+      return { success: false, message: DEMO_MESSAGE };
     }
 
     await db.delete(userAvatars).where(eq(userAvatars.userId, currentUser.id));
